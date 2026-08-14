@@ -36,8 +36,8 @@ import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen'
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const GRID_PADDING = 40;
-const DAY_CELL_WIDTH = Math.floor((SCREEN_WIDTH - GRID_PADDING - 40) / 7);
+const GRID_PADDING = 36;
+const DAY_CELL_WIDTH = Math.floor((SCREEN_WIDTH - GRID_PADDING - 36) / 7);
 
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
@@ -371,7 +371,7 @@ export default function App() {
           {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetHeaderRow}>
-              <Text style={styles.widgetHeaderTitleCompact} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.widgetHeaderTitleCompact}>
                 Métricas de Atleta
               </Text>
               <TouchableOpacity
@@ -396,23 +396,22 @@ export default function App() {
               {/* Lista de Métricas Reales de SQLite */}
               <View style={styles.metricsList}>
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel} numberOfLines={1}>Volumen Acumulado</Text>
-                  <Text style={[styles.metricValue, { color: colors.secondary }]} numberOfLines={1} adjustsFontSizeToFit>
-                    {stats.totalVolumeKg.toLocaleString()}{' '}
-                    <Text style={styles.metricUnit}>KG</Text>
+                  <Text style={styles.metricLabel}>Volumen Acumulado</Text>
+                  <Text style={[styles.metricValue, { color: colors.secondary }]}>
+                    {stats.totalVolumeKg.toLocaleString()} <Text style={styles.metricUnit}>KG</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel} numberOfLines={1}>Sesiones Completadas</Text>
-                  <Text style={[styles.metricValue, { color: colors.primary }]} numberOfLines={1} adjustsFontSizeToFit>
+                  <Text style={styles.metricLabel}>Sesiones Completadas</Text>
+                  <Text style={[styles.metricValue, { color: colors.primary }]}>
                     {stats.totalSessions} <Text style={styles.metricUnit}>SESIONES</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel} numberOfLines={1}>Series Registradas</Text>
-                  <Text style={[styles.metricValue, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
+                  <Text style={styles.metricLabel}>Series Registradas</Text>
+                  <Text style={[styles.metricValue, { color: colors.cyan }]}>
                     {stats.totalSets} <Text style={styles.metricUnit}>SERIES</Text>
                   </Text>
                 </View>
@@ -423,35 +422,37 @@ export default function App() {
           {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
-              <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.widgetGridTitle} numberOfLines={1}>Días Entrenados</Text>
-                <Text style={styles.widgetSubLabel} numberOfLines={1}>
+              <View style={{ flex: 1, marginRight: 6 }}>
+                <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
+                <Text style={styles.widgetSubLabel}>
                   {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
                 </Text>
               </View>
               
-              {/* Insignia de Racha */}
+              {/* Insignia de Racha Inmune a Recortes */}
               <View style={styles.streakBadge}>
                 <Ionicons name="flame" size={13} color={colors.primary} />
-                <Text style={styles.streakText} numberOfLines={1}>
-                  Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'Día' : 'Días'}
+                <Text style={styles.streakText}>
+                  Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
                 </Text>
               </View>
             </View>
 
-            {/* Selector de Meses (Anterior / Siguiente) */}
+            {/* Selector de Meses (Anterior / Siguiente) Resiliente */}
             <View style={styles.monthNavRow}>
               <TouchableOpacity style={styles.monthNavBtn} onPress={handlePrevMonth}>
                 <Ionicons name="chevron-back" size={14} color={colors.textPrimary} />
-                <Text style={styles.monthNavBtnText}>Anterior</Text>
+                <Text style={styles.monthNavBtnText}>Ant.</Text>
               </TouchableOpacity>
 
-              <Text style={styles.monthCurrentText} numberOfLines={1} adjustsFontSizeToFit>
-                {stats.trainedDaysInSelectedMonth.length} días activos
-              </Text>
+              <View style={styles.monthCurrentCenterContainer}>
+                <Text style={styles.monthCurrentText}>
+                  {stats.trainedDaysInSelectedMonth.length} activos
+                </Text>
+              </View>
 
               <TouchableOpacity style={styles.monthNavBtn} onPress={handleNextMonth}>
-                <Text style={styles.monthNavBtnText}>Siguiente</Text>
+                <Text style={styles.monthNavBtnText}>Sig.</Text>
                 <Ionicons name="chevron-forward" size={14} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
@@ -507,9 +508,9 @@ export default function App() {
           <View style={styles.widgetGridRow}>
             {/* Widget Izquierda: Total Series */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle} numberOfLines={1}>Total Series</Text>
-              <Text style={styles.widgetSubLabel} numberOfLines={1}>Histórico Local</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.purple }]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.widgetGridTitle}>Total Series</Text>
+              <Text style={styles.widgetSubLabel}>Histórico Local</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>
                 {stats.totalSets}
               </Text>
               
@@ -524,9 +525,9 @@ export default function App() {
 
             {/* Widget Derecha: Intensidad RPE Medio */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle} numberOfLines={1}>Esfuerzo (RPE)</Text>
-              <Text style={styles.widgetSubLabel} numberOfLines={1}>Promedio</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.widgetGridTitle}>Esfuerzo (RPE)</Text>
+              <Text style={styles.widgetSubLabel}>Promedio</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>
                 {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
               </Text>
 
@@ -590,29 +591,29 @@ export default function App() {
             </View>
           </View>
 
-          {/* Card 2: Estadísticas del Perfil con Ajuste Antidesbordamiento */}
+          {/* Card 2: Estadísticas del Perfil Totalmente Inmunes a Recortes */}
           <View style={styles.appleWidget}>
             <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>
               Estadísticas & Récords (PRs)
             </Text>
             
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel} numberOfLines={1}>Volumen Acumulado:</Text>
-              <Text style={[styles.profileValue, { color: colors.secondary }]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.profileLabel}>Volumen Acumulado:</Text>
+              <Text style={[styles.profileValue, { color: colors.secondary }]}>
                 {stats.totalVolumeKg.toLocaleString()} kg
               </Text>
             </View>
             
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel} numberOfLines={1}>1RM Máximo Histórico:</Text>
-              <Text style={[styles.profileValue, { color: colors.primary }]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.profileLabel}>1RM Máximo Histórico:</Text>
+              <Text style={[styles.profileValue, { color: colors.primary }]}>
                 {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
               </Text>
             </View>
 
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel} numberOfLines={1}>Racha Actual de Días:</Text>
-              <Text style={[styles.profileValue, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={styles.profileLabel}>Racha Actual de Días:</Text>
+              <Text style={[styles.profileValue, { color: colors.cyan }]}>
                 {stats.currentStreakDays} días
               </Text>
             </View>
@@ -626,13 +627,13 @@ export default function App() {
               stats.exercisePRs.map((pr) => (
                 <View key={pr.exerciseId} style={styles.prRowItem}>
                   <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={styles.prExerciseName} numberOfLines={1}>{pr.exerciseName}</Text>
-                    <Text style={styles.prSubText} numberOfLines={1}>
+                    <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
+                    <Text style={styles.prSubText}>
                       Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
                     </Text>
                   </View>
                   <View style={styles.prRankBadge}>
-                    <Text style={styles.prRankText} numberOfLines={1}>
+                    <Text style={styles.prRankText}>
                       {pr.rankEmoji} {pr.rankLabel}
                     </Text>
                   </View>
@@ -704,13 +705,13 @@ export default function App() {
                 stats.exercisePRs.map((pr) => (
                   <View key={`modal_${pr.exerciseId}`} style={styles.prRowItem}>
                     <View style={{ flex: 1, marginRight: 8 }}>
-                      <Text style={styles.prExerciseName} numberOfLines={1}>{pr.exerciseName}</Text>
-                      <Text style={styles.prSubText} numberOfLines={1}>
+                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
+                      <Text style={styles.prSubText}>
                         Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
                       </Text>
                     </View>
                     <View style={styles.prRankBadge}>
-                      <Text style={styles.prRankText} numberOfLines={1}>
+                      <Text style={styles.prRankText}>
                         {pr.rankEmoji} {pr.rankLabel}
                       </Text>
                     </View>
@@ -741,7 +742,6 @@ export default function App() {
             <Text
               style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               Resumen
             </Text>
@@ -759,7 +759,6 @@ export default function App() {
             <Text
               style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               Rutinas
             </Text>
@@ -777,7 +776,6 @@ export default function App() {
             <Text
               style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               Ejercicios
             </Text>
@@ -795,7 +793,6 @@ export default function App() {
             <Text
               style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               Perfil
             </Text>
@@ -829,36 +826,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
     paddingBottom: 12
   },
   greetingTitle: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 32,
-    letterSpacing: -0.5
+    fontSize: 30,
+    letterSpacing: -0.5,
+    includeFontPadding: false
   },
   dateSubtitle: {
     color: colors.textSecondary,
     fontFamily: fonts.bodySemiBold,
     fontSize: 13,
-    marginTop: 2
+    marginTop: 2,
+    includeFontPadding: false
   },
   avatarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: colors.surfaceLight,
     borderColor: colors.border,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12
+    marginLeft: 8
   },
   avatarText: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 14
+    fontSize: 13
   },
   pagerStyle: {
     flex: 1
@@ -867,7 +866,7 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 140
   },
@@ -876,37 +875,40 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceBorder,
     borderWidth: 1,
     borderRadius: radii.xl,
-    padding: 18,
-    marginBottom: 16
+    padding: 16,
+    marginBottom: 14
   },
   widgetHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14
+    marginBottom: 12
   },
   widgetHeaderTitle: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 18,
-    marginBottom: 12
+    fontSize: 17,
+    marginBottom: 10,
+    includeFontPadding: false
   },
   widgetHeaderTitleCompact: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 16,
+    fontSize: 15,
     flex: 1,
-    marginRight: 6
+    marginRight: 6,
+    includeFontPadding: false
   },
   moreStatsBtnVisible: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary + '25',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: colors.primary
+    borderColor: colors.primary,
+    flexShrink: 0
   },
   moreStatsBtnText: {
     color: colors.primary,
@@ -923,13 +925,15 @@ const styles = StyleSheet.create({
   widgetGridTitle: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 15
+    fontSize: 15,
+    includeFontPadding: false
   },
   widgetSubLabel: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 12,
-    marginTop: 2
+    marginTop: 2,
+    includeFontPadding: false
   },
   streakBadge: {
     flexDirection: 'row',
@@ -937,10 +941,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary + '20',
     borderColor: colors.primary,
     borderWidth: 1,
-    paddingVertical: 4,
+    paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: radii.full,
-    flexShrink: 1
+    flexShrink: 0
   },
   streakText: {
     color: colors.primary,
@@ -956,11 +960,14 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     borderRadius: radii.md,
-    marginBottom: 14
+    marginBottom: 12
   },
   monthNavBtn: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    flexShrink: 0
   },
   monthNavBtnText: {
     color: colors.textPrimary,
@@ -968,12 +975,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginHorizontal: 2
   },
+  monthCurrentCenterContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4
+  },
   monthCurrentText: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
-    textAlign: 'center',
-    flexShrink: 1
+    textAlign: 'center'
   },
   weekDaysHeaderGrid: {
     flexDirection: 'row',
@@ -997,13 +1009,13 @@ const styles = StyleSheet.create({
     marginVertical: 3
   },
   calendarDotBlank: {
-    width: 32,
-    height: 32
+    width: 30,
+    height: 30
   },
   calendarDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -1020,7 +1032,7 @@ const styles = StyleSheet.create({
   },
   calendarDotText: {
     fontFamily: fonts.headingSemiBold,
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textMuted
   },
   calendarDotTextWhite: {
@@ -1033,77 +1045,80 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   ringsVisualContainer: {
-    width: 100,
-    height: 100,
+    width: 90,
+    height: 90,
     justifyContent: 'center',
     alignItems: 'center'
   },
   ringOuter: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 8,
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    borderWidth: 7,
     justifyContent: 'center',
     alignItems: 'center'
   },
   ringMiddle: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    borderWidth: 8,
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    borderWidth: 7,
     justifyContent: 'center',
     alignItems: 'center'
   },
   ringInner: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 8
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 7
   },
   metricsList: {
     flex: 1,
-    marginLeft: 16
+    marginLeft: 14
   },
   metricItem: {
-    marginBottom: 8
+    marginBottom: 6
   },
   metricLabel: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
-    fontSize: 12
+    fontSize: 11,
+    includeFontPadding: false
   },
   metricValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 17,
-    marginTop: 1
+    fontSize: 16,
+    marginTop: 1,
+    includeFontPadding: false
   },
   metricUnit: {
     fontFamily: fonts.headingSemiBold,
-    fontSize: 11
+    fontSize: 10
   },
   widgetGridRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16
+    marginBottom: 14
   },
   halfWidget: {
-    width: (SCREEN_WIDTH - 52) / 2,
+    width: (SCREEN_WIDTH - 44) / 2,
     marginBottom: 0
   },
   widgetBigNumber: {
     fontFamily: fonts.headingBold,
-    fontSize: 28,
-    marginVertical: 4
+    fontSize: 26,
+    marginVertical: 4,
+    includeFontPadding: false
   },
   miniBarChart: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 36,
+    height: 32,
     justifyContent: 'space-between',
     marginTop: 6
   },
   bar: {
-    width: 6,
+    width: 5,
     borderRadius: 3
   },
   routineDesc: {
@@ -1126,19 +1141,22 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
     flex: 1,
-    marginRight: 8
+    marginRight: 8,
+    includeFontPadding: false
   },
   profileValue: {
     color: colors.textPrimary,
     fontFamily: fonts.bodyBold,
     fontSize: 13,
-    textAlign: 'right'
+    textAlign: 'right',
+    flexShrink: 0,
+    includeFontPadding: false
   },
   prRowItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
-    padding: 12,
+    padding: 10,
     borderRadius: radii.md,
     marginBottom: 8,
     borderColor: colors.border,
@@ -1147,13 +1165,15 @@ const styles = StyleSheet.create({
   prExerciseName: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 13
+    fontSize: 13,
+    includeFontPadding: false
   },
   prSubText: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
-    marginTop: 2
+    marginTop: 2,
+    includeFontPadding: false
   },
   prRankBadge: {
     backgroundColor: colors.primary + '20',
@@ -1161,7 +1181,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: radii.sm,
     borderColor: colors.primary,
-    borderWidth: 1
+    borderWidth: 1,
+    flexShrink: 0
   },
   prRankText: {
     color: colors.primary,
@@ -1191,8 +1212,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radii.xl,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingHorizontal: 18,
+    paddingTop: 20,
     paddingBottom: Platform.OS === 'ios' ? 44 : 32,
     maxHeight: '90%',
     width: '100%',
@@ -1203,12 +1224,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 16
   },
   modalTitle: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 22
+    fontSize: 20,
+    includeFontPadding: false
   },
   closeBtn: {
     padding: 6,
@@ -1221,20 +1243,22 @@ const styles = StyleSheet.create({
   statGridCard: {
     backgroundColor: colors.surfaceLight,
     borderRadius: radii.lg,
-    padding: 16,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 10,
     borderColor: colors.border,
     borderWidth: 1
   },
   statGridLabel: {
     color: colors.textSecondary,
     fontFamily: fonts.bodySemiBold,
-    fontSize: 13,
-    marginBottom: 4
+    fontSize: 12,
+    marginBottom: 4,
+    includeFontPadding: false
   },
   statGridValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 22
+    fontSize: 20,
+    includeFontPadding: false
   },
   floatingNavContainer: {
     position: 'absolute',
@@ -1276,7 +1300,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: -0.2,
     marginTop: 2,
-    textAlign: 'center'
+    textAlign: 'center',
+    includeFontPadding: false
   },
   glassNavLabelActive: {
     color: colors.primary,
