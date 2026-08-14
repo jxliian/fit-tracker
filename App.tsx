@@ -647,15 +647,16 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Modal de Estadísticas Detalladas (Extendido 100% hasta la base de la pantalla) */}
+      {/* Modal de Estadísticas Translúcido que CUBRE 100% HASTA EL BORDE INFERIOR */}
       <Modal
         visible={showStatsModal}
         animationType="slide"
         transparent={true}
+        statusBarTranslucent={true}
         onRequestClose={() => setShowStatsModal(false)}
       >
         <View style={styles.modalOverlayFullBottom}>
-          <BlurView intensity={Platform.OS === 'ios' ? 90 : 100} tint="dark" style={styles.modalContainerFullBottom}>
+          <BlurView intensity={Platform.OS === 'ios' ? 95 : 100} tint="dark" style={styles.modalContainerFullBottom}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Informe de Atleta</Text>
               <TouchableOpacity onPress={() => setShowStatsModal(false)} style={styles.closeBtn}>
@@ -723,7 +724,7 @@ export default function App() {
         </View>
       </Modal>
 
-      {/* Barra Flotante Translucida de Navegación */}
+      {/* Barra Flotante Translucida de Navegación con Textos Anti-overflow */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
           <TouchableOpacity
@@ -732,10 +733,14 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'home' ? 'grid' : 'grid-outline'}
-              size={20}
+              size={18}
               color={activeTab === 'home' ? colors.primary : '#8E8E93'}
             />
-            <Text style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}>
+            <Text
+              style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               Resumen
             </Text>
           </TouchableOpacity>
@@ -746,10 +751,14 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'routines' ? 'flame' : 'flame-outline'}
-              size={20}
+              size={18}
               color={activeTab === 'routines' ? colors.primary : '#8E8E93'}
             />
-            <Text style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}>
+            <Text
+              style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               Rutinas
             </Text>
           </TouchableOpacity>
@@ -760,10 +769,14 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'catalog' ? 'barbell' : 'barbell-outline'}
-              size={20}
+              size={18}
               color={activeTab === 'catalog' ? colors.primary : '#8E8E93'}
             />
-            <Text style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}>
+            <Text
+              style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               Ejercicios
             </Text>
           </TouchableOpacity>
@@ -774,10 +787,14 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'profile' ? 'person' : 'person-outline'}
-              size={20}
+              size={18}
               color={activeTab === 'profile' ? colors.primary : '#8E8E93'}
             />
-            <Text style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}>
+            <Text
+              style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               Perfil
             </Text>
           </TouchableOpacity>
@@ -1154,7 +1171,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'flex-end',
-    margin: 0
+    width: '100%',
+    height: '100%'
   },
   modalContainerFullBottom: {
     backgroundColor: colors.surface,
@@ -1164,8 +1182,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
-    maxHeight: '92%',
+    paddingBottom: Platform.OS === 'ios' ? 44 : 32,
+    maxHeight: '90%',
+    width: '100%',
     borderColor: colors.border,
     borderWidth: 1
   },
@@ -1208,8 +1227,8 @@ const styles = StyleSheet.create({
   },
   floatingNavContainer: {
     position: 'absolute',
-    left: 18,
-    right: 18,
+    left: 14,
+    right: 14,
     borderRadius: 32,
     overflow: 'hidden',
     borderWidth: 1.5,
@@ -1226,12 +1245,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 6,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     backgroundColor: 'transparent'
   },
   glassNavItem: {
     flex: 1,
     paddingVertical: 8,
+    paddingHorizontal: 2,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center'
@@ -1243,7 +1263,9 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     fontFamily: fonts.bodySemiBold,
     fontSize: 10,
-    marginTop: 2
+    letterSpacing: -0.2,
+    marginTop: 2,
+    textAlign: 'center'
   },
   glassNavLabelActive: {
     color: colors.primary,
