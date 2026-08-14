@@ -14,6 +14,7 @@ import {
   NativeScrollEvent
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { useFonts } from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
@@ -31,6 +32,7 @@ type TabType = typeof TABS[number];
 const SAMPLE_WORKOUT_DAYS = [2, 4, 5, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 25];
 
 export default function App() {
+  const [fontsLoaded] = useFonts(Ionicons.font);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -110,11 +112,11 @@ export default function App() {
     }
   };
 
-  if (isInitializing) {
+  if (isInitializing || !fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Cargando base de datos local...</Text>
+        <Text style={styles.loadingText}>Cargando FitTracker...</Text>
       </View>
     );
   }
@@ -133,7 +135,9 @@ export default function App() {
   const bottomInset = Platform.OS === 'ios' ? 44 : 36;
 
   // Formato fecha estilo Apple Fitness ("viernes, 14 ago")
-  const formattedDate = new Date().toLocaleDateString('es-ES', {
+  const todayDate = new Date();
+  const currentDayNum = todayDate.getDate();
+  const formattedDate = todayDate.toLocaleDateString('es-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'short'
@@ -232,15 +236,23 @@ export default function App() {
             <View style={styles.calendarGrid}>
               {daysInMonth.map((day) => {
                 const trained = SAMPLE_WORKOUT_DAYS.includes(day);
+                const isToday = day === currentDayNum;
+
                 return (
                   <View
                     key={day}
                     style={[
                       styles.calendarDot,
-                      trained ? styles.calendarDotTrained : styles.calendarDotRest
+                      trained && styles.calendarDotTrained,
+                      isToday && styles.calendarDotToday
                     ]}
                   >
-                    <Text style={[styles.calendarDotText, trained && styles.calendarDotTextTrained]}>
+                    <Text
+                      style={[
+                        styles.calendarDotText,
+                        (trained || isToday) && styles.calendarDotTextWhite
+                      ]}
+                    >
                       {day}
                     </Text>
                   </View>
@@ -346,7 +358,7 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Barra Flotante Translucida con Iconos vectoriales Ionicons y Elevación Añadida */}
+      {/* Barra Flotante Translucida con Iconos Vectoriales Garantizados */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
           <TouchableOpacity
@@ -355,7 +367,7 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'home' ? 'grid' : 'grid-outline'}
-              size={18}
+              size={20}
               color={activeTab === 'home' ? colors.primary : '#8E8E93'}
             />
             <Text style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}>
@@ -369,7 +381,7 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'routines' ? 'flame' : 'flame-outline'}
-              size={18}
+              size={20}
               color={activeTab === 'routines' ? colors.primary : '#8E8E93'}
             />
             <Text style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}>
@@ -383,7 +395,7 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'catalog' ? 'barbell' : 'barbell-outline'}
-              size={18}
+              size={20}
               color={activeTab === 'catalog' ? colors.primary : '#8E8E93'}
             />
             <Text style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}>
@@ -397,7 +409,7 @@ export default function App() {
           >
             <Ionicons
               name={activeTab === 'profile' ? 'person' : 'person-outline'}
-              size={18}
+              size={20}
               color={activeTab === 'profile' ? colors.primary : '#8E8E93'}
             />
             <Text style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}>
@@ -541,18 +553,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 4
   },
-  calendarDotRest: {
-    backgroundColor: colors.surfaceLight,
-    borderWidth: 1,
-    borderColor: colors.surfaceBorder
+  calendarDotToday: {
+    borderColor: '#FFFFFF',
+    borderWidth: 1.5
   },
   calendarDotText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: colors.textMuted
   },
-  calendarDotTextTrained: {
-    color: '#000000',
+  calendarDotTextWhite: {
+    color: '#FFFFFF',
     fontWeight: '800'
   },
   ringsRow: {

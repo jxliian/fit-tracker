@@ -16,6 +16,7 @@
   "dependencies": {
     "expo": "^54.0.36",
     "expo-blur": "~15.0.8",
+    "expo-font": "^57.0.1",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "react": "^19.1.0",
