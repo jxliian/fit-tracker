@@ -836,17 +836,19 @@ export default function App() {
     heightCm: number;
     bodyWeightKg: number;
     experienceLevel: ExperienceLevel;
+    avatarKey?: string | null;
   }) => {
     const newProfile: UserProfile = {
       id: 'usr_' + Date.now(),
       ...data,
       language: 'es',
+      avatarKey: data.avatarKey !== undefined ? data.avatarKey : 'lion',
       createdAt: Date.now()
     };
 
     await db.runAsync(
-      `INSERT INTO user_profile (id, name, age, sex, height_cm, body_weight_kg, experience_level, language, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO user_profile (id, name, age, sex, height_cm, body_weight_kg, experience_level, language, avatar_key, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         newProfile.id,
         newProfile.name,
@@ -856,6 +858,7 @@ export default function App() {
         newProfile.bodyWeightKg,
         newProfile.experienceLevel,
         'es',
+        newProfile.avatarKey || null,
         newProfile.createdAt
       ]
     );

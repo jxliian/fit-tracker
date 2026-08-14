@@ -8,10 +8,18 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  StatusBar
+  StatusBar,
+  Image
 } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { Sex, ExperienceLevel } from '@domain/entities/user-profile';
+
+const AVATAR_OPTIONS = [
+  { key: 'lion', label: 'León', image: require('../../../../../assets/avatars/lion.png') },
+  { key: 'bear', label: 'Oso', image: require('../../../../../assets/avatars/bear.png') },
+  { key: 'panther', label: 'Pantera', image: require('../../../../../assets/avatars/panther.png') },
+  { key: 'eagle', label: 'Águila', image: require('../../../../../assets/avatars/eagle.png') }
+];
 
 export interface OnboardingScreenProps {
   onComplete: (profile: {
@@ -21,6 +29,7 @@ export interface OnboardingScreenProps {
     heightCm: number;
     bodyWeightKg: number;
     experienceLevel: ExperienceLevel;
+    avatarKey?: string | null;
   }) => void;
 }
 
@@ -31,6 +40,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const [heightCm, setHeightCm] = useState('175');
   const [bodyWeightKg, setBodyWeightKg] = useState('75');
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('intermediate');
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = () => {
@@ -53,13 +63,21 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       return;
     }
 
+    // Si no ha elegido avatar explícitamente (o iniciales), se asigna uno aleatorio
+    let finalAvatarKey = selectedAvatar;
+    if (finalAvatarKey === undefined || finalAvatarKey === null) {
+      const keys = ['lion', 'bear', 'panther', 'eagle'];
+      finalAvatarKey = keys[Math.floor(Math.random() * keys.length)];
+    }
+
     onComplete({
       name: name.trim(),
       age: parsedAge,
       sex,
       heightCm: parsedHeight,
       bodyWeightKg: parsedWeight,
-      experienceLevel
+      experienceLevel,
+      avatarKey: finalAvatarKey === 'initials' ? null : finalAvatarKey
     });
   };
 
@@ -77,11 +95,51 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           </View>
           <Text style={styles.title}>Configuración de Perfil</Text>
           <Text style={styles.subtitle}>
-            Introduce tus datos biométricos para personalizar el motor de sobrecarga progresiva y rangos de fuerza.
+            Personaliza tus datos y elige tu Avatar Memoji de animal gym para comenzar.
           </Text>
         </View>
 
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
+        {/* Selector de Avatar Memoji */}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Elige tu Avatar de Animal Memoji (Requerido)</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.avatarScroll}>
+            {AVATAR_OPTIONS.map((av) => (
+              <TouchableOpacity
+                key={av.key}
+                style={[
+                  styles.avatarCard,
+                  selectedAvatar === av.key && styles.avatarCardSelected
+                ]}
+                onPress={() => setSelectedAvatar(av.key)}
+                activeOpacity={0.8}
+              >
+                <Image source={av.image} style={styles.avatarImg} />
+                <Text style={[styles.avatarLabel, selectedAvatar === av.key && styles.avatarLabelSelected]}>
+                  {av.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            {/* Opción Iniciales */}
+            <TouchableOpacity
+              style={[
+                styles.avatarCard,
+                selectedAvatar === 'initials' && styles.avatarCardSelected
+              ]}
+              onPress={() => setSelectedAvatar('initials')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.initialsPlaceholder}>
+                <Text style={styles.initialsText}>{name.trim() ? name.trim().substring(0, 2).toUpperCase() : 'AA'}</Text>
+              </View>
+              <Text style={[styles.avatarLabel, selectedAvatar === 'initials' && styles.avatarLabelSelected]}>
+                Iniciales
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Nombre o Apodo</Text>
@@ -175,7 +233,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { paddingHorizontal: 24, paddingBottom: 40 },
-  header: { alignItems: 'center', marginBottom: 28 },
+  header: { alignItems: 'center', marginBottom: 20 },
   brandBadge: {
     backgroundColor: colors.surfaceLight,
     borderColor: colors.border,
@@ -194,8 +252,40 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
   subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 20 },
   errorText: { color: colors.danger, fontWeight: '600', textAlign: 'center', marginBottom: 16 },
-  formGroup: { marginBottom: 20 },
+  formGroup: { marginBottom: 18 },
   label: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  
+  // Avatares Scroll & Cards
+  avatarScroll: { paddingVertical: 4, paddingRight: 10 },
+  avatarCard: {
+    width: 78,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 8,
+    marginRight: 10
+  },
+  avatarCardSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+    backgroundColor: colors.primary + '20'
+  },
+  avatarImg: { width: 56, height: 56, borderRadius: 28, marginBottom: 4 },
+  avatarLabel: { fontSize: 11, color: colors.textSecondary, fontWeight: '600' },
+  avatarLabelSelected: { color: colors.primary, fontWeight: '700' },
+  initialsPlaceholder: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4
+  },
+  initialsText: { color: colors.textPrimary, fontWeight: '800', fontSize: 18 },
+
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
