@@ -965,11 +965,6 @@ export default function App() {
       <ScrollView ref={scrollViewRef} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={handleScroll} style={styles.pagerStyle}>
         {/* P1: Resumen Dashboard */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent} nestedScrollEnabled={true} overScrollMode="never" scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.startWorkoutCta} onPress={handleStartFreeWorkout}>
-            <Ionicons name="play" size={22} color="#FFFFFF" />
-            <Text style={styles.startWorkoutCtaText}>{t.startWorkout}</Text>
-          </TouchableOpacity>
-
           <View style={styles.widget}>
             <Text style={styles.wTitle}>{t.metrics}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
