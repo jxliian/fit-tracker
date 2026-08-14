@@ -72,3 +72,18 @@ Simultaneously, the progressive overload engine queries historical performance r
     \item \textbf{100\% Local-First Privacy Guarantee}: Zero external telemetry or server tracking. All training logs, sets, body metrics, and personal notes reside exclusively inside the encrypted device-local SQLite database.
     \item \textbf{Data Sovereignty \& Export}: Full JSON data export capabilities accessible from the session history view, providing athletes complete ownership over their training telemetry.
 \end{enumerate}
+
+\subsection{Persistent Workout Session Drafts, Live Telemetry, and Reordering}
+\begin{enumerate}
+    \item \textbf{Continuous Live Status Banner}: Active session telemetry (elapsed duration, current exercise name, active set index, and rest countdowns) is reported every 1000\,ms to a summary widget on the Dashboard view.
+    \item \textbf{Timestamp-Based Persistent Drafts}: When a session starts, its initial timestamp $t_{start}$ and set structure are written into the local SQLite \texttt{active\_workout\_draft} table. If the app is killed or the phone is rebooted, FitTracker recovers the exact session state and elapsed timer upon reopening.
+    \item \textbf{Interactive Reordering}: Athletes can long-press any exercise card header to highlight it with an OLED white border (\texttt{\#FFFFFF}) and move exercises up or down dynamically.
+\end{enumerate}
+
+\subsection{Standalone Build Architecture (APK Package \& EAS Distribution)}
+To support standalone mobile deployment and field beta testing without developer dev server dependencies:
+\begin{itemize}
+    \item \textbf{App Configuration (\texttt{app.json})}: Specifies app metadata, package identifier (\texttt{com.fittracker.app}), dark UI splash screens (\texttt{\#0A0D14}), and adaptive app icons.
+    \item \textbf{EAS Build Profile (\texttt{eas.json})}: Configured for internal preview distribution targeting direct Android APK binary output.
+    \item \textbf{Standalone Distribution Package (\texttt{builds/FitTracker-v1.0.0.apk})}: Pre-compiled standalone Android package stored in the \texttt{builds/} workspace directory for direct installation on mobile devices.
+\end{itemize}

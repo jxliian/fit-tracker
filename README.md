@@ -41,6 +41,22 @@ Upon completion of working sets, the internal overload engine evaluates historic
 
 ---
 
+## Standalone APK & Beta Distribution Package
+
+A compiled Android Package (APK) and Hermes bytecode bundle are pre-packaged in the workspace for direct device testing:
+
+* **APK Package Location:** `builds/FitTracker-v1.0.0.apk`
+* **Production Bundle:** `builds/bundle/`
+* **Package Instructions:** `builds/README.md`
+
+### Beta Tester Installation Guide (Android)
+1. Share `builds/FitTracker-v1.0.0.apk` with beta testers via WhatsApp, Telegram, or Google Drive.
+2. Open the `.apk` file on any Android mobile device.
+3. Grant temporary permission to **"Install from unknown sources"** when prompted by Android OS.
+4. Tap **Install** and launch FitTracker immediately.
+
+---
+
 ## Technical Stack
 
 * **Core Framework**: React Native (Expo SDK 54)

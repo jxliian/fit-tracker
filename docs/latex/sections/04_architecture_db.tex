@@ -77,4 +77,13 @@ CREATE TABLE user_profile (
     language TEXT NOT NULL DEFAULT 'es',
     avatar_key TEXT
 );
+
+-- Active Workout Draft Table (Persistent Session Recovery)
+CREATE TABLE active_workout_draft (
+    id TEXT PRIMARY KEY NOT NULL,
+    workout_title TEXT NOT NULL,
+    start_time_ms INTEGER NOT NULL,
+    exercises_json TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+);
 \end{lstlisting}
