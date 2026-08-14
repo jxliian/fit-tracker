@@ -26,11 +26,11 @@ FitTracker implements Clean Architecture structured by functional feature module
 CREATE TABLE exercises (
     id TEXT PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
-    category TEXT NOT NULL, -- Chest, Back, Legs, etc.
-    exercise_type TEXT NOT NULL, -- Compound vs Isolation
-    equipment TEXT,
+    category TEXT NOT NULL,
+    type TEXT NOT NULL,
+    equipment TEXT NOT NULL,
     gif_url TEXT,
-    created_at INTEGER NOT NULL
+    instructions TEXT
 );
 
 -- Workout Sessions Table
