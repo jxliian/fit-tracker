@@ -1,26 +1,56 @@
+/**
+ * FitTracker Apple Fitness & shadcn Design Tokens
+ * 
+ * Based on Apple iOS Fitness dark mode aesthetics:
+ * - Pure OLED Black (#000000)
+ * - Rounded squircle widgets (#1C1C1E)
+ * - Neon metric accents (Pink, Green, Cyan, Purple, Yellow)
+ * - Glassmorphism translucent floating navigation bar
+ */
 export const colors = {
-  background: '#0D0F12',       // Dark obsidian background
-  surface: '#161920',          // Card surface
-  surfaceLight: '#212530',     // Elevated card / input background
-  border: '#2E3444',           // Subtle borders
-  
-  primary: '#6366F1',          // Electric Indigo
-  primaryDark: '#4F46E5',
-  secondary: '#10B981',        // Emerald Green (Success / Increments)
-  accent: '#8B5CF6',           // Neon Violet
-  warning: '#F59E0B',          // Amber Warning / Maintain
-  danger: '#EF4444',           // Red Deload / Delete
+  // Base Palette (shadcn / Apple Dark Mode)
+  background: '#000000',          // Pure OLED Pitch Black
+  surface: '#1C1C1E',             // Apple Dark Card Widget Surface
+  surfaceLight: '#2C2C2E',        // Elevated Card / Input / Glass Pill
+  surfaceBorder: '#2C2C2E',       // Subtle widget border
+  border: '#38383A',              // Stronger border
 
-  textPrimary: '#F9FAFB',      // Crisp white
-  textSecondary: '#9CA3AF',    // Muted grey
-  textMuted: '#6B7280',        // Subdued label grey
+  // Glassmorphism Tokens
+  glassBackground: 'rgba(28, 28, 30, 0.75)',
+  glassBorder: 'rgba(255, 255, 255, 0.15)',
+  glassPillActive: '#3A3A3C',
 
-  // Strength Rank Badge Colors
-  rankWood: '#8B5A2B',
-  rankIron: '#6B7280',
+  // Neon Apple Fitness Accent Colors
+  primary: '#30D158',             // Apple Fitness Neon Green (Workout / Active)
+  secondary: '#FF2D55',           // Apple Fitness Neon Red/Pink (Move / Intensity)
+  cyan: '#64D2FF',                // Apple Fitness Neon Cyan (Volume / Distance)
+  purple: '#BF5AF2',              // Apple Fitness Neon Purple (Reps / Stats)
+  yellow: '#FFD60A',              // Apple Fitness Neon Yellow (Streaks / Ranks)
+  orange: '#FF9F0C',              // Apple Fitness Neon Orange (Fatigue / Warning)
+
+  warning: '#FF9F0C',
+  danger: '#FF453A',              // Apple Red (Deload / Delete)
+
+  // Typography
+  textPrimary: '#FFFFFF',         // Crisp White
+  textSecondary: '#8E8E93',       // iOS System Muted Grey
+  textMuted: '#636366',          // Darker Muted Label Grey
+
+  // Strength Rank Badges (Metallic Apple Tiers)
+  rankWood: '#A16207',
+  rankIron: '#94A3B8',
   rankBronze: '#D97706',
-  rankSilver: '#9CA3AF',
-  rankGold: '#F59E0B',
-  rankPlatinum: '#06B6D4',
-  rankDiamond: '#8B5CF6'
+  rankSilver: '#CBD5E1',
+  rankGold: '#FFD60A',
+  rankPlatinum: '#64D2FF',
+  rankDiamond: '#BF5AF2'
+};
+
+// Radius Tokens (shadcn / Apple Squircle standards)
+export const radii = {
+  sm: 8,
+  md: 14,
+  lg: 20,
+  xl: 26,
+  full: 9999
 };

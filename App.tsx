@@ -13,10 +13,11 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
 import { db } from '@database/client';
-import { colors } from '@core/theme/colors';
+import { colors, radii } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 
@@ -125,24 +126,31 @@ export default function App() {
   }
 
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
-  const bottomInset = Platform.OS === 'ios' ? 36 : 32;
+  const bottomInset = Platform.OS === 'ios' ? 36 : 30;
+
+  // Formato fecha estilo Apple Fitness ("viernes, 14 ago")
+  const formattedDate = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short'
+  });
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal */}
+      {/* Cabecera Principal Estilo Apple Fitness */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
-          <Text style={styles.greetingText}>Hola, {userProfile.name}</Text>
-          <Text style={styles.subGreetingText}>Panel de Entrenamiento</Text>
+          <Text style={styles.greetingTitle}>Resumen</Text>
+          <Text style={styles.dateSubtitle}>{formattedDate}</Text>
         </View>
-        <View style={styles.profileBadge}>
-          <Text style={styles.profileBadgeText}>{userProfile.bodyWeightKg} kg</Text>
-        </View>
+        <TouchableOpacity style={styles.avatarButton}>
+          <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Contenido Deslizable de Izquierda a Derecha (Swipe Pager) */}
+      {/* Contenido Deslizable (Swipe Pager) con Widgets Apple Style */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -151,43 +159,119 @@ export default function App() {
         onMomentumScrollEnd={handleScroll}
         style={styles.pagerStyle}
       >
-        {/* Pantalla 1: Inicio */}
-        <View style={styles.pageContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Inicio Rápido</Text>
-            <Text style={styles.cardSubtitle}>
-              Comienza una sesión en blanco o selecciona una rutina de tu catálogo.
-            </Text>
-            <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Empezar Entrenamiento Libre</Text>
+        {/* Pantalla 1: Resumen Dashboard (Estilo Apple Fitness Widgets) */}
+        <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          {/* Widget Grande: Anillos / Resumen de Métricas */}
+          <View style={styles.appleWidget}>
+            <Text style={styles.widgetHeaderTitle}>Resumen de Entrenamiento</Text>
+            
+            <View style={styles.ringsRow}>
+              {/* Indicador Visual Simulado */}
+              <View style={styles.ringsVisualContainer}>
+                <View style={[styles.ringOuter, { borderColor: colors.secondary }]}>
+                  <View style={[styles.ringMiddle, { borderColor: colors.primary }]}>
+                    <View style={[styles.ringInner, { borderColor: colors.cyan }]} />
+                  </View>
+                </View>
+              </View>
+
+              {/* Lista de Métricas Neon */}
+              <View style={styles.metricsList}>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Carga Levantada</Text>
+                  <Text style={[styles.metricValue, { color: colors.secondary }]}>
+                    4,850 <Text style={styles.metricUnit}>KCAL / KG</Text>
+                  </Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Tiempo de Sesión</Text>
+                  <Text style={[styles.metricValue, { color: colors.primary }]}>
+                    45/60 <Text style={styles.metricUnit}>MIN</Text>
+                  </Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Series Efectivas</Text>
+                  <Text style={[styles.metricValue, { color: colors.cyan }]}>
+                    16/20 <Text style={styles.metricUnit}>SERIES</Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* Fila de 2 Widgets Secundarios */}
+          <View style={styles.widgetGridRow}>
+            {/* Widget Izquierda: Volumen */}
+            <View style={[styles.appleWidget, styles.halfWidget]}>
+              <Text style={styles.widgetGridTitle}>Conteo de Reps</Text>
+              <Text style={styles.widgetSubLabel}>Hoy</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>148</Text>
+              
+              {/* Gráfica de Barras Minimalista */}
+              <View style={styles.miniBarChart}>
+                <View style={[styles.bar, { height: '30%', backgroundColor: colors.purple + '60' }]} />
+                <View style={[styles.bar, { height: '65%', backgroundColor: colors.purple + '60' }]} />
+                <View style={[styles.bar, { height: '100%', backgroundColor: colors.purple }]} />
+                <View style={[styles.bar, { height: '40%', backgroundColor: colors.purple + '60' }]} />
+                <View style={[styles.bar, { height: '80%', backgroundColor: colors.purple }]} />
+              </View>
+            </View>
+
+            {/* Widget Derecha: Intensidad RPE */}
+            <View style={[styles.appleWidget, styles.halfWidget]}>
+              <Text style={styles.widgetGridTitle}>Esfuerzo (RPE)</Text>
+              <Text style={styles.widgetSubLabel}>Promedio</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>8.5</Text>
+
+              {/* Gráfica de Barras Minimalista */}
+              <View style={styles.miniBarChart}>
+                <View style={[styles.bar, { height: '50%', backgroundColor: colors.cyan + '60' }]} />
+                <View style={[styles.bar, { height: '90%', backgroundColor: colors.cyan }]} />
+                <View style={[styles.bar, { height: '70%', backgroundColor: colors.cyan + '60' }]} />
+                <View style={[styles.bar, { height: '100%', backgroundColor: colors.cyan }]} />
+                <View style={[styles.bar, { height: '85%', backgroundColor: colors.cyan }]} />
+              </View>
+            </View>
+          </View>
+
+          {/* Widget Destacado: Rutina Recomendada */}
+          <View style={styles.appleWidget}>
+            <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>Entrenamiento Sugerido</Text>
+            <Text style={styles.routineTitle}>Torso / Sobrecarga Progresiva</Text>
+            <Text style={styles.routineDesc}>4 Ejercicios · Recomienda +2.5kg en Press de Banca</Text>
+            
+            <TouchableOpacity style={styles.appleButton}>
+              <Text style={styles.appleButtonText}>Iniciar Entrenamiento</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
 
         {/* Pantalla 2: Rutinas */}
-        <View style={styles.pageContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Rutinas Prediseñadas</Text>
-            <Text style={styles.cardSubtitle}>
-              Rutinas Push, Pull y Legs integradas con motor de sobrecarga automática.
+        <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.appleWidget}>
+            <Text style={styles.widgetHeaderTitle}>Rutinas Prediseñadas</Text>
+            <Text style={styles.routineDesc}>
+              Rutinas Push, Pull y Legs integradas con el motor matemático de sobrecarga determinista.
             </Text>
           </View>
-        </View>
+        </ScrollView>
 
-        {/* Pantalla 3: Ejercicios */}
-        <View style={styles.pageContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Catálogo de Ejercicios</Text>
-            <Text style={styles.cardSubtitle}>
+        {/* Pantalla 3: Catálogo de Ejercicios */}
+        <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.appleWidget}>
+            <Text style={styles.widgetHeaderTitle}>Catálogo de Ejercicios</Text>
+            <Text style={styles.routineDesc}>
               Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
             </Text>
           </View>
-        </View>
+        </ScrollView>
 
-        {/* Pantalla 4: Perfil */}
-        <View style={styles.pageContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Perfil de Atleta</Text>
+        {/* Pantalla 4: Perfil de Atleta */}
+        <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.appleWidget}>
+            <Text style={styles.widgetHeaderTitle}>Perfil de Atleta</Text>
             <View style={styles.profileRow}>
               <Text style={styles.profileLabel}>Nombre:</Text>
               <Text style={styles.profileValue}>{userProfile.name}</Text>
@@ -211,38 +295,48 @@ export default function App() {
               <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </ScrollView>
 
-      {/* Barra de Navegación Inferior con Margen de Seguridad Inferior */}
-      <View style={[styles.bottomNav, { paddingBottom: bottomInset }]}>
-        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('home', 0)}>
-          <View style={[styles.navIndicator, activeTab === 'home' && styles.navIndicatorActive]} />
-          <Text style={[styles.navLabel, activeTab === 'home' && styles.navLabelActive]}>
-            INICIO
-          </Text>
-        </TouchableOpacity>
+      {/* Barra Flotante Translucida de Navegación Estilo Glassmorphism Apple */}
+      <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
+        <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
+          <TouchableOpacity
+            style={[styles.glassNavItem, activeTab === 'home' && styles.glassNavItemActive]}
+            onPress={() => handleTabPress('home', 0)}
+          >
+            <Text style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}>
+              Resumen
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('routines', 1)}>
-          <View style={[styles.navIndicator, activeTab === 'routines' && styles.navIndicatorActive]} />
-          <Text style={[styles.navLabel, activeTab === 'routines' && styles.navLabelActive]}>
-            RUTINAS
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.glassNavItem, activeTab === 'routines' && styles.glassNavItemActive]}
+            onPress={() => handleTabPress('routines', 1)}
+          >
+            <Text style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}>
+              Rutinas
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('catalog', 2)}>
-          <View style={[styles.navIndicator, activeTab === 'catalog' && styles.navIndicatorActive]} />
-          <Text style={[styles.navLabel, activeTab === 'catalog' && styles.navLabelActive]}>
-            EJERCICIOS
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.glassNavItem, activeTab === 'catalog' && styles.glassNavItemActive]}
+            onPress={() => handleTabPress('catalog', 2)}
+          >
+            <Text style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}>
+              Ejercicios
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('profile', 3)}>
-          <View style={[styles.navIndicator, activeTab === 'profile' && styles.navIndicatorActive]} />
-          <Text style={[styles.navLabel, activeTab === 'profile' && styles.navLabelActive]}>
-            PERFIL
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.glassNavItem, activeTab === 'profile' && styles.glassNavItemActive]}
+            onPress={() => handleTabPress('profile', 3)}
+          >
+            <Text style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}>
+              Perfil
+            </Text>
+          </TouchableOpacity>
+        </BlurView>
       </View>
     </SafeAreaView>
   );
@@ -270,63 +364,178 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16
+    paddingHorizontal: 22,
+    paddingBottom: 12
   },
-  greetingText: {
+  greetingTitle: {
     color: colors.textPrimary,
-    fontSize: 22,
-    fontWeight: '800'
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: -0.5
   },
-  subGreetingText: {
+  dateSubtitle: {
     color: colors.textSecondary,
     fontSize: 13,
+    fontWeight: '600',
     marginTop: 2
   },
-  profileBadge: {
+  avatarButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.surfaceLight,
     borderColor: colors.border,
     borderWidth: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  profileBadgeText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 13
+  avatarText: {
+    color: colors.textPrimary,
+    fontWeight: '800',
+    fontSize: 14
   },
   pagerStyle: {
     flex: 1
   },
   pageContainer: {
-    width: SCREEN_WIDTH,
+    width: SCREEN_WIDTH
+  },
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 8
+    paddingTop: 8,
+    paddingBottom: 110
   },
-  card: {
+  appleWidget: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
+    borderColor: colors.surfaceBorder,
     borderWidth: 1,
-    borderRadius: 18,
-    padding: 20
+    borderRadius: radii.xl,
+    padding: 20,
+    marginBottom: 16
   },
-  cardTitle: {
+  widgetHeaderTitle: {
     color: colors.textPrimary,
     fontSize: 18,
     fontWeight: '800',
-    marginBottom: 6
+    marginBottom: 16
   },
-  cardSubtitle: {
+  ringsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  ringsVisualContainer: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  ringOuter: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  ringMiddle: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    borderWidth: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  ringInner: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 8
+  },
+  metricsList: {
+    flex: 1,
+    marginLeft: 20
+  },
+  metricItem: {
+    marginBottom: 10
+  },
+  metricLabel: {
     color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600'
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 1
+  },
+  metricUnit: {
+    fontSize: 11,
+    fontWeight: '800'
+  },
+  widgetGridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16
+  },
+  halfWidget: {
+    width: (SCREEN_WIDTH - 52) / 2,
+    marginBottom: 0
+  },
+  widgetGridTitle: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '800'
+  },
+  widgetSubLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2
+  },
+  widgetBigNumber: {
+    fontSize: 32,
+    fontWeight: '900',
+    marginVertical: 6
+  },
+  miniBarChart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 36,
+    justifyContent: 'space-between',
+    marginTop: 6
+  },
+  bar: {
+    width: 6,
+    borderRadius: 3
+  },
+  routineTitle: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 4
+  },
+  routineDesc: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 14
+  },
+  appleButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 13,
+    borderRadius: radii.md,
+    alignItems: 'center'
+  },
+  appleButtonText: {
+    color: '#000000',
+    fontWeight: '800',
     fontSize: 14,
-    marginBottom: 16,
-    lineHeight: 20
+    letterSpacing: 0.3
   },
   profileRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceLight
   },
@@ -339,48 +548,38 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14
   },
-  primaryButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8
+  floatingNavContainer: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    borderRadius: 36,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.glassBorder
   },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
-    letterSpacing: 0.5
-  },
-  bottomNav: {
+  glassBar: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 12,
-    paddingHorizontal: 16,
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    backgroundColor: colors.glassBackground
   },
-  navItem: {
+  glassNavItem: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 28,
     alignItems: 'center'
   },
-  navIndicator: {
-    width: 16,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: 'transparent',
-    marginBottom: 4
+  glassNavItemActive: {
+    backgroundColor: colors.glassPillActive
   },
-  navIndicatorActive: {
-    backgroundColor: colors.primary
+  glassNavLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700'
   },
-  navLabel: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8
-  },
-  navLabelActive: {
-    color: colors.primary
+  glassNavLabelActive: {
+    color: colors.primary,
+    fontWeight: '800'
   }
 });
