@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+  Platform
+} from 'react-native';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
 import { db } from '@database/client';
@@ -15,13 +24,9 @@ export default function App() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        // 1. Inicializar esquema de tablas SQLite
         await initDatabase();
-
-        // 2. Sembrar catálogo de ejercicios y rutinas predefinidas
         await seedExercises();
 
-        // 3. Comprobar si existe perfil de usuario
         const profile = await db.getFirstAsync<any>('SELECT * FROM user_profile LIMIT 1;');
         if (profile) {
           setUserProfile({
@@ -81,7 +86,7 @@ export default function App() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Cargando catálogo de ejercicios y base de datos local...</Text>
+        <Text style={styles.loadingText}>Cargando base de datos local...</Text>
       </View>
     );
   }
@@ -96,78 +101,112 @@ export default function App() {
     );
   }
 
+  const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal */}
-      <View style={styles.header}>
+      {/* Cabecera Principal con margen para la cámara / notificaciones */}
+      <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
-          <Text style={styles.greetingText}>¡Hola, {userProfile.name}! 👋</Text>
-          <Text style={styles.subGreetingText}>¿Listo para superar tus marcas hoy?</Text>
+          <Text style={styles.greetingText}>Hola, {userProfile.name}</Text>
+          <Text style={styles.subGreetingText}>Panel de Entrenamiento</Text>
         </View>
         <View style={styles.profileBadge}>
           <Text style={styles.profileBadgeText}>{userProfile.bodyWeightKg} kg</Text>
         </View>
       </View>
 
-      {/* Contenido Principal de la Pantalla */}
+      {/* Contenido Principal */}
       <View style={styles.mainContent}>
         {activeTab === 'home' && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>🔥 Inicio Rápido de Entrenamiento</Text>
-            <Text style={styles.cardSubtitle}>Comienza una sesión en blanco o selecciona una rutina.</Text>
+            <Text style={styles.cardTitle}>Inicio Rápido</Text>
+            <Text style={styles.cardSubtitle}>
+              Comienza una sesión en blanco o selecciona una rutina de tu catálogo.
+            </Text>
             <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>+ Empezar Entrenamiento Libre</Text>
+              <Text style={styles.primaryButtonText}>Empezar Entrenamiento Libre</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {activeTab === 'routines' && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>📋 Rutinas Prediseñadas</Text>
-            <Text style={styles.cardSubtitle}>Push / Pull / Legs integrados con sobrecarga automática.</Text>
+            <Text style={styles.cardTitle}>Rutinas Prediseñadas</Text>
+            <Text style={styles.cardSubtitle}>
+              Rutinas Push, Pull y Legs integradas con motor de sobrecarga automática.
+            </Text>
           </View>
         )}
 
         {activeTab === 'catalog' && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>🏋️‍♂️ Catálogo (+1.500 Ejercicios)</Text>
-            <Text style={styles.cardSubtitle}>Busca ejercicios por grupo muscular y equipamiento.</Text>
+            <Text style={styles.cardTitle}>Catálogo de Ejercicios</Text>
+            <Text style={styles.cardSubtitle}>
+              Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
+            </Text>
           </View>
         )}
 
         {activeTab === 'profile' && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>👤 Perfil de {userProfile.name}</Text>
-            <Text style={styles.profileDetail}>Edad: {userProfile.age} años</Text>
-            <Text style={styles.profileDetail}>Sexo: {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}</Text>
-            <Text style={styles.profileDetail}>Peso Corporal: {userProfile.bodyWeightKg} kg</Text>
-            <Text style={styles.profileDetail}>Nivel: {userProfile.experienceLevel}</Text>
+            <Text style={styles.cardTitle}>Perfil de Atleta</Text>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Nombre:</Text>
+              <Text style={styles.profileValue}>{userProfile.name}</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Edad:</Text>
+              <Text style={styles.profileValue}>{userProfile.age} años</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Sexo:</Text>
+              <Text style={styles.profileValue}>
+                {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
+              </Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Peso Corporal:</Text>
+              <Text style={styles.profileValue}>{userProfile.bodyWeightKg} kg</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Nivel:</Text>
+              <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
+            </View>
           </View>
         )}
       </View>
 
-      {/* Barra de Navegación Inferior */}
+      {/* Barra de Navegación Inferior Limpia */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('home')}>
-          <Text style={[styles.navIcon, activeTab === 'home' && styles.navIconActive]}>🏠</Text>
-          <Text style={[styles.navLabel, activeTab === 'home' && styles.navLabelActive]}>Inicio</Text>
+          <View style={[styles.navIndicator, activeTab === 'home' && styles.navIndicatorActive]} />
+          <Text style={[styles.navLabel, activeTab === 'home' && styles.navLabelActive]}>
+            INICIO
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('routines')}>
-          <Text style={[styles.navIcon, activeTab === 'routines' && styles.navIconActive]}>📋</Text>
-          <Text style={[styles.navLabel, activeTab === 'routines' && styles.navLabelActive]}>Rutinas</Text>
+          <View style={[styles.navIndicator, activeTab === 'routines' && styles.navIndicatorActive]} />
+          <Text style={[styles.navLabel, activeTab === 'routines' && styles.navLabelActive]}>
+            RUTINAS
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('catalog')}>
-          <Text style={[styles.navIcon, activeTab === 'catalog' && styles.navIconActive]}>🏋️</Text>
-          <Text style={[styles.navLabel, activeTab === 'catalog' && styles.navLabelActive]}>Ejercicios</Text>
+          <View style={[styles.navIndicator, activeTab === 'catalog' && styles.navIndicatorActive]} />
+          <Text style={[styles.navLabel, activeTab === 'catalog' && styles.navLabelActive]}>
+            EJERCICIOS
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('profile')}>
-          <Text style={[styles.navIcon, activeTab === 'profile' && styles.navIconActive]}>👤</Text>
-          <Text style={[styles.navLabel, activeTab === 'profile' && styles.navLabelActive]}>Perfil</Text>
+          <View style={[styles.navIndicator, activeTab === 'profile' && styles.navIndicatorActive]} />
+          <Text style={[styles.navLabel, activeTab === 'profile' && styles.navLabelActive]}>
+            PERFIL
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -197,8 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12
+    paddingBottom: 16
   },
   greetingText: {
     color: colors.textPrimary,
@@ -225,7 +263,8 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    padding: 20
+    paddingHorizontal: 20,
+    paddingTop: 8
   },
   card: {
     backgroundColor: colors.surface,
@@ -246,10 +285,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 20
   },
-  profileDetail: {
+  profileRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surfaceLight
+  },
+  profileLabel: {
+    color: colors.textSecondary,
+    fontSize: 14
+  },
+  profileValue: {
     color: colors.textPrimary,
-    fontSize: 15,
-    marginVertical: 4
+    fontWeight: '700',
+    fontSize: 14
   },
   primaryButton: {
     backgroundColor: colors.primary,
@@ -261,35 +311,38 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 15
+    fontSize: 14,
+    letterSpacing: 0.5
   },
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     justifyContent: 'space-around'
   },
   navItem: {
     alignItems: 'center'
   },
-  navIcon: {
-    fontSize: 20,
-    opacity: 0.6
+  navIndicator: {
+    width: 16,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'transparent',
+    marginBottom: 4
   },
-  navIconActive: {
-    opacity: 1.0
+  navIndicatorActive: {
+    backgroundColor: colors.primary
   },
   navLabel: {
     color: colors.textMuted,
     fontSize: 11,
-    fontWeight: '600',
-    marginTop: 3
+    fontWeight: '700',
+    letterSpacing: 0.8
   },
   navLabelActive: {
-    color: colors.primary,
-    fontWeight: '700'
+    color: colors.primary
   }
 });

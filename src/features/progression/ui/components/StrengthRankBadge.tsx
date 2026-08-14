@@ -31,8 +31,7 @@ export const StrengthRankBadge: React.FC<StrengthRankBadgeProps> = ({
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={[styles.badgePill, { backgroundColor: badgeColor + '25', borderColor: badgeColor }]}>
-          <Text style={styles.emoji}>{rankInfo.emoji}</Text>
-          <Text style={[styles.tierText, { color: badgeColor }]}>{rankInfo.label.toUpperCase()}</Text>
+          <Text style={[styles.tierText, { color: badgeColor }]}>RANGO {rankInfo.label.toUpperCase()}</Text>
         </View>
         <Text style={styles.percentileText}>Top {100 - rankInfo.percentile}%</Text>
       </View>

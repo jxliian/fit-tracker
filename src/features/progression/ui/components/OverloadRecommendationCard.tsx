@@ -19,21 +19,21 @@ export const OverloadRecommendationCard: React.FC<OverloadRecommendationCardProp
           bg: colors.secondary + '18',
           border: colors.secondary,
           titleColor: colors.secondary,
-          title: '🚀 ¡Aumentar Carga recomendada!'
+          title: 'Aumentar Carga Recomendada'
         };
       case 'DELOAD':
         return {
           bg: colors.danger + '18',
           border: colors.danger,
           titleColor: colors.danger,
-          title: '🔄 Descarga / Mantener Fatiga'
+          title: 'Semana de Descarga Programada'
         };
       default:
         return {
           bg: colors.warning + '18',
           border: colors.warning,
           titleColor: colors.warning,
-          title: '⚖️ Mantener Carga Actual'
+          title: 'Mantener Carga Actual'
         };
     }
   };

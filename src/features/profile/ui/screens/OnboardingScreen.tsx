@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  StatusBar
 } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { Sex, ExperienceLevel } from '@domain/entities/user-profile';
@@ -62,27 +63,31 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
     });
   };
 
+  const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 16 : 24;
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: topInset }]}>
         <View style={styles.header}>
-          <Text style={styles.emojiLogo}>⚡</Text>
-          <Text style={styles.title}>Bienvenido a FitTracker</Text>
+          <View style={styles.brandBadge}>
+            <Text style={styles.brandBadgeText}>FITTRACKER</Text>
+          </View>
+          <Text style={styles.title}>Configuración de Perfil</Text>
           <Text style={styles.subtitle}>
-            Configura tu perfil para calcular tus rangos de fuerza y sobrecarga progresiva personalizada.
+            Introduce tus datos biométricos para personalizar el motor de sobrecarga progresiva y rangos de fuerza.
           </Text>
         </View>
 
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Nombre / Apodo</Text>
+          <Text style={styles.label}>Nombre o Apodo</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej. Alex"
+            placeholder="Ej. Alexander"
             placeholderTextColor={colors.textMuted}
             value={name}
             onChangeText={setName}
@@ -101,7 +106,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           </View>
 
           <View style={[styles.formGroup, styles.half]}>
-            <Text style={styles.label}>Peso (kg)</Text>
+            <Text style={styles.label}>Peso Corporal (kg)</Text>
             <TextInput
               style={styles.input}
               keyboardType="decimal-pad"
@@ -112,14 +117,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Sexo biológico (para percentiles de fuerza)</Text>
+          <Text style={styles.label}>Sexo biológico (Cálculo de Percentiles)</Text>
           <View style={styles.segmentedControl}>
             <TouchableOpacity
               style={[styles.segment, sex === 'male' && styles.segmentActive]}
               onPress={() => setSex('male')}
             >
               <Text style={[styles.segmentText, sex === 'male' && styles.segmentTextActive]}>
-                👨 Masculino
+                Masculino
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -127,7 +132,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               onPress={() => setSex('female')}
             >
               <Text style={[styles.segmentText, sex === 'female' && styles.segmentTextActive]}>
-                👩 Femenino
+                Femenino
               </Text>
             </TouchableOpacity>
           </View>
@@ -149,10 +154,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   ]}
                 >
                   {lvl === 'beginner'
-                    ? '🌱 Novato'
+                    ? 'Principiante'
                     : lvl === 'intermediate'
-                    ? '💪 Intermedio'
-                    : '🔥 Avanzado'}
+                    ? 'Intermedio'
+                    : 'Avanzado'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -160,7 +165,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </View>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Comenzar a Entrenar 🚀</Text>
+          <Text style={styles.submitButtonText}>Comenzar Entrenamiento</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -169,13 +174,27 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  container: { padding: 24, justifyContent: 'center' },
+  container: { paddingHorizontal: 24, paddingBottom: 40 },
   header: { alignItems: 'center', marginBottom: 28 },
-  emojiLogo: { fontSize: 48, marginBottom: 8 },
+  brandBadge: {
+    backgroundColor: colors.surfaceLight,
+    borderColor: colors.border,
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 12
+  },
+  brandBadgeText: {
+    color: colors.primary,
+    fontWeight: '800',
+    fontSize: 11,
+    letterSpacing: 1.5
+  },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
-  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 6, lineHeight: 20 },
+  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 20 },
   errorText: { color: colors.danger, fontWeight: '600', textAlign: 'center', marginBottom: 16 },
-  formGroup: { marginBottom: 18 },
+  formGroup: { marginBottom: 20 },
   label: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8 },
   input: {
     backgroundColor: colors.surface,
@@ -197,7 +216,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border
   },
-  segment: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  segment: { flex: 1, paddingVertical: 11, borderRadius: 8, alignItems: 'center' },
   segmentActive: { backgroundColor: colors.primary },
   segmentText: { color: colors.textMuted, fontWeight: '600', fontSize: 13 },
   segmentTextActive: { color: '#FFFFFF', fontWeight: '700' },
@@ -207,7 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderRadius: 10,
     alignItems: 'center',
     marginHorizontal: 3
@@ -217,10 +236,10 @@ const styles = StyleSheet.create({
   levelChipTextActive: { color: colors.primary, fontWeight: '700' },
   submitButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 16
   },
-  submitButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' }
+  submitButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 }
 });

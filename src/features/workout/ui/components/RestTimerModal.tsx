@@ -52,7 +52,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.title}>⏱️ Descanso en Progreso</Text>
+          <Text style={styles.title}>TIEMPO DE DESCANSO</Text>
           
           <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
 
