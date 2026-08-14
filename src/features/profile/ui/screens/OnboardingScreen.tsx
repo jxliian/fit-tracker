@@ -15,10 +15,10 @@ import { colors } from '@core/theme/colors';
 import { Sex, ExperienceLevel } from '@domain/entities/user-profile';
 
 const AVATAR_OPTIONS = [
-  { key: 'lion', labelEs: '🦁 León', labelEn: '🦁 Lion', image: require('../../../../../assets/avatars/lion.png') },
-  { key: 'bear', labelEs: '🐻 Oso', labelEn: '🐻 Bear', image: require('../../../../../assets/avatars/bear.png') },
-  { key: 'panther', labelEs: '🐆 Pantera', labelEn: '🐆 Panther', image: require('../../../../../assets/avatars/panther.png') },
-  { key: 'eagle', labelEs: '🦅 Águila', labelEn: '🦅 Eagle', image: require('../../../../../assets/avatars/eagle.png') }
+  { key: 'lion', labelEs: 'León', labelEn: 'Lion', image: require('../../../../../assets/avatars/lion.png') },
+  { key: 'bear', labelEs: 'Oso', labelEn: 'Bear', image: require('../../../../../assets/avatars/bear.png') },
+  { key: 'panther', labelEs: 'Pantera', labelEn: 'Panther', image: require('../../../../../assets/avatars/panther.png') },
+  { key: 'eagle', labelEs: 'Águila', labelEn: 'Eagle', image: require('../../../../../assets/avatars/eagle.png') }
 ];
 
 export interface OnboardingScreenProps {
@@ -100,13 +100,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             style={[styles.langChip, language === 'es' && styles.langChipActive]}
             onPress={() => setLanguage('es')}
           >
-            <Text style={[styles.langChipText, language === 'es' && styles.langChipTextActive]}>🇪🇸 Español</Text>
+            <Text style={[styles.langChipText, language === 'es' && styles.langChipTextActive]}>Español</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.langChip, language === 'en' && styles.langChipActive]}
             onPress={() => setLanguage('en')}
           >
-            <Text style={[styles.langChipText, language === 'en' && styles.langChipTextActive]}>🇬🇧 English</Text>
+            <Text style={[styles.langChipText, language === 'en' && styles.langChipTextActive]}>English</Text>
           </TouchableOpacity>
         </View>
 
@@ -117,17 +117,17 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           <Text style={styles.title}>{isEs ? 'Configuración de Perfil' : 'Profile Setup'}</Text>
           <Text style={styles.subtitle}>
             {isEs
-              ? 'Personaliza tus datos y elige tu Avatar Animoji de animal gym para comenzar.'
-              : 'Customize your stats and pick your Gym Animoji avatar to get started.'}
+              ? 'Personaliza tus datos y elige tu FitMoji para comenzar.'
+              : 'Customize your stats and pick your FitMoji to get started.'}
           </Text>
         </View>
 
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-        {/* Selector de Avatar Animoji */}
+        {/* Selector de Avatar FitMoji */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>
-            {isEs ? 'Elige tu Avatar de Animal Animoji (Requerido)' : 'Choose your Animoji Animal Avatar (Required)'}
+            {isEs ? 'Elige tu FitMoji (Requerido)' : 'Choose your FitMoji (Required)'}
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.avatarScroll}>
             {AVATAR_OPTIONS.map((av) => (
