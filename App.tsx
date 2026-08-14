@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,7 +7,11 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
-  Platform
+  Platform,
+  ScrollView,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent
 } from 'react-native';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
@@ -16,10 +20,16 @@ import { colors } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
+type TabType = typeof TABS[number];
+
 export default function App() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'routines' | 'catalog' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     async function prepareApp() {
@@ -82,6 +92,19 @@ export default function App() {
     setUserProfile(newProfile);
   };
 
+  const handleTabPress = (tab: TabType, index: number) => {
+    setActiveTab(tab);
+    scrollViewRef.current?.scrollTo({ x: index * SCREEN_WIDTH, animated: true });
+  };
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / SCREEN_WIDTH);
+    if (index >= 0 && index < TABS.length && TABS[index] !== activeTab) {
+      setActiveTab(TABS[index]);
+    }
+  };
+
   if (isInitializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -102,12 +125,13 @@ export default function App() {
   }
 
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
+  const bottomInset = Platform.OS === 'ios' ? 28 : 22;
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal con margen para la cámara / notificaciones */}
+      {/* Cabecera Principal */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
           <Text style={styles.greetingText}>Hola, {userProfile.name}</Text>
@@ -118,9 +142,17 @@ export default function App() {
         </View>
       </View>
 
-      {/* Contenido Principal */}
-      <View style={styles.mainContent}>
-        {activeTab === 'home' && (
+      {/* Contenido Deslizable de Izquierda a Derecha (Swipe Pager) */}
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScroll}
+        style={styles.pagerStyle}
+      >
+        {/* Pantalla 1: Inicio */}
+        <View style={styles.pageContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Inicio Rápido</Text>
             <Text style={styles.cardSubtitle}>
@@ -130,27 +162,30 @@ export default function App() {
               <Text style={styles.primaryButtonText}>Empezar Entrenamiento Libre</Text>
             </TouchableOpacity>
           </View>
-        )}
+        </View>
 
-        {activeTab === 'routines' && (
+        {/* Pantalla 2: Rutinas */}
+        <View style={styles.pageContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Rutinas Prediseñadas</Text>
             <Text style={styles.cardSubtitle}>
               Rutinas Push, Pull y Legs integradas con motor de sobrecarga automática.
             </Text>
           </View>
-        )}
+        </View>
 
-        {activeTab === 'catalog' && (
+        {/* Pantalla 3: Ejercicios */}
+        <View style={styles.pageContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Catálogo de Ejercicios</Text>
             <Text style={styles.cardSubtitle}>
               Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
             </Text>
           </View>
-        )}
+        </View>
 
-        {activeTab === 'profile' && (
+        {/* Pantalla 4: Perfil */}
+        <View style={styles.pageContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Perfil de Atleta</Text>
             <View style={styles.profileRow}>
@@ -176,33 +211,33 @@ export default function App() {
               <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
             </View>
           </View>
-        )}
-      </View>
+        </View>
+      </ScrollView>
 
-      {/* Barra de Navegación Inferior Limpia */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('home')}>
+      {/* Barra de Navegación Inferior con Margen de Seguridad Inferior */}
+      <View style={[styles.bottomNav, { paddingBottom: bottomInset }]}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('home', 0)}>
           <View style={[styles.navIndicator, activeTab === 'home' && styles.navIndicatorActive]} />
           <Text style={[styles.navLabel, activeTab === 'home' && styles.navLabelActive]}>
             INICIO
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('routines')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('routines', 1)}>
           <View style={[styles.navIndicator, activeTab === 'routines' && styles.navIndicatorActive]} />
           <Text style={[styles.navLabel, activeTab === 'routines' && styles.navLabelActive]}>
             RUTINAS
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('catalog')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('catalog', 2)}>
           <View style={[styles.navIndicator, activeTab === 'catalog' && styles.navIndicatorActive]} />
           <Text style={[styles.navLabel, activeTab === 'catalog' && styles.navLabelActive]}>
             EJERCICIOS
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('profile')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabPress('profile', 3)}>
           <View style={[styles.navIndicator, activeTab === 'profile' && styles.navIndicatorActive]} />
           <Text style={[styles.navLabel, activeTab === 'profile' && styles.navLabelActive]}>
             PERFIL
@@ -261,8 +296,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 13
   },
-  mainContent: {
-    flex: 1,
+  pagerStyle: {
+    flex: 1
+  },
+  pageContainer: {
+    width: SCREEN_WIDTH,
     paddingHorizontal: 20,
     paddingTop: 8
   },
@@ -319,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingVertical: 12,
+    paddingTop: 12,
     paddingHorizontal: 16,
     justifyContent: 'space-around'
   },
