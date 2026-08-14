@@ -34,7 +34,7 @@ import { colors, radii, fonts } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
-import { Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@components/ui';
+// Shadcn components inlined - Metro can't resolve @components/ui alias without babel plugin
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_PADDING = 36;
@@ -351,48 +351,27 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal Estilo Apple Fitness Dinámica según la Pestaña Activa */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View style={{ flex: 1 }}>
           <Text style={styles.greetingTitle}>{TAB_TITLES[activeTab]}</Text>
           <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.avatarButton}
-          onPress={() => handleTabPress('profile', 3)}
-        >
+        <TouchableOpacity style={styles.avatarButton} onPress={() => handleTabPress('profile', 3)}>
           <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Contenido Deslizable (Swipe Pager) con Componentes Shadcn Centrados */}
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScroll}
-        style={styles.pagerStyle}
-      >
-        {/* Pantalla 1: Resumen Dashboard (Estadísticas Reales SQLite) */}
+      <ScrollView ref={scrollViewRef} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={handleScroll} style={styles.pagerStyle}>
+        {/* P1: Resumen */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Shadcn Card 1: Métricas de Atleta con Encabezado Centrado */}
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Métricas de Atleta</CardTitle>
-              <View style={styles.centeredBadgeContainer}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  label="Estadísticas"
-                  icon={<Ionicons name="analytics" size={14} color={colors.primary} />}
-                  onPress={() => setShowStatsModal(true)}
-                />
-              </View>
-            </View>
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Métricas de Atleta</Text>
+            <TouchableOpacity style={styles.pillBtn} onPress={() => setShowStatsModal(true)}>
+              <Ionicons name="analytics" size={14} color={colors.primary} />
+              <Text style={styles.pillBtnText}>Estadísticas</Text>
+            </TouchableOpacity>
 
-            <CardContent style={styles.ringsRow}>
-              {/* Indicador Visual Simulado */}
+            <View style={styles.ringsRow}>
               <View style={styles.ringsVisualContainer}>
                 <View style={[styles.ringOuter, { borderColor: colors.secondary }]}>
                   <View style={[styles.ringMiddle, { borderColor: colors.primary }]}>
@@ -400,132 +379,55 @@ export default function App() {
                   </View>
                 </View>
               </View>
-
-              {/* Lista de Métricas Reales de SQLite Centradas */}
               <View style={styles.metricsList}>
-                <View style={styles.metricItemCentered}>
-                  <Text style={styles.metricLabelCentered}>Volumen Acumulado</Text>
-                  <Text style={[styles.metricValueCentered, { color: colors.secondary }]}>
-                    {stats.totalVolumeKg.toLocaleString()} <Text style={styles.metricUnit}>KG</Text>
-                  </Text>
-                </View>
-
-                <View style={styles.metricItemCentered}>
-                  <Text style={styles.metricLabelCentered}>Sesiones Completadas</Text>
-                  <Text style={[styles.metricValueCentered, { color: colors.primary }]}>
-                    {stats.totalSessions} <Text style={styles.metricUnit}>SESIONES</Text>
-                  </Text>
-                </View>
-
-                <View style={styles.metricItemCentered}>
-                  <Text style={styles.metricLabelCentered}>Series Registradas</Text>
-                  <Text style={[styles.metricValueCentered, { color: colors.cyan }]}>
-                    {stats.totalSets} <Text style={styles.metricUnit}>SERIES</Text>
-                  </Text>
-                </View>
-              </View>
-            </CardContent>
-          </Card>
-
-          {/* Shadcn Card 2: Historial Mensual Interactivo Totalmente Centrado */}
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Días Entrenados</CardTitle>
-              <CardDescription style={styles.centeredSub}>
-                {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
-              </CardDescription>
-              <View style={styles.centeredBadgeContainer}>
-                <Badge
-                  variant="streak"
-                  label={`Racha: ${stats.currentStreakDays} ${stats.currentStreakDays === 1 ? 'día' : 'días'}`}
-                  icon={<Ionicons name="flame" size={14} color={colors.primary} />}
-                />
+                <View style={styles.mItem}><Text style={styles.mLabel}>Volumen</Text><Text style={[styles.mVal, { color: colors.secondary }]}>{stats.totalVolumeKg.toLocaleString()} KG</Text></View>
+                <View style={styles.mItem}><Text style={styles.mLabel}>Sesiones</Text><Text style={[styles.mVal, { color: colors.primary }]}>{stats.totalSessions}</Text></View>
+                <View style={styles.mItem}><Text style={styles.mLabel}>Series</Text><Text style={[styles.mVal, { color: colors.cyan }]}>{stats.totalSets}</Text></View>
               </View>
             </View>
+          </View>
 
-            <CardContent>
-              {/* Selector de Meses Centrado con Botones Shadcn Explícitos (Anterior / Siguiente) */}
-              <View style={styles.monthNavRowCentered}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  label="Anterior"
-                  icon={<Ionicons name="chevron-back" size={14} color={colors.primary} />}
-                  onPress={handlePrevMonth}
-                />
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Días Entrenados</Text>
+            <Text style={styles.wSub}>{monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}</Text>
+            <View style={styles.streakRow}>
+              <Ionicons name="flame" size={14} color={colors.primary} />
+              <Text style={styles.streakTxt}>Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}</Text>
+            </View>
 
-                <View style={styles.monthCurrentCenterContainer}>
-                  <Text style={styles.monthCurrentText}>
-                    {stats.trainedDaysInSelectedMonth.length} días
-                  </Text>
-                </View>
+            <View style={styles.monthNav}>
+              <TouchableOpacity style={styles.monthIconBtn} onPress={handlePrevMonth}>
+                <Ionicons name="chevron-back" size={20} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.monthCenter}>{stats.trainedDaysInSelectedMonth.length} días activos</Text>
+              <TouchableOpacity style={styles.monthIconBtn} onPress={handleNextMonth}>
+                <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
 
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  label="Siguiente"
-                  iconPosition="right"
-                  icon={<Ionicons name="chevron-forward" size={14} color={colors.primary} />}
-                  onPress={handleNextMonth}
-                />
-              </View>
-
-              {/* Días de la Semana Header (L, M, X, J, V, S, D) */}
-              <View style={styles.weekDaysHeaderGrid}>
-                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                  <Text key={idx} style={[styles.weekDayTextGrid, { width: DAY_CELL_WIDTH }]}>
-                    {day}
-                  </Text>
-                ))}
-              </View>
-
-              {/* Matriz Mensual Dinámica Estricta de 7 Columnas Exactas */}
-              <View style={styles.calendarGridStrict}>
-                {paddingSlotsArray.map((p) => (
-                  <View key={`pad_${p}`} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
-                    <View style={styles.calendarDotBlank} />
-                  </View>
-                ))}
-
-                {daysInMonthArray.map((day) => {
-                  const trained = stats.trainedDaysInSelectedMonth.includes(day);
-                  const isToday = isViewingCurrentMonth && day === todayDate.getDate();
-
-                  return (
-                    <View key={day} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
-                      <View
-                        style={[
-                          styles.calendarDot,
-                          trained && styles.calendarDotTrained,
-                          isToday && styles.calendarDotToday
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.calendarDotText,
-                            (trained || isToday) && styles.calendarDotTextWhite
-                          ]}
-                        >
-                          {day}
-                        </Text>
-                      </View>
+            <View style={styles.weekRow}>
+              {['L','M','X','J','V','S','D'].map((d,i) => <Text key={i} style={[styles.weekDay, { width: DAY_CELL_WIDTH }]}>{d}</Text>)}
+            </View>
+            <View style={styles.calGrid}>
+              {paddingSlotsArray.map(p => <View key={`p${p}`} style={[styles.calCell, { width: DAY_CELL_WIDTH }]}><View style={styles.calBlank} /></View>)}
+              {daysInMonthArray.map(day => {
+                const t = stats.trainedDaysInSelectedMonth.includes(day);
+                const today = isViewingCurrentMonth && day === todayDate.getDate();
+                return (
+                  <View key={day} style={[styles.calCell, { width: DAY_CELL_WIDTH }]}>
+                    <View style={[styles.calDot, t && styles.calDotActive, today && styles.calDotToday]}>
+                      <Text style={[styles.calDotTxt, (t || today) && styles.calDotTxtW]}>{day}</Text>
                     </View>
-                  );
-                })}
-              </View>
-            </CardContent>
-          </Card>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
 
-          {/* Fila de 2 Widgets Secundarios: Reps & Esfuerzo RPE */}
           <View style={styles.widgetGridRow}>
-            {/* Shadcn Card Izquierda: Total Series Centradas */}
-            <Card style={styles.halfWidget}>
-              <CardTitle style={styles.widgetGridTitleCentered}>Total Series</CardTitle>
-              <CardDescription style={styles.widgetSubLabelCentered}>Histórico Local</CardDescription>
-              <Text style={[styles.widgetBigNumberCentered, { color: colors.purple }]}>
-                {stats.totalSets}
-              </Text>
-              
+            <View style={[styles.widget, styles.halfW]}>
+              <Text style={styles.wTitleSm}>Total Series</Text>
+              <Text style={[styles.bigNum, { color: colors.purple }]}>{stats.totalSets}</Text>
               <View style={styles.miniBarChart}>
                 <View style={[styles.bar, { height: '40%', backgroundColor: colors.purple + '60' }]} />
                 <View style={[styles.bar, { height: '70%', backgroundColor: colors.purple + '60' }]} />
@@ -533,16 +435,10 @@ export default function App() {
                 <View style={[styles.bar, { height: '60%', backgroundColor: colors.purple + '60' }]} />
                 <View style={[styles.bar, { height: '85%', backgroundColor: colors.purple }]} />
               </View>
-            </Card>
-
-            {/* Shadcn Card Derecha: Intensidad RPE Medio Centrado */}
-            <Card style={styles.halfWidget}>
-              <CardTitle style={styles.widgetGridTitleCentered}>Esfuerzo (RPE)</CardTitle>
-              <CardDescription style={styles.widgetSubLabelCentered}>Promedio</CardDescription>
-              <Text style={[styles.widgetBigNumberCentered, { color: colors.cyan }]}>
-                {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
-              </Text>
-
+            </View>
+            <View style={[styles.widget, styles.halfW]}>
+              <Text style={styles.wTitleSm}>RPE Medio</Text>
+              <Text style={[styles.bigNum, { color: colors.cyan }]}>{stats.avgRpe > 0 ? stats.avgRpe : '0.0'}</Text>
               <View style={styles.miniBarChart}>
                 <View style={[styles.bar, { height: '50%', backgroundColor: colors.cyan + '60' }]} />
                 <View style={[styles.bar, { height: '90%', backgroundColor: colors.cyan }]} />
@@ -550,732 +446,179 @@ export default function App() {
                 <View style={[styles.bar, { height: '100%', backgroundColor: colors.cyan }]} />
                 <View style={[styles.bar, { height: '85%', backgroundColor: colors.cyan }]} />
               </View>
-            </Card>
+            </View>
           </View>
         </ScrollView>
 
-        {/* Pantalla 2: Rutinas */}
+        {/* P2: Rutinas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Rutinas Prediseñadas</CardTitle>
-              <CardDescription style={styles.centeredSub}>
-                Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.
-              </CardDescription>
-            </View>
-          </Card>
+          <View style={styles.widget}><Text style={styles.wTitle}>Rutinas Prediseñadas</Text><Text style={styles.wSub}>Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.</Text></View>
         </ScrollView>
 
-        {/* Pantalla 3: Catálogo de Ejercicios */}
+        {/* P3: Ejercicios */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Catálogo de Ejercicios</CardTitle>
-              <CardDescription style={styles.centeredSub}>
-                Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
-              </CardDescription>
-            </View>
-          </Card>
+          <View style={styles.widget}><Text style={styles.wTitle}>Catálogo de Ejercicios</Text><Text style={styles.wSub}>Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.</Text></View>
         </ScrollView>
 
-        {/* Pantalla 4: Perfil de Atleta + Estadísticas Integradas Totalmente Centradas */}
+        {/* P4: Perfil */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Shadcn Card 1: Datos Personales Centrados en Bloques */}
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Perfil de Atleta</CardTitle>
-            </View>
-            <CardContent>
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Nombre</Text>
-                <Text style={styles.profileBlockValueCentered}>{userProfile.name}</Text>
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Perfil de Atleta</Text>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Nombre</Text><Text style={styles.bVal}>{userProfile.name}</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Edad</Text><Text style={styles.bVal}>{userProfile.age} años</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Sexo</Text><Text style={styles.bVal}>{userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Peso Corporal</Text><Text style={styles.bVal}>{userProfile.bodyWeightKg} kg</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Nivel</Text><Text style={styles.bVal}>{userProfile.experienceLevel.toUpperCase()}</Text></View>
+          </View>
+
+          <View style={styles.widget}>
+            <Text style={[styles.wTitle, { color: colors.primary }]}>Estadísticas & Récords</Text>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Volumen Acumulado</Text><Text style={[styles.bVal, { color: colors.secondary }]}>{stats.totalVolumeKg.toLocaleString()} kg</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>1RM Máximo</Text><Text style={[styles.bVal, { color: colors.primary }]}>{stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}</Text></View>
+            <View style={styles.blockCard}><Text style={styles.bLabel}>Racha Actual</Text><Text style={[styles.bVal, { color: colors.cyan }]}>{stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}</Text></View>
+          </View>
+
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Mejores Marcas</Text>
+            {stats.exercisePRs.length > 0 ? stats.exercisePRs.map(pr => (
+              <View key={pr.exerciseId} style={styles.blockCard}>
+                <Text style={styles.bVal}>{pr.exerciseName}</Text>
+                <Text style={styles.bLabel}>Max: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg</Text>
+                <Text style={[styles.bLabel, { color: colors.primary, marginTop: 4 }]}>{pr.rankEmoji} {pr.rankLabel}</Text>
               </View>
-
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Edad</Text>
-                <Text style={styles.profileBlockValueCentered}>{userProfile.age} años</Text>
-              </View>
-
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Sexo</Text>
-                <Text style={styles.profileBlockValueCentered}>
-                  {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
-                </Text>
-              </View>
-
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Peso Corporal</Text>
-                <Text style={styles.profileBlockValueCentered}>{userProfile.bodyWeightKg} kg</Text>
-              </View>
-
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Nivel</Text>
-                <Text style={styles.profileBlockValueCentered}>{userProfile.experienceLevel.toUpperCase()}</Text>
-              </View>
-            </CardContent>
-          </Card>
-
-          {/* Shadcn Card 2: Estadísticas del Perfil Totalmente Centradas */}
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={[styles.centeredTitle, { color: colors.primary }]}>
-                Estadísticas & Récords (PRs)
-              </CardTitle>
-            </View>
-
-            <CardContent>
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Volumen Acumulado</Text>
-                <Text style={[styles.profileBlockValueCentered, { color: colors.secondary }]}>
-                  {stats.totalVolumeKg.toLocaleString()} kg
-                </Text>
-              </View>
-              
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>1RM Máximo Histórico</Text>
-                <Text style={[styles.profileBlockValueCentered, { color: colors.primary }]}>
-                  {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
-                </Text>
-              </View>
-
-              <View style={styles.profileBlockCardCentered}>
-                <Text style={styles.profileBlockLabelCentered}>Racha Actual</Text>
-                <Text style={[styles.profileBlockValueCentered, { color: colors.cyan }]}>
-                  {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
-                </Text>
-              </View>
-            </CardContent>
-          </Card>
-
-          {/* Shadcn Card 3: Marcas Adaptativas Centradas */}
-          <Card>
-            <View style={styles.centeredHeaderBlock}>
-              <CardTitle style={styles.centeredTitle}>Mejores Marcas por Ejercicio</CardTitle>
-            </View>
-
-            <CardContent>
-              {stats.exercisePRs.length > 0 ? (
-                stats.exercisePRs.map((pr) => (
-                  <View key={pr.exerciseId} style={styles.prRowItemCentered}>
-                    <Text style={styles.prExerciseNameCentered}>{pr.exerciseName}</Text>
-                    <Text style={styles.prSubTextCentered}>
-                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
-                    </Text>
-                    <View style={styles.prBadgeCenterWrapper}>
-                      <Badge
-                        variant="primary"
-                        label={`${pr.rankEmoji} ${pr.rankLabel}`}
-                      />
-                    </View>
-                  </View>
-                ))
-              ) : (
-                <View style={styles.emptyPrContainer}>
-                  <Text style={styles.emptyPrTextCentered}>
-                    Aún no has registrado series completadas. Tus mejores marcas por ejercicio aparecerán aquí automáticamente.
-                  </Text>
-                </View>
-              )}
-            </CardContent>
-          </Card>
+            )) : (
+              <Text style={styles.wSub}>Aún no has registrado series. Tus marcas aparecerán aquí.</Text>
+            )}
+          </View>
         </ScrollView>
       </ScrollView>
 
-      {/* Modal de Estadísticas Translúcido Centrado */}
-      <Modal
-        visible={showStatsModal}
-        animationType="slide"
-        transparent={true}
-        statusBarTranslucent={true}
-        onRequestClose={() => setShowStatsModal(false)}
-      >
-        <View style={styles.modalOverlayFullBottom}>
-          <BlurView intensity={Platform.OS === 'ios' ? 95 : 100} tint="dark" style={styles.modalContainerFullBottom}>
-            <View style={styles.modalHeader}>
+      {/* Modal Estadísticas */}
+      <Modal visible={showStatsModal} animationType="slide" transparent statusBarTranslucent onRequestClose={() => setShowStatsModal(false)}>
+        <View style={styles.modalOverlay}>
+          <BlurView intensity={Platform.OS === 'ios' ? 95 : 100} tint="dark" style={styles.modalBox}>
+            <View style={styles.modalHead}>
               <Text style={styles.modalTitle}>Informe de Atleta</Text>
-              <Button
-                variant="secondary"
-                size="icon"
-                icon={<Ionicons name="close" size={18} color={colors.textPrimary} />}
-                onPress={() => setShowStatsModal(false)}
-              />
+              <TouchableOpacity onPress={() => setShowStatsModal(false)} style={styles.closeBtn}><Ionicons name="close" size={20} color={colors.textPrimary} /></TouchableOpacity>
             </View>
-
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              <View style={styles.statGridCardCentered}>
-                <Text style={styles.statGridLabelCentered}>1RM Máximo Estimado</Text>
-                <Text style={[styles.statGridValueCentered, { color: colors.primary }]}>
-                  {stats.max1RM > 0 ? `${stats.max1RM} KG` : 'Sin registro'}
-                </Text>
-              </View>
-
-              <View style={styles.statGridCardCentered}>
-                <Text style={styles.statGridLabelCentered}>Volumen Promedio por Sesión</Text>
-                <Text style={[styles.statGridValueCentered, { color: colors.cyan }]}>
-                  {stats.avgVolumePerSession > 0 ? `${stats.avgVolumePerSession.toLocaleString()} KG` : '0 KG'}
-                </Text>
-              </View>
-
-              <View style={styles.statGridCardCentered}>
-                <Text style={styles.statGridLabelCentered}>Racha Más Larga</Text>
-                <Text style={[styles.statGridValueCentered, { color: colors.purple }]}>
-                  {stats.bestStreakDays} Días
-                </Text>
-              </View>
-
-              <View style={styles.statGridCardCentered}>
-                <Text style={styles.statGridLabelCentered}>Intensidad RPE Medio</Text>
-                <Text style={[styles.statGridValueCentered, { color: colors.secondary }]}>
-                  {stats.avgRpe > 0 ? `${stats.avgRpe} RPE` : '0.0'}
-                </Text>
-              </View>
-
-              {/* Récords Adaptativos por Ejercicio dentro del Modal Centrados */}
-              <Text style={[styles.centeredTitle, { marginTop: 16, marginBottom: 12 }]}>
-                Marcas Personales (PRs)
-              </Text>
-
-              {stats.exercisePRs.length > 0 ? (
-                stats.exercisePRs.map((pr) => (
-                  <View key={`modal_${pr.exerciseId}`} style={styles.prRowItemCentered}>
-                    <Text style={styles.prExerciseNameCentered}>{pr.exerciseName}</Text>
-                    <Text style={styles.prSubTextCentered}>
-                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
-                    </Text>
-                    <View style={styles.prBadgeCenterWrapper}>
-                      <Badge
-                        variant="primary"
-                        label={`${pr.rankEmoji} ${pr.rankLabel}`}
-                      />
-                    </View>
-                  </View>
-                ))
-              ) : (
-                <Text style={styles.emptyPrTextCentered}>
-                  Completa tu primera sesión de entrenamiento para calcular tus marcas en tiempo real.
-                </Text>
-              )}
+            <ScrollView style={{ marginBottom: 10 }} showsVerticalScrollIndicator={false}>
+              <View style={styles.blockCard}><Text style={styles.bLabel}>1RM Máximo</Text><Text style={[styles.bVal, { color: colors.primary }]}>{stats.max1RM > 0 ? `${stats.max1RM} KG` : 'Sin registro'}</Text></View>
+              <View style={styles.blockCard}><Text style={styles.bLabel}>Vol. Promedio/Sesión</Text><Text style={[styles.bVal, { color: colors.cyan }]}>{stats.avgVolumePerSession > 0 ? `${stats.avgVolumePerSession.toLocaleString()} KG` : '0 KG'}</Text></View>
+              <View style={styles.blockCard}><Text style={styles.bLabel}>Racha Más Larga</Text><Text style={[styles.bVal, { color: colors.purple }]}>{stats.bestStreakDays} Días</Text></View>
+              <View style={styles.blockCard}><Text style={styles.bLabel}>RPE Medio</Text><Text style={[styles.bVal, { color: colors.secondary }]}>{stats.avgRpe > 0 ? `${stats.avgRpe}` : '0.0'}</Text></View>
+              <Text style={[styles.wTitle, { marginTop: 16 }]}>Marcas Personales</Text>
+              {stats.exercisePRs.length > 0 ? stats.exercisePRs.map(pr => (
+                <View key={`m_${pr.exerciseId}`} style={styles.blockCard}>
+                  <Text style={styles.bVal}>{pr.exerciseName}</Text>
+                  <Text style={styles.bLabel}>Max: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg</Text>
+                </View>
+              )) : <Text style={styles.wSub}>Completa tu primera sesión para ver tus marcas.</Text>}
             </ScrollView>
           </BlurView>
         </View>
       </Modal>
 
-      {/* Barra Flotante Translucida de Navegación con Textos Anti-overflow */}
-      <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
+      {/* Nav Bar */}
+      <View style={[styles.floatingNav, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
-          <TouchableOpacity
-            style={[styles.glassNavItem, activeTab === 'home' && styles.glassNavItemActive]}
-            onPress={() => handleTabPress('home', 0)}
-          >
-            <Ionicons
-              name={activeTab === 'home' ? 'grid' : 'grid-outline'}
-              size={18}
-              color={activeTab === 'home' ? colors.primary : '#8E8E93'}
-            />
-            <Text
-              style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}
-              numberOfLines={1}
-            >
-              Resumen
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.glassNavItem, activeTab === 'routines' && styles.glassNavItemActive]}
-            onPress={() => handleTabPress('routines', 1)}
-          >
-            <Ionicons
-              name={activeTab === 'routines' ? 'flame' : 'flame-outline'}
-              size={18}
-              color={activeTab === 'routines' ? colors.primary : '#8E8E93'}
-            />
-            <Text
-              style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}
-              numberOfLines={1}
-            >
-              Rutinas
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.glassNavItem, activeTab === 'catalog' && styles.glassNavItemActive]}
-            onPress={() => handleTabPress('catalog', 2)}
-          >
-            <Ionicons
-              name={activeTab === 'catalog' ? 'barbell' : 'barbell-outline'}
-              size={18}
-              color={activeTab === 'catalog' ? colors.primary : '#8E8E93'}
-            />
-            <Text
-              style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}
-              numberOfLines={1}
-            >
-              Ejercicios
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.glassNavItem, activeTab === 'profile' && styles.glassNavItemActive]}
-            onPress={() => handleTabPress('profile', 3)}
-          >
-            <Ionicons
-              name={activeTab === 'profile' ? 'person' : 'person-outline'}
-              size={18}
-              color={activeTab === 'profile' ? colors.primary : '#8E8E93'}
-            />
-            <Text
-              style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}
-              numberOfLines={1}
-            >
-              Perfil
-            </Text>
-          </TouchableOpacity>
+          {(['home','routines','catalog','profile'] as const).map((tab, idx) => {
+            const icons: Record<string, [string, string]> = { home: ['grid','grid-outline'], routines: ['flame','flame-outline'], catalog: ['barbell','barbell-outline'], profile: ['person','person-outline'] };
+            const labels: Record<string, string> = { home: 'Inicio', routines: 'Rutinas', catalog: 'Ejercicios', profile: 'Perfil' };
+            const isActive = activeTab === tab;
+            return (
+              <TouchableOpacity key={tab} style={[styles.navItem, isActive && styles.navItemActive]} onPress={() => handleTabPress(tab, idx)}>
+                <Ionicons name={(isActive ? icons[tab][0] : icons[tab][1]) as any} size={18} color={isActive ? colors.primary : '#8E8E93'} />
+                <Text style={[styles.navLabel, isActive && styles.navLabelActive]} numberOfLines={1}>{labels[tab]}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </BlurView>
       </View>
     </SafeAreaView>
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24
-  },
-  loadingText: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 14,
-    marginTop: 16,
-    textAlign: 'center'
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 12
-  },
-  greetingTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 30,
-    letterSpacing: -0.5,
-    includeFontPadding: false
-  },
-  dateSubtitle: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 13,
-    marginTop: 2,
-    includeFontPadding: false
-  },
-  avatarButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.surfaceLight,
-    borderColor: colors.border,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8
-  },
-  avatarText: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 13
-  },
-  pagerStyle: {
-    flex: 1
-  },
-  pageContainer: {
-    width: SCREEN_WIDTH
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 140
-  },
-  centeredHeaderBlock: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14
-  },
-  centeredTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 17,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  centeredSub: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    marginTop: 2,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  centeredBadgeContainer: {
-    marginTop: 8,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  monthNavRowCentered: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceLight,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: radii.md,
-    marginBottom: 14
-  },
-  monthCurrentCenterContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6
-  },
-  monthCurrentText: {
-    color: colors.textPrimary,
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  weekDaysHeaderGrid: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginBottom: 8
-  },
-  weekDayTextGrid: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 11,
-    textAlign: 'center'
-  },
-  calendarGridStrict: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start'
-  },
-  calendarCellContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 3
-  },
-  calendarDotBlank: {
-    width: 30,
-    height: 30
-  },
-  calendarDot: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  calendarDotTrained: {
-    backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4
-  },
-  calendarDotToday: {
-    borderColor: '#FFFFFF',
-    borderWidth: 1.5
-  },
-  calendarDotText: {
-    fontFamily: fonts.headingSemiBold,
-    fontSize: 11,
-    color: colors.textMuted
-  },
-  calendarDotTextWhite: {
-    color: '#FFFFFF',
-    fontFamily: fonts.headingBold
-  },
-  ringsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  ringsVisualContainer: {
-    width: 90,
-    height: 90,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  ringOuter: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    borderWidth: 7,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  ringMiddle: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    borderWidth: 7,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  ringInner: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 7
-  },
-  metricsList: {
-    flex: 1,
-    marginLeft: 14
-  },
-  metricItemCentered: {
-    marginBottom: 8,
-    alignItems: 'center'
-  },
-  metricLabelCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  metricValueCentered: {
-    fontFamily: fonts.headingBold,
-    fontSize: 16,
-    marginTop: 1,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  metricUnit: {
-    fontFamily: fonts.headingSemiBold,
-    fontSize: 10
-  },
-  widgetGridRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14
-  },
-  halfWidget: {
-    width: (SCREEN_WIDTH - 44) / 2,
-    marginBottom: 0
-  },
-  widgetGridTitleCentered: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 15,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  widgetSubLabelCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    marginTop: 2,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  widgetBigNumberCentered: {
-    fontFamily: fonts.headingBold,
-    fontSize: 26,
-    marginVertical: 4,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  miniBarChart: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: 32,
-    justifyContent: 'space-between',
-    marginTop: 6
-  },
-  bar: {
-    width: 5,
-    borderRadius: 3
-  },
-  profileBlockCardCentered: {
-    backgroundColor: colors.surfaceLight,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: radii.md,
-    marginBottom: 10,
-    borderColor: colors.border,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  profileBlockLabelCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 12,
-    marginBottom: 2,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  profileBlockValueCentered: {
-    fontFamily: fonts.headingBold,
-    fontSize: 18,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  prRowItemCentered: {
-    backgroundColor: colors.surfaceLight,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: radii.md,
-    marginBottom: 10,
-    borderColor: colors.border,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  prExerciseNameCentered: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 14,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  prSubTextCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    marginTop: 2,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  prBadgeCenterWrapper: {
-    marginTop: 8,
-    alignItems: 'center'
-  },
-  emptyPrContainer: {
-    paddingVertical: 12
-  },
-  emptyPrTextCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    lineHeight: 18,
-    fontStyle: 'italic',
-    textAlign: 'center'
-  },
-  modalOverlayFullBottom: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'flex-end',
-    width: '100%',
-    height: '100%'
-  },
-  modalContainerFullBottom: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radii.xl,
-    borderTopRightRadius: radii.xl,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: Platform.OS === 'ios' ? 44 : 32,
-    maxHeight: '90%',
-    width: '100%',
-    borderColor: colors.border,
-    borderWidth: 1
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16
-  },
-  modalBody: {
-    marginBottom: 10
-  },
-  modalTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    includeFontPadding: false
-  },
-  statGridCardCentered: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: radii.lg,
-    padding: 14,
-    marginBottom: 10,
-    borderColor: colors.border,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  statGridLabelCentered: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 12,
-    marginBottom: 4,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  statGridValueCentered: {
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  floatingNavContainer: {
-    position: 'absolute',
-    left: 14,
-    right: 14,
-    borderRadius: 32,
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
-    backgroundColor: 'rgba(28, 28, 30, 0.94)',
-    zIndex: 9999,
-    elevation: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12
-  },
-  glassBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    backgroundColor: 'transparent'
-  },
-  glassNavItem: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 2,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  glassNavItemActive: {
-    backgroundColor: '#3A3A3C'
-  },
-  glassNavLabel: {
-    color: '#8E8E93',
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 10,
-    letterSpacing: -0.2,
-    marginTop: 2,
-    textAlign: 'center',
-    includeFontPadding: false
-  },
-  glassNavLabelActive: {
-    color: colors.primary,
-    fontFamily: fonts.bodyBold
-  }
+  container: { flex: 1, backgroundColor: colors.background },
+  loadingContainer: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  loadingText: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 14, marginTop: 16, textAlign: 'center' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 12 },
+  greetingTitle: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 30, letterSpacing: -0.5, includeFontPadding: false },
+  dateSubtitle: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 13, marginTop: 2, includeFontPadding: false },
+  avatarButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 13, includeFontPadding: false },
+  pagerStyle: { flex: 1 },
+  pageContainer: { width: SCREEN_WIDTH },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 140 },
+
+  // Widget = Card container
+  widget: { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, borderWidth: 1, borderRadius: radii.xl, paddingHorizontal: 20, paddingVertical: 18, marginBottom: 14, alignItems: 'center' },
+  wTitle: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 17, textAlign: 'center', includeFontPadding: false, marginBottom: 8 },
+  wTitleSm: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 15, textAlign: 'center', includeFontPadding: false, marginBottom: 4 },
+  wSub: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 13, textAlign: 'center', lineHeight: 20, includeFontPadding: false },
+
+  // Pill button (Stats)
+  pillBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 6, paddingHorizontal: 14, marginBottom: 12 },
+  pillBtnText: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
+
+  // Streak badge
+  streakRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 5, paddingHorizontal: 12, marginBottom: 12 },
+  streakTxt: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
+
+  // Month navigation - icon buttons only, no text that can clip
+  monthNav: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceLight, borderRadius: radii.md, paddingVertical: 6, paddingHorizontal: 8, marginBottom: 14, alignSelf: 'stretch' },
+  monthIconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
+  monthCenter: { flex: 1, color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: 'center', includeFontPadding: false },
+
+  // Rings & metrics
+  ringsRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
+  ringsVisualContainer: { width: 90, height: 90, justifyContent: 'center', alignItems: 'center' },
+  ringOuter: { width: 86, height: 86, borderRadius: 43, borderWidth: 7, justifyContent: 'center', alignItems: 'center' },
+  ringMiddle: { width: 66, height: 66, borderRadius: 33, borderWidth: 7, justifyContent: 'center', alignItems: 'center' },
+  ringInner: { width: 46, height: 46, borderRadius: 23, borderWidth: 7 },
+  metricsList: { flex: 1, marginLeft: 14 },
+  mItem: { marginBottom: 8, alignItems: 'center' },
+  mLabel: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 11, textAlign: 'center', includeFontPadding: false },
+  mVal: { fontFamily: fonts.headingBold, fontSize: 16, textAlign: 'center', includeFontPadding: false },
+
+  // Calendar
+  weekRow: { flexDirection: 'row', alignSelf: 'stretch', marginBottom: 8 },
+  weekDay: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11, textAlign: 'center' },
+  calGrid: { flexDirection: 'row', flexWrap: 'wrap', alignSelf: 'stretch' },
+  calCell: { alignItems: 'center', justifyContent: 'center', marginVertical: 3 },
+  calBlank: { width: 30, height: 30 },
+  calDot: { width: 30, height: 30, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
+  calDotActive: { backgroundColor: colors.primary },
+  calDotToday: { borderColor: '#FFF', borderWidth: 1.5 },
+  calDotTxt: { fontFamily: fonts.headingSemiBold, fontSize: 11, color: colors.textMuted, includeFontPadding: false },
+  calDotTxtW: { color: '#FFF', fontFamily: fonts.headingBold },
+
+  // Widget grid row (2 half-width cards)
+  widgetGridRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
+  halfW: { width: (SCREEN_WIDTH - 44) / 2, marginBottom: 0 },
+  bigNum: { fontFamily: fonts.headingBold, fontSize: 26, textAlign: 'center', includeFontPadding: false, marginVertical: 4 },
+  miniBarChart: { flexDirection: 'row', alignItems: 'flex-end', height: 32, justifyContent: 'space-between', marginTop: 6, alignSelf: 'stretch' },
+  bar: { width: 5, borderRadius: 3 },
+
+  // Block cards (profile, stats) - vertical stacked, centered text
+  blockCard: { backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, borderRadius: radii.md, paddingVertical: 12, paddingHorizontal: 16, marginBottom: 10, alignItems: 'center', alignSelf: 'stretch' },
+  bLabel: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 12, textAlign: 'center', includeFontPadding: false, marginBottom: 2 },
+  bVal: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 17, textAlign: 'center', includeFontPadding: false },
+
+  // Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: colors.surface, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, paddingHorizontal: 20, paddingTop: 20, paddingBottom: Platform.OS === 'ios' ? 44 : 32, maxHeight: '90%', borderColor: colors.border, borderWidth: 1 },
+  modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 20, includeFontPadding: false },
+  closeBtn: { padding: 8, backgroundColor: colors.surfaceLight, borderRadius: radii.full },
+
+  // Floating Nav
+  floatingNav: { position: 'absolute', left: 14, right: 14, borderRadius: 32, overflow: 'hidden', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)', backgroundColor: 'rgba(28,28,30,0.94)', zIndex: 9999, elevation: 10 },
+  glassBar: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 6, paddingHorizontal: 4, backgroundColor: 'transparent' },
+  navItem: { flex: 1, paddingVertical: 8, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  navItemActive: { backgroundColor: '#3A3A3C' },
+  navLabel: { color: '#8E8E93', fontFamily: fonts.bodySemiBold, fontSize: 10, marginTop: 2, textAlign: 'center', includeFontPadding: false },
+  navLabelActive: { color: colors.primary, fontFamily: fonts.bodyBold }
 });
+
