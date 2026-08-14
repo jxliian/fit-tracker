@@ -1,4 +1,4 @@
-# FitTracker 🏋️‍♂️📊
+# FitTracker
 
 Local-first mobile application for workout tracking with **Automatic Progressive Overload**, nutrition, and body metrics.
 
