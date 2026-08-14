@@ -65,3 +65,10 @@ L = \sqrt{(x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2}, \quad \theta = \operatorname{a
 Using \texttt{expo-notifications}, active workout timer states, current exercise names, and rest countdowns synchronize with local push notifications when the application enters background state.
 
 Simultaneously, the progressive overload engine queries historical performance records and automatically pre-fills set rows with calculated target loads ($w_{rec}$) and target repetitions ($r_{rec}$), streamlining session execution.
+
+\subsection{Internationalization (i18n) and Local-First Privacy Architecture}
+\begin{enumerate}
+    \item \textbf{Dual-Language Localization (ES / EN)}: Centralized i18n dictionary mapping tab titles, workout control buttons, metric telemetry, exercise catalog muscle groups, and FitMoji character labels seamlessly. Athletes select their preferred language during onboarding or toggle it anytime from the profile management widget.
+    \item \textbf{100\% Local-First Privacy Guarantee}: Zero external telemetry or server tracking. All training logs, sets, body metrics, and personal notes reside exclusively inside the encrypted device-local SQLite database.
+    \item \textbf{Data Sovereignty \& Export}: Full JSON data export capabilities accessible from the session history view, providing athletes complete ownership over their training telemetry.
+\end{enumerate}

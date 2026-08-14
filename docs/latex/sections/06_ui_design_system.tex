@@ -53,3 +53,11 @@ To guarantee zero UI clipping against device physical notches, camera punch-hole
     \item \textbf{Horizontal Gesture Pager}: Implemented using a native \texttt{ScrollView} with \texttt{pagingEnabled} and \texttt{onMomentumScrollEnd} event listeners, allowing seamless bidirectional swiping synchronized with the floating bottom tab bar.
 \end{itemize}
 
+\subsection{FitMojis Avatar System and Launcher Icon Architecture}
+FitTracker incorporates a custom visual avatar identity system (\textbf{FitMojis}) to personalize athlete profiles while maintaining a high-end, minimal 3D design language:
+\begin{enumerate}
+    \item \textbf{FitMojis Character Set}: Four high-resolution 3D minimal animal head assets (Lion, Bear, Panther, Eagle) sculpted with smooth clay/plastic textures, solid dark backdrops, and subtle athletic accessories (headbands, glasses, headphones).
+    \item \textbf{Mandatory Onboarding Selection \& Random Fallback}: Profile creation enforces an explicit avatar selection modal. If an athlete bypasses avatar selection, the system automatically assigns a random FitMoji key (\texttt{lion}, \texttt{bear}, \texttt{panther}, \texttt{eagle}) to guarantee visual integrity across athlete cards.
+    \item \textbf{Android Launcher Icon Branding}: Standardized $1024 \times 1024\text{px}$ squircle app launcher icon featuring a matte dark charcoal background (\texttt{\#18181A}), a central matte cyan ring with a white bold \textbf{"FT"} monogram emblem, and a symmetrical 4-quadrant placement of the FitMojis.
+\end{enumerate}
+
