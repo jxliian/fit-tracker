@@ -556,14 +556,14 @@ const styles = StyleSheet.create({
   widget: { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, borderWidth: 1, borderRadius: radii.xl, paddingHorizontal: 20, paddingVertical: 18, marginBottom: 14, alignItems: 'center' },
   wTitle: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 17, textAlign: 'center', includeFontPadding: false, marginBottom: 8 },
   wTitleSm: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 15, textAlign: 'center', includeFontPadding: false, marginBottom: 4 },
-  wSub: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 13, textAlign: 'center', lineHeight: 20, includeFontPadding: false },
+  wSub: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 13, textAlign: 'center', lineHeight: 20, includeFontPadding: false, marginBottom: 4 },
 
   // Pill button (Stats)
   pillBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 6, paddingHorizontal: 14, marginBottom: 12 },
   pillBtnText: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
 
   // Streak badge
-  streakRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 5, paddingHorizontal: 12, marginTop: 8, marginBottom: 12 },
+  streakRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 6, paddingHorizontal: 14, marginTop: 12, marginBottom: 16 },
   streakTxt: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
 
   // Month navigation - icon buttons only, no text that can clip
@@ -571,16 +571,16 @@ const styles = StyleSheet.create({
   monthIconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
   monthCenter: { flex: 1, color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: 'center', includeFontPadding: false },
 
-  // Rings & metrics
+  // Rings & metrics - row layout with left label and right value (space-between, no clipping)
   ringsRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
   ringsVisualContainer: { width: 90, height: 90, justifyContent: 'center', alignItems: 'center' },
   ringOuter: { width: 86, height: 86, borderRadius: 43, borderWidth: 7, justifyContent: 'center', alignItems: 'center' },
   ringMiddle: { width: 66, height: 66, borderRadius: 33, borderWidth: 7, justifyContent: 'center', alignItems: 'center' },
   ringInner: { width: 46, height: 46, borderRadius: 23, borderWidth: 7 },
-  metricsList: { flex: 1, marginLeft: 14 },
-  mItem: { marginBottom: 8 },
-  mLabel: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 11, includeFontPadding: false },
-  mVal: { fontFamily: fonts.headingBold, fontSize: 16, includeFontPadding: false },
+  metricsList: { flex: 1, marginLeft: 16 },
+  mItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingVertical: 2 },
+  mLabel: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 12, includeFontPadding: false, flexShrink: 1 },
+  mVal: { fontFamily: fonts.headingBold, fontSize: 14, includeFontPadding: false, marginLeft: 6 },
 
   // Calendar
   weekRow: { flexDirection: 'row', alignSelf: 'stretch', marginBottom: 8 },
