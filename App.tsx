@@ -343,13 +343,16 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal Estilo Apple Fitness con Fuente Outfit */}
+      {/* Cabecera Principal Estilo Apple Fitness con Botón de Usuario a Perfil */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
           <Text style={styles.greetingTitle}>Resumen</Text>
           <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
-        <TouchableOpacity style={styles.avatarButton}>
+        <TouchableOpacity
+          style={styles.avatarButton}
+          onPress={() => handleTabPress('profile', 3)}
+        >
           <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
@@ -644,15 +647,15 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Modal de Estadísticas Detalladas (Informe de Atleta) */}
+      {/* Modal de Estadísticas Detalladas (Extendido 100% hasta la base de la pantalla) */}
       <Modal
         visible={showStatsModal}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setShowStatsModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <BlurView intensity={Platform.OS === 'ios' ? 90 : 100} tint="dark" style={styles.modalContainer}>
+        <View style={styles.modalOverlayFullBottom}>
+          <BlurView intensity={Platform.OS === 'ios' ? 90 : 100} tint="dark" style={styles.modalContainerFullBottom}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Informe de Atleta</Text>
               <TouchableOpacity onPress={() => setShowStatsModal(false)} style={styles.closeBtn}>
@@ -660,7 +663,7 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               <View style={styles.statGridCard}>
                 <Text style={styles.statGridLabel}>1RM Máximo Estimado</Text>
                 <Text style={[styles.statGridValue, { color: colors.primary }]}>
@@ -1147,17 +1150,22 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontStyle: 'italic'
   },
-  modalOverlay: {
+  modalOverlayFullBottom: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end'
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'flex-end',
+    margin: 0
   },
-  modalContainer: {
+  modalContainerFullBottom: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,
-    padding: 24,
-    maxHeight: '75%',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
+    maxHeight: '92%',
     borderColor: colors.border,
     borderWidth: 1
   },
@@ -1178,7 +1186,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.full
   },
   modalBody: {
-    marginBottom: 20
+    marginBottom: 10
   },
   statGridCard: {
     backgroundColor: colors.surfaceLight,
