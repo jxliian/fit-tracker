@@ -34,6 +34,7 @@ import { colors, radii, fonts } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
+import { Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@components/ui';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_PADDING = 36;
@@ -364,7 +365,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Contenido Deslizable (Swipe Pager) con Tipografía Deportiva */}
+      {/* Contenido Deslizable (Swipe Pager) con Componentes Shadcn */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -375,22 +376,20 @@ export default function App() {
       >
         {/* Pantalla 1: Resumen Dashboard (Estadísticas Reales SQLite) */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
-          <View style={styles.appleWidget}>
-            <View style={styles.widgetHeaderRow}>
-              <Text style={styles.widgetHeaderTitleCompact}>
-                Métricas de Atleta
-              </Text>
-              <TouchableOpacity
-                style={styles.moreStatsBtnVisible}
+          {/* Shadcn Card 1: Métricas de Atleta */}
+          <Card>
+            <CardHeader>
+              <CardTitle style={{ flex: 1, marginRight: 8 }}>Métricas de Atleta</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                label="Stats"
+                icon={<Ionicons name="analytics" size={14} color={colors.primary} />}
                 onPress={() => setShowStatsModal(true)}
-              >
-                <Ionicons name="analytics" size={14} color={colors.primary} />
-                <Text style={styles.moreStatsBtnText}>Stats</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.ringsRow}>
+              />
+            </CardHeader>
+
+            <CardContent style={styles.ringsRow}>
               {/* Indicador Visual Simulado */}
               <View style={styles.ringsVisualContainer}>
                 <View style={[styles.ringOuter, { borderColor: colors.secondary }]}>
@@ -423,98 +422,102 @@ export default function App() {
                   </Text>
                 </View>
               </View>
-            </View>
-          </View>
+            </CardContent>
+          </Card>
 
-          {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
-          <View style={styles.appleWidget}>
-            <View style={styles.widgetTopHeader}>
+          {/* Shadcn Card 2: Historial Mensual Interactivo de Días Entrenados */}
+          <Card>
+            <CardHeader>
               <View style={{ flex: 1, marginRight: 6 }}>
-                <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
-                <Text style={styles.widgetSubLabel}>
+                <CardTitle>Días Entrenados</CardTitle>
+                <CardDescription>
                   {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
-                </Text>
+                </CardDescription>
               </View>
               
-              {/* Insignia de Racha Ultra Compacta */}
-              <View style={styles.streakBadge}>
-                <Ionicons name="flame" size={13} color={colors.primary} />
-                <Text style={styles.streakText}>
-                  {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
-                </Text>
-              </View>
-            </View>
+              <Badge
+                variant="streak"
+                label={`${stats.currentStreakDays} ${stats.currentStreakDays === 1 ? 'día' : 'días'}`}
+                icon={<Ionicons name="flame" size={13} color={colors.primary} />}
+              />
+            </CardHeader>
 
-            {/* Selector de Meses con Chevrons Inmune a Recortes */}
-            <View style={styles.monthNavRow}>
-              <TouchableOpacity style={styles.monthNavIconBtn} onPress={handlePrevMonth}>
-                <Ionicons name="chevron-back" size={18} color={colors.primary} />
-              </TouchableOpacity>
+            <CardContent>
+              {/* Selector de Meses Shadcn Icon Buttons */}
+              <View style={styles.monthNavRow}>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  icon={<Ionicons name="chevron-back" size={18} color={colors.primary} />}
+                  onPress={handlePrevMonth}
+                />
 
-              <View style={styles.monthCurrentCenterContainer}>
-                <Text style={styles.monthCurrentText}>
-                  {stats.trainedDaysInSelectedMonth.length} días activos
-                </Text>
-              </View>
-
-              <TouchableOpacity style={styles.monthNavIconBtn} onPress={handleNextMonth}>
-                <Ionicons name="chevron-forward" size={18} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Días de la Semana Header (L, M, X, J, V, S, D) */}
-            <View style={styles.weekDaysHeaderGrid}>
-              {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                <Text key={idx} style={[styles.weekDayTextGrid, { width: DAY_CELL_WIDTH }]}>
-                  {day}
-                </Text>
-              ))}
-            </View>
-
-            {/* Matriz Mensual Dinámica Estricta de 7 Columnas Exactas */}
-            <View style={styles.calendarGridStrict}>
-              {/* Huecos vacíos de inicio de mes */}
-              {paddingSlotsArray.map((p) => (
-                <View key={`pad_${p}`} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
-                  <View style={styles.calendarDotBlank} />
+                <View style={styles.monthCurrentCenterContainer}>
+                  <Text style={styles.monthCurrentText}>
+                    {stats.trainedDaysInSelectedMonth.length} días activos
+                  </Text>
                 </View>
-              ))}
 
-              {/* Días del mes en celdas de ancho exacto */}
-              {daysInMonthArray.map((day) => {
-                const trained = stats.trainedDaysInSelectedMonth.includes(day);
-                const isToday = isViewingCurrentMonth && day === todayDate.getDate();
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  icon={<Ionicons name="chevron-forward" size={18} color={colors.primary} />}
+                  onPress={handleNextMonth}
+                />
+              </View>
 
-                return (
-                  <View key={day} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
-                    <View
-                      style={[
-                        styles.calendarDot,
-                        trained && styles.calendarDotTrained,
-                        isToday && styles.calendarDotToday
-                      ]}
-                    >
-                      <Text
+              {/* Días de la Semana Header (L, M, X, J, V, S, D) */}
+              <View style={styles.weekDaysHeaderGrid}>
+                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
+                  <Text key={idx} style={[styles.weekDayTextGrid, { width: DAY_CELL_WIDTH }]}>
+                    {day}
+                  </Text>
+                ))}
+              </View>
+
+              {/* Matriz Mensual Dinámica Estricta de 7 Columnas Exactas */}
+              <View style={styles.calendarGridStrict}>
+                {paddingSlotsArray.map((p) => (
+                  <View key={`pad_${p}`} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
+                    <View style={styles.calendarDotBlank} />
+                  </View>
+                ))}
+
+                {daysInMonthArray.map((day) => {
+                  const trained = stats.trainedDaysInSelectedMonth.includes(day);
+                  const isToday = isViewingCurrentMonth && day === todayDate.getDate();
+
+                  return (
+                    <View key={day} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
+                      <View
                         style={[
-                          styles.calendarDotText,
-                          (trained || isToday) && styles.calendarDotTextWhite
+                          styles.calendarDot,
+                          trained && styles.calendarDotTrained,
+                          isToday && styles.calendarDotToday
                         ]}
                       >
-                        {day}
-                      </Text>
+                        <Text
+                          style={[
+                            styles.calendarDotText,
+                            (trained || isToday) && styles.calendarDotTextWhite
+                          ]}
+                        >
+                          {day}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
+                  );
+                })}
+              </View>
+            </CardContent>
+          </Card>
 
           {/* Fila de 2 Widgets Secundarios: Reps & Esfuerzo RPE */}
           <View style={styles.widgetGridRow}>
-            {/* Widget Izquierda: Total Series */}
-            <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle}>Total Series</Text>
-              <Text style={styles.widgetSubLabel}>Histórico Local</Text>
+            {/* Shadcn Card Izquierda: Total Series */}
+            <Card style={styles.halfWidget}>
+              <CardTitle style={styles.widgetGridTitle}>Total Series</CardTitle>
+              <CardDescription style={styles.widgetSubLabel}>Histórico Local</CardDescription>
               <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>
                 {stats.totalSets}
               </Text>
@@ -526,12 +529,12 @@ export default function App() {
                 <View style={[styles.bar, { height: '60%', backgroundColor: colors.purple + '60' }]} />
                 <View style={[styles.bar, { height: '85%', backgroundColor: colors.purple }]} />
               </View>
-            </View>
+            </Card>
 
-            {/* Widget Derecha: Intensidad RPE Medio */}
-            <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle}>Esfuerzo (RPE)</Text>
-              <Text style={styles.widgetSubLabel}>Promedio</Text>
+            {/* Shadcn Card Derecha: Intensidad RPE Medio */}
+            <Card style={styles.halfWidget}>
+              <CardTitle style={styles.widgetGridTitle}>Esfuerzo (RPE)</CardTitle>
+              <CardDescription style={styles.widgetSubLabel}>Promedio</CardDescription>
               <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>
                 {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
               </Text>
@@ -543,115 +546,134 @@ export default function App() {
                 <View style={[styles.bar, { height: '100%', backgroundColor: colors.cyan }]} />
                 <View style={[styles.bar, { height: '85%', backgroundColor: colors.cyan }]} />
               </View>
-            </View>
+            </Card>
           </View>
         </ScrollView>
 
         {/* Pantalla 2: Rutinas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Rutinas Prediseñadas</Text>
-            <Text style={styles.routineDesc}>
-              Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.
-            </Text>
-          </View>
+          <Card>
+            <CardHeader>
+              <CardTitle>Rutinas Prediseñadas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.
+              </CardDescription>
+            </CardContent>
+          </Card>
         </ScrollView>
 
         {/* Pantalla 3: Catálogo de Ejercicios */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Catálogo de Ejercicios</Text>
-            <Text style={styles.routineDesc}>
-              Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
-            </Text>
-          </View>
+          <Card>
+            <CardHeader>
+              <CardTitle>Catálogo de Ejercicios</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
+              </CardDescription>
+            </CardContent>
+          </Card>
         </ScrollView>
 
         {/* Pantalla 4: Perfil de Atleta + Estadísticas Integradas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Card 1: Datos Personales */}
-          <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Perfil de Atleta</Text>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Nombre</Text>
-              <Text style={styles.profileValue}>{userProfile.name}</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Edad</Text>
-              <Text style={styles.profileValue}>{userProfile.age} años</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Sexo</Text>
-              <Text style={styles.profileValue}>
-                {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
-              </Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Peso Corporal</Text>
-              <Text style={styles.profileValue}>{userProfile.bodyWeightKg} kg</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Nivel</Text>
-              <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
-            </View>
-          </View>
-
-          {/* Card 2: Estadísticas del Perfil en Tarjetas de Bloque Amplio */}
-          <View style={styles.appleWidget}>
-            <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>
-              Estadísticas & Récords (PRs)
-            </Text>
-            
-            <View style={styles.profileBlockCard}>
-              <Text style={styles.profileBlockLabel}>Volumen Acumulado</Text>
-              <Text style={[styles.profileBlockValue, { color: colors.secondary }]}>
-                {stats.totalVolumeKg.toLocaleString()} kg
-              </Text>
-            </View>
-            
-            <View style={styles.profileBlockCard}>
-              <Text style={styles.profileBlockLabel}>1RM Máximo Histórico</Text>
-              <Text style={[styles.profileBlockValue, { color: colors.primary }]}>
-                {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
-              </Text>
-            </View>
-
-            <View style={styles.profileBlockCard}>
-              <Text style={styles.profileBlockLabel}>Racha Actual</Text>
-              <Text style={[styles.profileBlockValue, { color: colors.cyan }]}>
-                {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Card 3: Marcas Adaptativas por Ejercicio Clave */}
-          <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Mejores Marcas por Ejercicio</Text>
-
-            {stats.exercisePRs.length > 0 ? (
-              stats.exercisePRs.map((pr) => (
-                <View key={pr.exerciseId} style={styles.prRowItem}>
-                  <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
-                    <Text style={styles.prSubText}>
-                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
-                    </Text>
-                  </View>
-                  <View style={styles.prRankBadge}>
-                    <Text style={styles.prRankText}>
-                      {pr.rankEmoji} {pr.rankLabel}
-                    </Text>
-                  </View>
-                </View>
-              ))
-            ) : (
-              <View style={styles.emptyPrContainer}>
-                <Text style={styles.emptyPrText}>
-                  Aún no has registrado series completadas. Tus mejores marcas por ejercicio aparecerán aquí automáticamente.
+          {/* Shadcn Card 1: Datos Personales */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Perfil de Atleta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Nombre</Text>
+                <Text style={styles.profileValue}>{userProfile.name}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Edad</Text>
+                <Text style={styles.profileValue}>{userProfile.age} años</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Sexo</Text>
+                <Text style={styles.profileValue}>
+                  {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
                 </Text>
               </View>
-            )}
-          </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Peso Corporal</Text>
+                <Text style={styles.profileValue}>{userProfile.bodyWeightKg} kg</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Nivel</Text>
+                <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
+              </View>
+            </CardContent>
+          </Card>
+
+          {/* Shadcn Card 2: Estadísticas del Perfil en Tarjetas de Bloque Amplio */}
+          <Card>
+            <CardHeader>
+              <CardTitle style={{ color: colors.primary }}>
+                Estadísticas & Récords (PRs)
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <View style={styles.profileBlockCard}>
+                <Text style={styles.profileBlockLabel}>Volumen Acumulado</Text>
+                <Text style={[styles.profileBlockValue, { color: colors.secondary }]}>
+                  {stats.totalVolumeKg.toLocaleString()} kg
+                </Text>
+              </View>
+              
+              <View style={styles.profileBlockCard}>
+                <Text style={styles.profileBlockLabel}>1RM Máximo Histórico</Text>
+                <Text style={[styles.profileBlockValue, { color: colors.primary }]}>
+                  {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
+                </Text>
+              </View>
+
+              <View style={styles.profileBlockCard}>
+                <Text style={styles.profileBlockLabel}>Racha Actual</Text>
+                <Text style={[styles.profileBlockValue, { color: colors.cyan }]}>
+                  {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
+                </Text>
+              </View>
+            </CardContent>
+          </Card>
+
+          {/* Shadcn Card 3: Marcas Adaptativas por Ejercicio Clave */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Mejores Marcas por Ejercicio</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              {stats.exercisePRs.length > 0 ? (
+                stats.exercisePRs.map((pr) => (
+                  <View key={pr.exerciseId} style={styles.prRowItem}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
+                      <Text style={styles.prSubText}>
+                        Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
+                      </Text>
+                    </View>
+                    <Badge
+                      variant="primary"
+                      label={`${pr.rankEmoji} ${pr.rankLabel}`}
+                    />
+                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyPrContainer}>
+                  <Text style={styles.emptyPrText}>
+                    Aún no has registrado series completadas. Tus mejores marcas por ejercicio aparecerán aquí automáticamente.
+                  </Text>
+                </View>
+              )}
+            </CardContent>
+          </Card>
         </ScrollView>
       </ScrollView>
 
@@ -667,9 +689,12 @@ export default function App() {
           <BlurView intensity={Platform.OS === 'ios' ? 95 : 100} tint="dark" style={styles.modalContainerFullBottom}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Informe de Atleta</Text>
-              <TouchableOpacity onPress={() => setShowStatsModal(false)} style={styles.closeBtn}>
-                <Ionicons name="close" size={20} color={colors.textPrimary} />
-              </TouchableOpacity>
+              <Button
+                variant="secondary"
+                size="icon"
+                icon={<Ionicons name="close" size={18} color={colors.textPrimary} />}
+                onPress={() => setShowStatsModal(false)}
+              />
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
@@ -715,11 +740,10 @@ export default function App() {
                         Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
                       </Text>
                     </View>
-                    <View style={styles.prRankBadge}>
-                      <Text style={styles.prRankText}>
-                        {pr.rankEmoji} {pr.rankLabel}
-                      </Text>
-                    </View>
+                    <Badge
+                      variant="primary"
+                      label={`${pr.rankEmoji} ${pr.rankLabel}`}
+                    />
                   </View>
                 ))
               ) : (
@@ -875,89 +899,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 140
   },
-  appleWidget: {
-    backgroundColor: colors.surface,
-    borderColor: colors.surfaceBorder,
-    borderWidth: 1,
-    borderRadius: radii.xl,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    marginBottom: 14
-  },
-  widgetHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12
-  },
-  widgetHeaderTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 17,
-    marginBottom: 12,
-    includeFontPadding: false
-  },
-  widgetHeaderTitleCompact: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 15,
-    flex: 1,
-    marginRight: 6,
-    includeFontPadding: false
-  },
-  moreStatsBtnVisible: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary + '25',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: colors.primary
-  },
-  moreStatsBtnText: {
-    color: colors.primary,
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    marginLeft: 4,
-    includeFontPadding: false
-  },
-  widgetTopHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10
-  },
-  widgetGridTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 15,
-    includeFontPadding: false
-  },
-  widgetSubLabel: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    marginTop: 2,
-    includeFontPadding: false
-  },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary,
-    borderWidth: 1,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: radii.full
-  },
-  streakText: {
-    color: colors.primary,
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    marginLeft: 4,
-    includeFontPadding: false
-  },
   monthNavRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -967,16 +908,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: radii.md,
     marginBottom: 14
-  },
-  monthNavIconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.sm,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: colors.border,
-    borderWidth: 1
   },
   monthCurrentCenterContainer: {
     flex: 1,
@@ -1108,6 +1039,19 @@ const styles = StyleSheet.create({
     width: (SCREEN_WIDTH - 44) / 2,
     marginBottom: 0
   },
+  widgetGridTitle: {
+    color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
+    fontSize: 15,
+    includeFontPadding: false
+  },
+  widgetSubLabel: {
+    color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    marginTop: 2,
+    includeFontPadding: false
+  },
   widgetBigNumber: {
     fontFamily: fonts.headingBold,
     fontSize: 26,
@@ -1125,12 +1069,11 @@ const styles = StyleSheet.create({
     width: 5,
     borderRadius: 3
   },
-  routineDesc: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    lineHeight: 20,
-    marginBottom: 14,
+  widgetHeaderTitle: {
+    color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+    marginBottom: 12,
     includeFontPadding: false
   },
   profileRow: {
@@ -1201,20 +1144,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
     includeFontPadding: false
   },
-  prRankBadge: {
-    backgroundColor: colors.primary + '20',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: radii.sm,
-    borderColor: colors.primary,
-    borderWidth: 1
-  },
-  prRankText: {
-    color: colors.primary,
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    includeFontPadding: false
-  },
   emptyPrContainer: {
     paddingVertical: 12
   },
@@ -1252,19 +1181,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16
   },
+  modalBody: {
+    marginBottom: 10
+  },
   modalTitle: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
     fontSize: 20,
     includeFontPadding: false
-  },
-  closeBtn: {
-    padding: 6,
-    backgroundColor: colors.surfaceLight,
-    borderRadius: radii.full
-  },
-  modalBody: {
-    marginBottom: 10
   },
   statGridCard: {
     backgroundColor: colors.surfaceLight,
