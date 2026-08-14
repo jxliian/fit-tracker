@@ -42,6 +42,13 @@ const DAY_CELL_WIDTH = Math.floor((SCREEN_WIDTH - GRID_PADDING - 36) / 7);
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
 
+const TAB_TITLES: Record<TabType, string> = {
+  home: 'Resumen',
+  routines: 'Rutinas',
+  catalog: 'Ejercicios',
+  profile: 'Perfil'
+};
+
 interface ExercisePR {
   exerciseId: string;
   exerciseName: string;
@@ -343,10 +350,10 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal Estilo Apple Fitness con Botón de Usuario a Perfil */}
+      {/* Cabecera Principal Estilo Apple Fitness Dinámica según la Pestaña Activa */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.greetingTitle}>Resumen</Text>
+          <Text style={styles.greetingTitle}>{TAB_TITLES[activeTab]}</Text>
           <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
         <TouchableOpacity
@@ -422,14 +429,14 @@ export default function App() {
           {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
-              <View style={{ flex: 1, marginRight: 6 }}>
+              <View style={{ flex: 1, marginRight: 8 }}>
                 <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
                 <Text style={styles.widgetSubLabel}>
                   {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
                 </Text>
               </View>
               
-              {/* Insignia de Racha Inmune a Recortes */}
+              {/* Insignia de Racha */}
               <View style={styles.streakBadge}>
                 <Ionicons name="flame" size={13} color={colors.primary} />
                 <Text style={styles.streakText}>
@@ -442,17 +449,17 @@ export default function App() {
             <View style={styles.monthNavRow}>
               <TouchableOpacity style={styles.monthNavBtn} onPress={handlePrevMonth}>
                 <Ionicons name="chevron-back" size={14} color={colors.textPrimary} />
-                <Text style={styles.monthNavBtnText}>Ant.</Text>
+                <Text style={styles.monthNavBtnText}>Anterior</Text>
               </TouchableOpacity>
 
               <View style={styles.monthCurrentCenterContainer}>
                 <Text style={styles.monthCurrentText}>
-                  {stats.trainedDaysInSelectedMonth.length} activos
+                  {stats.trainedDaysInSelectedMonth.length} días activos
                 </Text>
               </View>
 
               <TouchableOpacity style={styles.monthNavBtn} onPress={handleNextMonth}>
-                <Text style={styles.monthNavBtnText}>Sig.</Text>
+                <Text style={styles.monthNavBtnText}>Siguiente</Text>
                 <Ionicons name="chevron-forward" size={14} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
@@ -875,7 +882,8 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceBorder,
     borderWidth: 1,
     borderRadius: radii.xl,
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     marginBottom: 14
   },
   widgetHeaderRow: {
@@ -888,7 +896,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
     fontSize: 17,
-    marginBottom: 10,
+    marginBottom: 12,
     includeFontPadding: false
   },
   widgetHeaderTitleCompact: {
@@ -903,18 +911,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary + '25',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: colors.primary,
-    flexShrink: 0
+    borderColor: colors.primary
   },
   moreStatsBtnText: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    marginLeft: 3
+    fontSize: 12,
+    marginLeft: 4,
+    paddingRight: 2,
+    includeFontPadding: false
   },
   widgetTopHeader: {
     flexDirection: 'row',
@@ -941,39 +950,40 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary + '20',
     borderColor: colors.primary,
     borderWidth: 1,
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: radii.full,
-    flexShrink: 0
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: radii.full
   },
   streakText: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    marginLeft: 3
+    fontSize: 12,
+    marginLeft: 4,
+    paddingRight: 2,
+    includeFontPadding: false
   },
   monthNavRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: radii.md,
-    marginBottom: 12
+    marginBottom: 14
   },
   monthNavBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    flexShrink: 0
+    paddingVertical: 3,
+    paddingHorizontal: 6
   },
   monthNavBtnText: {
     color: colors.textPrimary,
     fontFamily: fonts.bodySemiBold,
-    fontSize: 11,
-    marginHorizontal: 2
+    fontSize: 12,
+    paddingHorizontal: 3,
+    includeFontPadding: false
   },
   monthCurrentCenterContainer: {
     flex: 1,
@@ -984,8 +994,9 @@ const styles = StyleSheet.create({
   monthCurrentText: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    textAlign: 'center'
+    fontSize: 12,
+    textAlign: 'center',
+    includeFontPadding: false
   },
   weekDaysHeaderGrid: {
     flexDirection: 'row',
@@ -1089,6 +1100,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.headingBold,
     fontSize: 16,
     marginTop: 1,
+    paddingRight: 4,
     includeFontPadding: false
   },
   metricUnit: {
@@ -1108,6 +1120,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.headingBold,
     fontSize: 26,
     marginVertical: 4,
+    paddingRight: 4,
     includeFontPadding: false
   },
   miniBarChart: {
@@ -1125,14 +1138,17 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 14
+    lineHeight: 20,
+    marginBottom: 14,
+    paddingRight: 8,
+    includeFontPadding: false
   },
   profileRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceLight
   },
@@ -1141,7 +1157,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
     flex: 1,
-    marginRight: 8,
+    paddingRight: 8,
     includeFontPadding: false
   },
   profileValue: {
@@ -1149,14 +1165,15 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 13,
     textAlign: 'right',
-    flexShrink: 0,
+    paddingRight: 6,
     includeFontPadding: false
   },
   prRowItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: radii.md,
     marginBottom: 8,
     borderColor: colors.border,
@@ -1166,6 +1183,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
     fontSize: 13,
+    paddingRight: 4,
     includeFontPadding: false
   },
   prSubText: {
@@ -1173,21 +1191,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
     marginTop: 2,
+    paddingRight: 4,
     includeFontPadding: false
   },
   prRankBadge: {
     backgroundColor: colors.primary + '20',
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     borderRadius: radii.sm,
     borderColor: colors.primary,
-    borderWidth: 1,
-    flexShrink: 0
+    borderWidth: 1
   },
   prRankText: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 11
+    fontSize: 11,
+    paddingRight: 2,
+    includeFontPadding: false
   },
   emptyPrContainer: {
     paddingVertical: 12
@@ -1212,7 +1232,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radii.xl,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: Platform.OS === 'ios' ? 44 : 32,
     maxHeight: '90%',
