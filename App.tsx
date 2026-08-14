@@ -385,8 +385,8 @@ export default function App() {
                 style={styles.moreStatsBtnVisible}
                 onPress={() => setShowStatsModal(true)}
               >
-                <Ionicons name="analytics" size={13} color={colors.primary} />
-                <Text style={styles.moreStatsBtnText}>Estadísticas</Text>
+                <Ionicons name="analytics" size={14} color={colors.primary} />
+                <Text style={styles.moreStatsBtnText}>Stats</Text>
               </TouchableOpacity>
             </View>
             
@@ -429,27 +429,26 @@ export default function App() {
           {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
-              <View style={{ flex: 1, marginRight: 8 }}>
+              <View style={{ flex: 1, marginRight: 6 }}>
                 <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
                 <Text style={styles.widgetSubLabel}>
                   {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
                 </Text>
               </View>
               
-              {/* Insignia de Racha */}
+              {/* Insignia de Racha Ultra Compacta */}
               <View style={styles.streakBadge}>
                 <Ionicons name="flame" size={13} color={colors.primary} />
                 <Text style={styles.streakText}>
-                  Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
+                  {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
                 </Text>
               </View>
             </View>
 
-            {/* Selector de Meses (Anterior / Siguiente) Resiliente */}
+            {/* Selector de Meses con Chevrons Inmune a Recortes */}
             <View style={styles.monthNavRow}>
-              <TouchableOpacity style={styles.monthNavBtn} onPress={handlePrevMonth}>
-                <Ionicons name="chevron-back" size={14} color={colors.textPrimary} />
-                <Text style={styles.monthNavBtnText}>Anterior</Text>
+              <TouchableOpacity style={styles.monthNavIconBtn} onPress={handlePrevMonth}>
+                <Ionicons name="chevron-back" size={18} color={colors.primary} />
               </TouchableOpacity>
 
               <View style={styles.monthCurrentCenterContainer}>
@@ -458,9 +457,8 @@ export default function App() {
                 </Text>
               </View>
 
-              <TouchableOpacity style={styles.monthNavBtn} onPress={handleNextMonth}>
-                <Text style={styles.monthNavBtnText}>Siguiente</Text>
-                <Ionicons name="chevron-forward" size={14} color={colors.textPrimary} />
+              <TouchableOpacity style={styles.monthNavIconBtn} onPress={handleNextMonth}>
+                <Ionicons name="chevron-forward" size={18} color={colors.primary} />
               </TouchableOpacity>
             </View>
 
@@ -575,53 +573,53 @@ export default function App() {
           <View style={styles.appleWidget}>
             <Text style={styles.widgetHeaderTitle}>Perfil de Atleta</Text>
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Nombre:</Text>
+              <Text style={styles.profileLabel}>Nombre</Text>
               <Text style={styles.profileValue}>{userProfile.name}</Text>
             </View>
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Edad:</Text>
+              <Text style={styles.profileLabel}>Edad</Text>
               <Text style={styles.profileValue}>{userProfile.age} años</Text>
             </View>
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Sexo:</Text>
+              <Text style={styles.profileLabel}>Sexo</Text>
               <Text style={styles.profileValue}>
                 {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
               </Text>
             </View>
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Peso Corporal:</Text>
+              <Text style={styles.profileLabel}>Peso Corporal</Text>
               <Text style={styles.profileValue}>{userProfile.bodyWeightKg} kg</Text>
             </View>
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Nivel:</Text>
+              <Text style={styles.profileLabel}>Nivel</Text>
               <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
             </View>
           </View>
 
-          {/* Card 2: Estadísticas del Perfil Totalmente Inmunes a Recortes */}
+          {/* Card 2: Estadísticas del Perfil en Tarjetas de Bloque Amplio */}
           <View style={styles.appleWidget}>
             <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>
               Estadísticas & Récords (PRs)
             </Text>
             
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Volumen Acumulado:</Text>
-              <Text style={[styles.profileValue, { color: colors.secondary }]}>
+            <View style={styles.profileBlockCard}>
+              <Text style={styles.profileBlockLabel}>Volumen Acumulado</Text>
+              <Text style={[styles.profileBlockValue, { color: colors.secondary }]}>
                 {stats.totalVolumeKg.toLocaleString()} kg
               </Text>
             </View>
             
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>1RM Máximo Histórico:</Text>
-              <Text style={[styles.profileValue, { color: colors.primary }]}>
+            <View style={styles.profileBlockCard}>
+              <Text style={styles.profileBlockLabel}>1RM Máximo Histórico</Text>
+              <Text style={[styles.profileBlockValue, { color: colors.primary }]}>
                 {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
               </Text>
             </View>
 
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Racha Actual de Días:</Text>
-              <Text style={[styles.profileValue, { color: colors.cyan }]}>
-                {stats.currentStreakDays} días
+            <View style={styles.profileBlockCard}>
+              <Text style={styles.profileBlockLabel}>Racha Actual</Text>
+              <Text style={[styles.profileBlockValue, { color: colors.cyan }]}>
+                {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
               </Text>
             </View>
           </View>
@@ -882,7 +880,7 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceBorder,
     borderWidth: 1,
     borderRadius: radii.xl,
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 18,
     marginBottom: 14
   },
@@ -922,7 +920,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 12,
     marginLeft: 4,
-    paddingRight: 2,
     includeFontPadding: false
   },
   widgetTopHeader: {
@@ -951,7 +948,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     borderWidth: 1,
     paddingVertical: 5,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderRadius: radii.full
   },
   streakText: {
@@ -959,7 +956,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 12,
     marginLeft: 4,
-    paddingRight: 2,
     includeFontPadding: false
   },
   monthNavRow: {
@@ -967,33 +963,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: radii.md,
     marginBottom: 14
   },
-  monthNavBtn: {
-    flexDirection: 'row',
+  monthNavIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radii.sm,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 3,
-    paddingHorizontal: 6
-  },
-  monthNavBtnText: {
-    color: colors.textPrimary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 12,
-    paddingHorizontal: 3,
-    includeFontPadding: false
+    borderColor: colors.border,
+    borderWidth: 1
   },
   monthCurrentCenterContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4
+    paddingHorizontal: 8
   },
   monthCurrentText: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
+    color: colors.textPrimary,
+    fontFamily: fonts.bodySemiBold,
     fontSize: 12,
     textAlign: 'center',
     includeFontPadding: false
@@ -1100,7 +1093,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.headingBold,
     fontSize: 16,
     marginTop: 1,
-    paddingRight: 4,
     includeFontPadding: false
   },
   metricUnit: {
@@ -1120,7 +1112,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.headingBold,
     fontSize: 26,
     marginVertical: 4,
-    paddingRight: 4,
     includeFontPadding: false
   },
   miniBarChart: {
@@ -1140,7 +1131,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     marginBottom: 14,
-    paddingRight: 8,
     includeFontPadding: false
   },
   profileRow: {
@@ -1148,7 +1138,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceLight
   },
@@ -1157,7 +1146,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
     flex: 1,
-    paddingRight: 8,
+    marginRight: 8,
     includeFontPadding: false
   },
   profileValue: {
@@ -1165,7 +1154,27 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 13,
     textAlign: 'right',
-    paddingRight: 6,
+    includeFontPadding: false
+  },
+  profileBlockCard: {
+    backgroundColor: colors.surfaceLight,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: radii.md,
+    marginBottom: 10,
+    borderColor: colors.border,
+    borderWidth: 1
+  },
+  profileBlockLabel: {
+    color: colors.textSecondary,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12,
+    marginBottom: 2,
+    includeFontPadding: false
+  },
+  profileBlockValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 18,
     includeFontPadding: false
   },
   prRowItem: {
@@ -1183,7 +1192,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
     fontSize: 13,
-    paddingRight: 4,
     includeFontPadding: false
   },
   prSubText: {
@@ -1191,7 +1199,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
     marginTop: 2,
-    paddingRight: 4,
     includeFontPadding: false
   },
   prRankBadge: {
@@ -1206,7 +1213,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontFamily: fonts.bodyBold,
     fontSize: 11,
-    paddingRight: 2,
     includeFontPadding: false
   },
   emptyPrContainer: {
