@@ -3,22 +3,37 @@
   "compilerOptions": {
     "strict": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
+    "module": "esnext",
+    "types": ["jest"],
     "paths": {
-      "@core/*": ["src/core/*"],
-      "@database/*": ["src/database/*"],
-      "@domain/*": ["src/domain/*"],
-      "@features/*": ["src/features/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@components/*": ["src/components/*"],
-      "@navigation/*": ["src/navigation/*"],
-      "@types/*": ["src/types/*"]
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@database/*": [
+        "./src/database/*"
+      ],
+      "@domain/*": [
+        "./src/domain/*"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@navigation/*": [
+        "./src/navigation/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ]
 }

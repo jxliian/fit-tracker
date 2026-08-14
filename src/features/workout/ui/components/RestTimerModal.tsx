@@ -22,7 +22,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   }, [initialSeconds, visible]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: any = null;
 
     if (visible && isRunning && secondsLeft > 0) {
       interval = setInterval(() => {
