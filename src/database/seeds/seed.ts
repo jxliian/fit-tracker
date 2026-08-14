@@ -3,12 +3,12 @@ import exercisesData from './data/exercises.json';
 
 export async function seedExercises(): Promise<void> {
     try {
-        // 1. Ensure exercise catalog exists (over 100 exercises)
+        // 1. Ensure full exercise catalog exists (over 1,300 exercises)
         const result = await db.getFirstAsync<{ count: number }>(
             'SELECT COUNT(*) as count FROM exercises;'
         );
 
-        if (!result || result.count < 100) {
+        if (!result || result.count < 1000) {
             console.log('Seeding full exercise catalog into SQLite in fast batches...');
             const items = exercisesData as any[];
             const CHUNK_SIZE = 50;
