@@ -345,7 +345,7 @@ export default function App() {
 
       {/* Cabecera Principal Estilo Apple Fitness con Botón de Usuario a Perfil */}
       <View style={[styles.header, { paddingTop: topInset }]}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.greetingTitle}>Resumen</Text>
           <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
@@ -371,12 +371,14 @@ export default function App() {
           {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetHeaderRow}>
-              <Text style={styles.widgetHeaderTitleCompact}>Métricas de Atleta</Text>
+              <Text style={styles.widgetHeaderTitleCompact} numberOfLines={1} adjustsFontSizeToFit>
+                Métricas de Atleta
+              </Text>
               <TouchableOpacity
                 style={styles.moreStatsBtnVisible}
                 onPress={() => setShowStatsModal(true)}
               >
-                <Ionicons name="analytics" size={14} color={colors.primary} />
+                <Ionicons name="analytics" size={13} color={colors.primary} />
                 <Text style={styles.moreStatsBtnText}>Estadísticas</Text>
               </TouchableOpacity>
             </View>
@@ -394,23 +396,23 @@ export default function App() {
               {/* Lista de Métricas Reales de SQLite */}
               <View style={styles.metricsList}>
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Volumen Acumulado</Text>
-                  <Text style={[styles.metricValue, { color: colors.secondary }]}>
+                  <Text style={styles.metricLabel} numberOfLines={1}>Volumen Acumulado</Text>
+                  <Text style={[styles.metricValue, { color: colors.secondary }]} numberOfLines={1} adjustsFontSizeToFit>
                     {stats.totalVolumeKg.toLocaleString()}{' '}
                     <Text style={styles.metricUnit}>KG</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Sesiones Completadas</Text>
-                  <Text style={[styles.metricValue, { color: colors.primary }]}>
+                  <Text style={styles.metricLabel} numberOfLines={1}>Sesiones Completadas</Text>
+                  <Text style={[styles.metricValue, { color: colors.primary }]} numberOfLines={1} adjustsFontSizeToFit>
                     {stats.totalSessions} <Text style={styles.metricUnit}>SESIONES</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Series Registradas</Text>
-                  <Text style={[styles.metricValue, { color: colors.cyan }]}>
+                  <Text style={styles.metricLabel} numberOfLines={1}>Series Registradas</Text>
+                  <Text style={[styles.metricValue, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
                     {stats.totalSets} <Text style={styles.metricUnit}>SERIES</Text>
                   </Text>
                 </View>
@@ -421,17 +423,17 @@ export default function App() {
           {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
-              <View>
-                <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
-                <Text style={styles.widgetSubLabel}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.widgetGridTitle} numberOfLines={1}>Días Entrenados</Text>
+                <Text style={styles.widgetSubLabel} numberOfLines={1}>
                   {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
                 </Text>
               </View>
               
               {/* Insignia de Racha */}
               <View style={styles.streakBadge}>
-                <Ionicons name="flame" size={14} color={colors.primary} />
-                <Text style={styles.streakText}>
+                <Ionicons name="flame" size={13} color={colors.primary} />
+                <Text style={styles.streakText} numberOfLines={1}>
                   Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'Día' : 'Días'}
                 </Text>
               </View>
@@ -440,17 +442,17 @@ export default function App() {
             {/* Selector de Meses (Anterior / Siguiente) */}
             <View style={styles.monthNavRow}>
               <TouchableOpacity style={styles.monthNavBtn} onPress={handlePrevMonth}>
-                <Ionicons name="chevron-back" size={16} color={colors.textPrimary} />
+                <Ionicons name="chevron-back" size={14} color={colors.textPrimary} />
                 <Text style={styles.monthNavBtnText}>Anterior</Text>
               </TouchableOpacity>
 
-              <Text style={styles.monthCurrentText}>
+              <Text style={styles.monthCurrentText} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.trainedDaysInSelectedMonth.length} días activos
               </Text>
 
               <TouchableOpacity style={styles.monthNavBtn} onPress={handleNextMonth}>
                 <Text style={styles.monthNavBtnText}>Siguiente</Text>
-                <Ionicons name="chevron-forward" size={16} color={colors.textPrimary} />
+                <Ionicons name="chevron-forward" size={14} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -505,9 +507,9 @@ export default function App() {
           <View style={styles.widgetGridRow}>
             {/* Widget Izquierda: Total Series */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle}>Total Series</Text>
-              <Text style={styles.widgetSubLabel}>Histórico Local</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>
+              <Text style={styles.widgetGridTitle} numberOfLines={1}>Total Series</Text>
+              <Text style={styles.widgetSubLabel} numberOfLines={1}>Histórico Local</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.purple }]} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.totalSets}
               </Text>
               
@@ -522,9 +524,9 @@ export default function App() {
 
             {/* Widget Derecha: Intensidad RPE Medio */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle}>Esfuerzo (RPE)</Text>
-              <Text style={styles.widgetSubLabel}>Promedio</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>
+              <Text style={styles.widgetGridTitle} numberOfLines={1}>Esfuerzo (RPE)</Text>
+              <Text style={styles.widgetSubLabel} numberOfLines={1}>Promedio</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
               </Text>
 
@@ -588,29 +590,29 @@ export default function App() {
             </View>
           </View>
 
-          {/* Card 2: Estadísticas del Perfil */}
+          {/* Card 2: Estadísticas del Perfil con Ajuste Antidesbordamiento */}
           <View style={styles.appleWidget}>
             <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>
               Estadísticas & Récords (PRs)
             </Text>
             
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Volumen Acumulado:</Text>
-              <Text style={[styles.profileValue, { color: colors.secondary }]}>
+              <Text style={styles.profileLabel} numberOfLines={1}>Volumen Acumulado:</Text>
+              <Text style={[styles.profileValue, { color: colors.secondary }]} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.totalVolumeKg.toLocaleString()} kg
               </Text>
             </View>
             
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>1RM Máximo Histórico:</Text>
-              <Text style={[styles.profileValue, { color: colors.primary }]}>
+              <Text style={styles.profileLabel} numberOfLines={1}>1RM Máximo Histórico:</Text>
+              <Text style={[styles.profileValue, { color: colors.primary }]} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
               </Text>
             </View>
 
             <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Racha Actual de Días:</Text>
-              <Text style={[styles.profileValue, { color: colors.cyan }]}>
+              <Text style={styles.profileLabel} numberOfLines={1}>Racha Actual de Días:</Text>
+              <Text style={[styles.profileValue, { color: colors.cyan }]} numberOfLines={1} adjustsFontSizeToFit>
                 {stats.currentStreakDays} días
               </Text>
             </View>
@@ -623,14 +625,14 @@ export default function App() {
             {stats.exercisePRs.length > 0 ? (
               stats.exercisePRs.map((pr) => (
                 <View key={pr.exerciseId} style={styles.prRowItem}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
-                    <Text style={styles.prSubText}>
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={styles.prExerciseName} numberOfLines={1}>{pr.exerciseName}</Text>
+                    <Text style={styles.prSubText} numberOfLines={1}>
                       Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
                     </Text>
                   </View>
                   <View style={styles.prRankBadge}>
-                    <Text style={styles.prRankText}>
+                    <Text style={styles.prRankText} numberOfLines={1}>
                       {pr.rankEmoji} {pr.rankLabel}
                     </Text>
                   </View>
@@ -701,14 +703,14 @@ export default function App() {
               {stats.exercisePRs.length > 0 ? (
                 stats.exercisePRs.map((pr) => (
                   <View key={`modal_${pr.exerciseId}`} style={styles.prRowItem}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
-                      <Text style={styles.prSubText}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.prExerciseName} numberOfLines={1}>{pr.exerciseName}</Text>
+                      <Text style={styles.prSubText} numberOfLines={1}>
                         Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
                       </Text>
                     </View>
                     <View style={styles.prRankBadge}>
-                      <Text style={styles.prRankText}>
+                      <Text style={styles.prRankText} numberOfLines={1}>
                         {pr.rankEmoji} {pr.rankLabel}
                       </Text>
                     </View>
@@ -850,7 +852,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderWidth: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginLeft: 12
   },
   avatarText: {
     color: colors.textPrimary,
@@ -873,14 +876,14 @@ const styles = StyleSheet.create({
     borderColor: colors.surfaceBorder,
     borderWidth: 1,
     borderRadius: radii.xl,
-    padding: 20,
+    padding: 18,
     marginBottom: 16
   },
   widgetHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 14
   },
   widgetHeaderTitle: {
     color: colors.textPrimary,
@@ -891,15 +894,16 @@ const styles = StyleSheet.create({
   widgetHeaderTitleCompact: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 17,
-    flex: 1
+    fontSize: 16,
+    flex: 1,
+    marginRight: 6
   },
   moreStatsBtnVisible: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary + '25',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: radii.full,
     borderWidth: 1,
     borderColor: colors.primary
@@ -907,8 +911,8 @@ const styles = StyleSheet.create({
   moreStatsBtnText: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    marginLeft: 4
+    fontSize: 11,
+    marginLeft: 3
   },
   widgetTopHeader: {
     flexDirection: 'row',
@@ -934,14 +938,15 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     borderWidth: 1,
     paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: radii.full
+    paddingHorizontal: 8,
+    borderRadius: radii.full,
+    flexShrink: 1
   },
   streakText: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    marginLeft: 4
+    fontSize: 11,
+    marginLeft: 3
   },
   monthNavRow: {
     flexDirection: 'row',
@@ -949,7 +954,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: radii.md,
     marginBottom: 14
   },
@@ -960,13 +965,15 @@ const styles = StyleSheet.create({
   monthNavBtnText: {
     color: colors.textPrimary,
     fontFamily: fonts.bodySemiBold,
-    fontSize: 12,
-    marginHorizontal: 4
+    fontSize: 11,
+    marginHorizontal: 2
   },
   monthCurrentText: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
-    fontSize: 12
+    fontSize: 11,
+    textAlign: 'center',
+    flexShrink: 1
   },
   weekDaysHeaderGrid: {
     flexDirection: 'row',
@@ -1055,10 +1062,10 @@ const styles = StyleSheet.create({
   },
   metricsList: {
     flex: 1,
-    marginLeft: 20
+    marginLeft: 16
   },
   metricItem: {
-    marginBottom: 10
+    marginBottom: 8
   },
   metricLabel: {
     color: colors.textSecondary,
@@ -1067,7 +1074,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 18,
+    fontSize: 17,
     marginTop: 1
   },
   metricUnit: {
@@ -1085,8 +1092,8 @@ const styles = StyleSheet.create({
   },
   widgetBigNumber: {
     fontFamily: fonts.headingBold,
-    fontSize: 32,
-    marginVertical: 6
+    fontSize: 28,
+    marginVertical: 4
   },
   miniBarChart: {
     flexDirection: 'row',
@@ -1109,6 +1116,7 @@ const styles = StyleSheet.create({
   profileRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceLight
@@ -1116,12 +1124,15 @@ const styles = StyleSheet.create({
   profileLabel: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
-    fontSize: 14
+    fontSize: 13,
+    flex: 1,
+    marginRight: 8
   },
   profileValue: {
     color: colors.textPrimary,
     fontFamily: fonts.bodyBold,
-    fontSize: 14
+    fontSize: 13,
+    textAlign: 'right'
   },
   prRowItem: {
     flexDirection: 'row',
@@ -1136,12 +1147,12 @@ const styles = StyleSheet.create({
   prExerciseName: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 14
+    fontSize: 13
   },
   prSubText: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 2
   },
   prRankBadge: {
@@ -1180,7 +1191,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radii.xl,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: Platform.OS === 'ios' ? 44 : 32,
     maxHeight: '90%',
