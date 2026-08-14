@@ -23,14 +23,23 @@ import { db } from '@database/client';
 import { colors, radii } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
+import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-// Ancho exacto de cada celda para 7 columnas perfectas
 const GRID_PADDING = 40;
 const DAY_CELL_WIDTH = Math.floor((SCREEN_WIDTH - GRID_PADDING - 40) / 7);
 
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
+
+interface ExercisePR {
+  exerciseId: string;
+  exerciseName: string;
+  maxWeightKg: number;
+  maxEstimated1RM: number;
+  rankLabel: string;
+  rankEmoji: string;
+}
 
 interface DashboardStats {
   totalVolumeKg: number;
@@ -42,6 +51,7 @@ interface DashboardStats {
   currentStreakDays: number;
   bestStreakDays: number;
   trainedDaysInSelectedMonth: number[];
+  exercisePRs: ExercisePR[];
 }
 
 export default function App() {
@@ -62,7 +72,8 @@ export default function App() {
     avgVolumePerSession: 0,
     currentStreakDays: 0,
     bestStreakDays: 0,
-    trainedDaysInSelectedMonth: []
+    trainedDaysInSelectedMonth: [],
+    exercisePRs: []
   });
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -75,8 +86,9 @@ export default function App() {
 
       // 1. Cargar Perfil
       const profile = await db.getFirstAsync<any>('SELECT * FROM user_profile LIMIT 1;');
+      let userProf: UserProfile | null = null;
       if (profile) {
-        setUserProfile({
+        userProf = {
           id: profile.id,
           name: profile.name,
           age: profile.age,
@@ -85,7 +97,8 @@ export default function App() {
           bodyWeightKg: profile.body_weight_kg,
           experienceLevel: profile.experience_level as ExperienceLevel,
           createdAt: profile.created_at
-        });
+        };
+        setUserProfile(userProf);
       }
 
       // 2. Calcular Estadísticas Reales desde SQLite
@@ -117,6 +130,40 @@ export default function App() {
       const max1RMRes = await db.getFirstAsync<{ max_1rm: number }>(
         `SELECT MAX(estimated_1rm) as max_1rm FROM exercise_sets;`
       );
+
+      // Records Adaptativos por Ejercicio Clave
+      const exercisePRsRaw = await db.getAllAsync<{
+        exercise_id: string;
+        exercise_name: string;
+        max_weight: number;
+        max_1rm: number;
+      }>(
+        `SELECT 
+           es.exercise_id, 
+           e.name as exercise_name, 
+           MAX(es.weight_kg) as max_weight, 
+           MAX(es.estimated_1rm) as max_1rm
+         FROM exercise_sets es
+         JOIN exercises e ON es.exercise_id = e.id
+         GROUP BY es.exercise_id
+         ORDER BY max_1rm DESC
+         LIMIT 5;`
+      );
+
+      const bodyWeight = userProf?.bodyWeightKg || 70;
+      const userSex = userProf?.sex || 'male';
+
+      const prs: ExercisePR[] = exercisePRsRaw.map((item) => {
+        const rankInfo = calculateStrengthRank(item.max_1rm, bodyWeight, userSex);
+        return {
+          exerciseId: item.exercise_id,
+          exerciseName: item.exercise_name,
+          maxWeightKg: item.max_weight,
+          maxEstimated1RM: Math.round(item.max_1rm),
+          rankLabel: rankInfo.label,
+          rankEmoji: rankInfo.emoji
+        };
+      });
 
       // Rachas de entrenamiento
       const allSessions = await db.getAllAsync<{ date: number }>(
@@ -153,7 +200,8 @@ export default function App() {
         avgVolumePerSession: avgVolPerSession,
         currentStreakDays: currentStreak,
         bestStreakDays: maxStreak,
-        trainedDaysInSelectedMonth: trainedDays
+        trainedDaysInSelectedMonth: trainedDays,
+        exercisePRs: prs
       });
     } catch (error) {
       console.error('Error cargando estadísticas reales de SQLite:', error);
@@ -307,7 +355,7 @@ export default function App() {
                 onPress={() => setShowStatsModal(true)}
               >
                 <Ionicons name="analytics" size={14} color={colors.primary} />
-                <Text style={styles.moreStatsBtnText}>Más Stats</Text>
+                <Text style={styles.moreStatsBtnText}>Estadísticas</Text>
               </TouchableOpacity>
             </View>
             
@@ -489,8 +537,9 @@ export default function App() {
           </View>
         </ScrollView>
 
-        {/* Pantalla 4: Perfil de Atleta */}
+        {/* Pantalla 4: Perfil de Atleta + Estadísticas Integradas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          {/* Card 1: Datos Personales */}
           <View style={styles.appleWidget}>
             <Text style={styles.widgetHeaderTitle}>Perfil de Atleta</Text>
             <View style={styles.profileRow}>
@@ -516,6 +565,63 @@ export default function App() {
               <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
             </View>
           </View>
+
+          {/* Card 2: Estadísticas del Perfil */}
+          <View style={styles.appleWidget}>
+            <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>
+              Estadísticas & Récords (PRs)
+            </Text>
+            
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Volumen Acumulado:</Text>
+              <Text style={[styles.profileValue, { color: colors.secondary }]}>
+                {stats.totalVolumeKg.toLocaleString()} kg
+              </Text>
+            </View>
+            
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>1RM Máximo Histórico:</Text>
+              <Text style={[styles.profileValue, { color: colors.primary }]}>
+                {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
+              </Text>
+            </View>
+
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Racha Actual de Días:</Text>
+              <Text style={[styles.profileValue, { color: colors.cyan }]}>
+                {stats.currentStreakDays} días
+              </Text>
+            </View>
+          </View>
+
+          {/* Card 3: Marcas Adaptativas por Ejercicio Clave */}
+          <View style={styles.appleWidget}>
+            <Text style={styles.widgetHeaderTitle}>Mejores Marcas por Ejercicio</Text>
+
+            {stats.exercisePRs.length > 0 ? (
+              stats.exercisePRs.map((pr) => (
+                <View key={pr.exerciseId} style={styles.prRowItem}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
+                    <Text style={styles.prSubText}>
+                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
+                    </Text>
+                  </View>
+                  <View style={styles.prRankBadge}>
+                    <Text style={styles.prRankText}>
+                      {pr.rankEmoji} {pr.rankLabel}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyPrContainer}>
+                <Text style={styles.emptyPrText}>
+                  Aún no has registrado series completadas. Tus mejores marcas por ejercicio aparecerán aquí automáticamente.
+                </Text>
+              </View>
+            )}
+          </View>
         </ScrollView>
       </ScrollView>
 
@@ -539,7 +645,7 @@ export default function App() {
               <View style={styles.statGridCard}>
                 <Text style={styles.statGridLabel}>1RM Máximo Estimado</Text>
                 <Text style={[styles.statGridValue, { color: colors.primary }]}>
-                  {stats.max1RM > 0 ? `${stats.max1RM} KG` : 'N/A'}
+                  {stats.max1RM > 0 ? `${stats.max1RM} KG` : 'Sin registro'}
                 </Text>
               </View>
 
@@ -563,6 +669,33 @@ export default function App() {
                   {stats.avgRpe > 0 ? `${stats.avgRpe} RPE` : '0.0'}
                 </Text>
               </View>
+
+              {/* Récords Adaptativos por Ejercicio dentro del Modal */}
+              <Text style={[styles.widgetHeaderTitle, { marginTop: 12, marginBottom: 12 }]}>
+                Marcas Personales (PRs)
+              </Text>
+
+              {stats.exercisePRs.length > 0 ? (
+                stats.exercisePRs.map((pr) => (
+                  <View key={`modal_${pr.exerciseId}`} style={styles.prRowItem}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
+                      <Text style={styles.prSubText}>
+                        Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
+                      </Text>
+                    </View>
+                    <View style={styles.prRankBadge}>
+                      <Text style={styles.prRankText}>
+                        {pr.rankEmoji} {pr.rankLabel}
+                      </Text>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.emptyPrText}>
+                  Completa tu primera sesión de entrenamiento para calcular tus marcas en tiempo real.
+                </Text>
+              )}
             </ScrollView>
           </BlurView>
         </View>
@@ -712,7 +845,8 @@ const styles = StyleSheet.create({
   widgetHeaderTitle: {
     color: colors.textPrimary,
     fontSize: 18,
-    fontWeight: '800'
+    fontWeight: '800',
+    marginBottom: 12
   },
   widgetHeaderTitleCompact: {
     color: colors.textPrimary,
@@ -945,6 +1079,48 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '700',
     fontSize: 14
+  },
+  prRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceLight,
+    padding: 12,
+    borderRadius: radii.md,
+    marginBottom: 8,
+    borderColor: colors.border,
+    borderWidth: 1
+  },
+  prExerciseName: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '800'
+  },
+  prSubText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2
+  },
+  prRankBadge: {
+    backgroundColor: colors.primary + '20',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: radii.sm,
+    borderColor: colors.primary,
+    borderWidth: 1
+  },
+  prRankText: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '800'
+  },
+  emptyPrContainer: {
+    paddingVertical: 12
+  },
+  emptyPrText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    fontStyle: 'italic'
   },
   modalOverlay: {
     flex: 1,
