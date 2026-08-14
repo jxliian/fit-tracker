@@ -383,22 +383,22 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
         {/* Bar de Selección de Semana (Progresión Automática) */}
         <View style={styles.weekProgressionBar}>
           <TouchableOpacity style={styles.weekBtn} onPress={() => handleWeekShift(-1)}>
-            <Ionicons name="chevron-back" size={16} color={colors.cyan} />
-            <Text style={styles.weekBtnText}>Sem. Anterior</Text>
+            <Ionicons name="chevron-back" size={14} color={colors.cyan} />
+            <Text style={styles.weekBtnText}>Sem. Ant.</Text>
           </TouchableOpacity>
 
           <View style={styles.weekBadge}>
-            <Ionicons name="sparkles" size={14} color={colors.primary} />
-            <Text style={styles.weekBadgeText}>
+            <Ionicons name="sparkles" size={12} color={colors.primary} />
+            <Text style={styles.weekBadgeText} numberOfLines={1}>
               {weekOffset === 0
-                ? 'Semana 1 (Actual)'
-                : `Semana ${1 + weekOffset} (${weekOffset > 0 ? '+' : ''}${(weekOffset * 2.5).toFixed(1)}kg)`}
+                ? 'Sem. 1 (Actual)'
+                : `Sem. ${1 + weekOffset} (${weekOffset > 0 ? '+' : ''}${(weekOffset * 2.5).toFixed(1)}kg)`}
             </Text>
           </View>
 
           <TouchableOpacity style={styles.weekBtn} onPress={() => handleWeekShift(1)}>
-            <Text style={styles.weekBtnText}>Sem. Siguiente</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.cyan} />
+            <Text style={styles.weekBtnText}>Sem. Sig.</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.cyan} />
           </TouchableOpacity>
         </View>
 
@@ -866,41 +866,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 4,
     borderBottomWidth: 1,
     borderBottomColor: colors.border
   },
   weekBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
     backgroundColor: colors.surfaceLight,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: colors.border
+    borderColor: colors.border,
+    flexShrink: 0
   },
   weekBtnText: {
     color: colors.cyan,
     fontFamily: fonts.bodySemiBold,
-    fontSize: 12
+    fontSize: 11
   },
   weekBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
+    gap: 4,
     backgroundColor: 'rgba(0, 102, 204, 0.15)',
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: colors.primary
+    borderColor: colors.primary,
+    flex: 1,
+    marginHorizontal: 2
   },
   weekBadgeText: {
     color: '#FFFFFF',
     fontFamily: fonts.bodyBold,
-    fontSize: 12
+    fontSize: 11,
+    textAlign: 'center'
   }
 });

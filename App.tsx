@@ -1316,21 +1316,25 @@ export default function App() {
             const imgIndex = Math.abs(charSum) % GYM_ROUTINE_IMAGES.length;
 
             return (
-              <View key={r.id} style={[styles.widget, { padding: 0, overflow: 'hidden' }]}>
-                <Image
-                  source={GYM_ROUTINE_IMAGES[imgIndex]}
-                  style={{ width: '100%', height: 130 }}
-                  resizeMode="cover"
-                />
-                <View style={{ padding: 16 }}>
-                  <Text style={styles.wTitle}>{getLocalizedRoutineName(r.name, activeLang)}</Text>
-                  <Text style={styles.wSub}>{getLocalizedRoutineDesc(r.description, r.name, activeLang)}</Text>
+              <View key={r.id} style={[styles.widget, { padding: 12, overflow: 'hidden' }]}>
+                {/* Imagen del Banner con Bordes Redondeados */}
+                <View style={{ width: '100%', height: 145, borderRadius: radii.lg, overflow: 'hidden', position: 'relative', marginBottom: 12 }}>
+                  <Image
+                    source={GYM_ROUTINE_IMAGES[imgIndex]}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode="cover"
+                  />
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.18)' }} />
+                </View>
+                <View style={{ width: '100%', alignItems: 'center' }}>
+                  <Text style={[styles.wTitle, { textAlign: 'center' }]}>{getLocalizedRoutineName(r.name, activeLang)}</Text>
+                  <Text style={[styles.wSub, { textAlign: 'center' }]}>{getLocalizedRoutineDesc(r.description, r.name, activeLang)}</Text>
                   <TouchableOpacity
-                    style={[styles.pillBtn, { marginTop: 12, backgroundColor: colors.primary, alignSelf: 'flex-start' }]}
+                    style={[styles.pillBtn, { marginTop: 12, backgroundColor: colors.primary, alignSelf: 'center', paddingHorizontal: 24 }]}
                     onPress={() => handleStartRoutineWorkout(r)}
                   >
                     <Ionicons name="play" size={14} color="#FFFFFF" />
-                    <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>{t.startRoutine}</Text>
+                    <Text style={[styles.pillBtnText, { color: '#FFFFFF', fontSize: 13 }]}>{t.startRoutine}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1439,19 +1443,23 @@ export default function App() {
 
           {/* Card de Registro de Peso Corporal */}
           <View style={styles.widget}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={styles.wTitle}>{activeLang === 'es' ? 'Evolución de Peso Corporal' : 'Body Weight Evolution'}</Text>
-              <TouchableOpacity
-                style={[styles.pillBtn, { backgroundColor: colors.cyan }]}
-                onPress={() => {
-                  setInputLogWeightKg(String(userProfile.bodyWeightKg));
-                  setShowWeightModal(true);
-                }}
-              >
-                <Ionicons name="add" size={14} color="#FFFFFF" />
-                <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>{activeLang === 'es' ? 'Registrar' : 'Log'}</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[styles.wTitle, { textAlign: 'center', marginBottom: 6 }]}>
+              {activeLang === 'es' ? 'Evolución de Peso Corporal' : 'Body Weight Evolution'}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.pillBtn, { backgroundColor: colors.cyan, alignSelf: 'center', marginBottom: 12, paddingHorizontal: 20, paddingVertical: 8 }]}
+              onPress={() => {
+                setInputLogWeightKg(String(userProfile.bodyWeightKg));
+                setShowWeightModal(true);
+              }}
+            >
+              <Ionicons name="add-circle-outline" size={16} color="#FFFFFF" />
+              <Text style={[styles.pillBtnText, { color: '#FFFFFF', fontSize: 13 }]}>
+                {activeLang === 'es' ? '+ Registrar Nuevo Peso' : '+ Log Body Weight'}
+              </Text>
+            </TouchableOpacity>
+
             <ProgressionChart
               title={activeLang === 'es' ? 'Histórico de Pesaje (KG)' : 'Weight History (KG)'}
               unit="KG"
