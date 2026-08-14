@@ -6,18 +6,24 @@ This specification adapts the IEEE 830 standard for offline-first mobile systems
 
 \begin{table}[h!]
 \centering
-\caption{System Functional Requirements}
-\begin{tabularx}{\textwidth}{l p{4.5cm} X}
+\small
+\caption{System Functional Requirements Specification}
+\label{tab:functional_requirements}
+\begin{tabularx}{\textwidth}{l p{4.2cm} X}
 \toprule
-\textbf{Code} & \textbf{Name} & \textbf{Description} \\
+\textbf{Code} & \textbf{Requirement Name} & \textbf{Technical Description \& Acceptance Criteria} \\
 \midrule
-\textbf{FR-01} & Exercise Catalog Management & The system shall allow creating, modifying, and categorizing exercises by primary and secondary muscle groups. \\
-\textbf{FR-02} & Routine Configuration & The system shall allow defining routines composed of exercise blocks, target rep ranges, and desired RPE. \\
-\textbf{FR-03} & Live Set Logging & Allows logging weight ($kg$), reps ($r$), and RPE/RIR ($R$) in real-time with an automated rest timer. \\
-\textbf{FR-04} & Automated Overload Calculation & The system shall compute weight/rep recommendations for the next session upon workout completion. \\
-\textbf{FR-05} & 1RM Estimation & The system shall compute current and historical estimated 1RM per session using validated mathematical models. \\
-\textbf{FR-06} & Offline Nutrition Tracking & Daily logging of macronutrients (protein, carbs, fats) and total calories without requiring external APIs. \\
-\textbf{FR-07} & Body Metrics Tracking & Tracking body weight, body fat percentage, and girth measurements. \\
+\textbf{FR-01} & Exercise Catalog Management & Search and filter +1,500 exercises by muscle group (Chest, Back, Legs, Shoulders, Biceps, Triceps) and equipment type, plus custom exercise creation. \\
+\textbf{FR-02} & Routine Template Builder & Create, edit, organize, and launch pre-configured workout routine templates with custom target reps, sets, and order. \\
+\textbf{FR-03} & Live Set Logging \& Tagging & Log weight ($kg$), reps ($r$), and RPE/RIR ($R$) in real-time, tagging sets as Warmup (\texttt{[Calent.]}) or Effective (\texttt{[Efectiva]}). \\
+\textbf{FR-04} & Automated Overload Engine & Compute recommended load ($w_{rec}$) and reps ($r_{rec}$) for upcoming sessions using RPE/RIR autoregulation rules. \\
+\textbf{FR-05} & 1RM Estimation \& Ranks & Calculate real-time estimated 1RM via Epley formula and map strength performance to rank badges (Beginner, Intermediate, Advanced, Elite). \\
+\textbf{FR-06} & Rest-Tolerant Streak Engine & Track consistency streak with an automated 3-day rest buffer allowance before resetting the streak counter. \\
+\textbf{FR-07} & Profile Setup \& FitMojis & Setup user profile (age, sex, height, weight, level) and enforce FitMojis animal avatar selection with random fallback. \\
+\textbf{FR-08} & Dual-Language Localization & Seamlessly translate UI controls, exercise catalog, profile settings, and FitMojis labels between Spanish (ES) and English (EN). \\
+\textbf{FR-09} & Background Notification Timer & Push live notifications with workout stopwatch duration, rest countdowns, and active exercise details when app is minimized. \\
+\textbf{FR-10} & Native Line Chart Analytics & Render real-time 2D progression charts per exercise natively without third-party chart package dependencies. \\
+\textbf{FR-11} & Local Data Backup \& Export & Export full workout database in JSON format from session history view for data portability and user backup. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -26,15 +32,20 @@ This specification adapts the IEEE 830 standard for offline-first mobile systems
 
 \begin{table}[h!]
 \centering
-\caption{System Non-Functional Requirements}
+\small
+\caption{System Non-Functional Requirements Specification}
+\label{tab:non_functional_requirements}
 \begin{tabularx}{\textwidth}{l p{4.5cm} X}
 \toprule
-\textbf{Code} & \textbf{Name} & \textbf{Metric / Acceptance Criteria} \\
+\textbf{Code} & \textbf{Requirement Name} & \textbf{Metric / Acceptance Criteria} \\
 \midrule
-\textbf{NFR-01} & Offline Operability & 100\% of read and write operations must execute locally without an internet connection. \\
-\textbf{NFR-02} & Write Performance & Inserting a completed set into SQLite must execute in under $50\,ms$. \\
-\textbf{NFR-03} & Portability & The React Native (TypeScript) codebase must be portable across Android and iOS without logic modifications. \\
-\textbf{NFR-04} & Data Integrity & SQLite database must use ACID transactions to prevent data corruption during unexpected app closures. \\
+\textbf{NFR-01} & 100\% Local-First Operability & 100\% of read, write, and analytics operations execute locally in SQLite without cloud dependencies or internet connection. \\
+\textbf{NFR-02} & Low Latency Database Writes & Set insertion and batch volume updates in SQLite must complete in $< 30\text{ ms}$ on standard Android and iOS devices. \\
+\textbf{NFR-03} & OLED Power Efficiency & Pitch black base theme (\texttt{\#000000}) with contrast ratio $> 15:1$, minimizing display energy consumption on OLED screens. \\
+\textbf{NFR-04} & Cross-Platform Code Base & Single unified React Native SDK 54 TypeScript codebase executing uniformly across Android and iOS without platform branches. \\
+\textbf{NFR-05} & ACID Data Reliability & SQLite WAL (Write-Ahead Logging) journaling ensures zero data corruption during abrupt application termination or battery drain. \\
+\textbf{NFR-06} & Safe Area Ergonomics & Dynamic status bar and bottom gesture inset offsets preventing UI clipping on physical notches and system navigation bars. \\
+\textbf{NFR-07} & Zero Telemetry Privacy & Absolute privacy guarantee with zero external analytics tracking, device isolation, and local database encryption. \\
 \bottomrule
 \end{tabularx}
 \end{table}

@@ -162,3 +162,45 @@
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsubsection{UC-08: Complete Profile Setup \& FitMojis Avatar Selection}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-08: Complete Profile Setup \& FitMojis Avatar Selection} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & Application launched for the first time without an active profile. \\
+\textbf{Main Flow} & 
+1. Athlete fills in body metrics (age, sex, height, weight, experience level, language).\newline
+2. Athlete selects a FitMoji avatar character (Lion, Bear, Panther, Eagle).\newline
+3. Athlete confirms profile creation.\newline
+4. System persists profile record to SQLite and initializes dashboard. \\
+\textbf{Alternative Flow} & 
+\textit{2a. Athlete omits avatar selection:}\newline
+- System assigns a random FitMoji key (\texttt{lion}, \texttt{bear}, \texttt{panther}, \texttt{eagle}) as fallback. \\
+\textbf{Postconditions} & Athlete profile saved; onboarding state completed. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-09: Export Database Telemetry JSON}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-09: Export Database Telemetry JSON} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & SQLite database contains logged sessions and sets. \\
+\textbf{Main Flow} & 
+1. Athlete selects "Export JSON" from session history interface.\newline
+2. System serializes all SQLite tables into a structured JSON string.\newline
+3. System triggers OS native share/save prompt for data backup. \\
+\textbf{Postconditions} & JSON backup file exported; zero data modified in database. \\
+\bottomrule
+\end{tabularx}
+\end{table}
