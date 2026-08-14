@@ -9,27 +9,31 @@
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[node distance=1.5cm, every node/.style={fill=white, font=\sffamily\small}]
-    % Actor
-    \node (actor) [draw, circle, minimum size=1cm] {User};
+\begin{tikzpicture}[
+    node distance=0.5cm and 2.5cm,
+    actorstyle/.style={draw=black!80, circle, fill=blue!8, thick, minimum size=1.3cm, font=\sffamily\bfseries\small},
+    ucstyle/.style={draw=black!70, fill=green!8, thick, rounded corners=6pt, align=center, text width=5.2cm, minimum height=0.65cm, font=\sffamily\small}
+]
+    % Actor node
+    \node (actor) [actorstyle] {User};
     
-    % Use Cases
-    \node (uc1) [draw, rounded corners, right=2.5cm of actor, yshift=3cm] {UC-01: Log Workout Set};
-    \node (uc2) [draw, rounded corners, right=2.5cm of actor, yshift=2cm] {UC-02: Get Overload Rec.};
-    \node (uc3) [draw, rounded corners, right=2.5cm of actor, yshift=1cm] {UC-03: Start Workout Session};
-    \node (uc4) [draw, rounded corners, right=2.5cm of actor, yshift=0cm] {UC-04: Finish Workout Session};
-    \node (uc5) [draw, rounded corners, right=2.5cm of actor, yshift=-1cm] {UC-05: Search Catalog};
-    \node (uc6) [draw, rounded corners, right=2.5cm of actor, yshift=-2cm] {UC-06: 1RM Progress Analytics};
-    \node (uc7) [draw, rounded corners, right=2.5cm of actor, yshift=-3cm] {UC-07: Rest Timer Management};
+    % Right column of Use Cases stacked vertically
+    \node (uc1) [ucstyle, right=2.8cm of actor, yshift=2.7cm] {UC-01: Log Workout Set \& 1RM};
+    \node (uc2) [ucstyle, right=2.8cm of actor, yshift=1.8cm] {UC-02: Get Overload Recommendation};
+    \node (uc3) [ucstyle, right=2.8cm of actor, yshift=0.9cm] {UC-03: Create \& Start Workout Session};
+    \node (uc4) [ucstyle, right=2.8cm of actor, yshift=0.0cm] {UC-04: Finish \& Finalize Session};
+    \node (uc5) [ucstyle, right=2.8cm of actor, yshift=-0.9cm] {UC-05: Filter \& Search Catalog};
+    \node (uc6) [ucstyle, right=2.8cm of actor, yshift=-1.8cm] {UC-06: 1RM Progress Analytics};
+    \node (uc7) [ucstyle, right=2.8cm of actor, yshift=-2.7cm] {UC-07: Gamification Strength Ranks};
 
-    % Connections
-    \draw (actor) -- (uc1);
-    \draw (actor) -- (uc2);
-    \draw (actor) -- (uc3);
-    \draw (actor) -- (uc4);
-    \draw (actor) -- (uc5);
-    \draw (actor) -- (uc6);
-    \draw (actor) -- (uc7);
+    % Clean straight connectors from actor's right edge to each use case's left edge
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc1.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc2.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc3.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc4.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc5.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc6.west);
+    \draw [line width=0.8pt, black!75] (actor.east) -- (uc7.west);
 \end{tikzpicture}
 \caption{UML Use Case Overview for FitTracker Domain Architecture.}
 \label{fig:use_cases}

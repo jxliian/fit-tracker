@@ -5,16 +5,24 @@ FitTracker implements Clean Architecture structured by functional feature module
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[node distance=1.5cm, auto]
-    \node [rectangle, draw, fill=blue!10, text width=6em, text centered, rounded corners, minimum height=2.5em] (ui) {UI Layer\newline (React Native)};
-    \node [rectangle, draw, fill=green!10, text width=7em, text centered, rounded corners, minimum height=2.5em, right=of ui] (usecase) {Use Cases\newline (Business Logic)};
-    \node [rectangle, draw, fill=red!10, text width=6em, text centered, rounded corners, minimum height=2.5em, right=of usecase] (domain) {Domain Layer\newline (Entities/Math)};
-    \node [rectangle, draw, fill=yellow!10, text width=6em, text centered, rounded corners, minimum height=2.5em, below=of usecase] (db) {Database Layer\newline (SQLite Engine)};
-    
-    \draw [->, thick] (ui) -- (usecase);
-    \draw [->, thick] (usecase) -- (domain);
-    \draw [->, thick] (usecase) -- (db);
-    \draw [->, thick] (db) -| (domain);
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.8cm,
+    block/.style={rectangle, draw=black!70, fill=blue!8, thick, text width=2.6cm, align=center, rounded corners=4pt, minimum height=1.2cm, font=\sffamily\small},
+    usecaseblock/.style={rectangle, draw=black!70, fill=green!10, thick, text width=2.8cm, align=center, rounded corners=4pt, minimum height=1.2cm, font=\sffamily\small},
+    domainblock/.style={rectangle, draw=black!70, fill=red!10, thick, text width=2.6cm, align=center, rounded corners=4pt, minimum height=1.2cm, font=\sffamily\small},
+    dbblock/.style={rectangle, draw=black!70, fill=yellow!12, thick, text width=2.8cm, align=center, rounded corners=4pt, minimum height=1.2cm, font=\sffamily\small}
+]
+    % Central nodes layout
+    \node [block] (ui) {UI Layer\\(React Native)};
+    \node [usecaseblock, right=of ui] (usecase) {Use Cases\\(Business Logic)};
+    \node [domainblock, right=of usecase] (domain) {Domain Layer\\(Entities / Math)};
+    \node [dbblock, below=1.0cm of usecase] (db) {Database Layer\\(SQLite Engine)};
+
+    % Connectors
+    \draw [->, >=stealth, line width=1pt] (ui) -- (usecase);
+    \draw [->, >=stealth, line width=1pt] (usecase) -- (domain);
+    \draw [->, >=stealth, line width=1pt] (usecase) -- (db);
+    \draw [->, >=stealth, line width=1pt] (db) -| (domain);
 \end{tikzpicture}
 \caption{Layer Dependency Diagram in Clean Architecture.}
 \end{figure}
