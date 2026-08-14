@@ -35,6 +35,52 @@ export interface ExerciseItemInWorkout {
   }[];
 }
 
+export const saveActiveWorkoutDraft = async (
+  workoutTitle: string,
+  startTimeMs: number,
+  exercises: ExerciseItemInWorkout[]
+) => {
+  try {
+    const json = JSON.stringify(exercises);
+    await db.runAsync(
+      `INSERT OR REPLACE INTO active_workout_draft (id, workout_title, start_time_ms, exercises_json, updated_at)
+       VALUES ('current_draft', ?, ?, ?, ?);`,
+      [workoutTitle, startTimeMs, json, Date.now()]
+    );
+  } catch (err) {
+    console.error('Error saving active workout draft:', err);
+  }
+};
+
+export const clearActiveWorkoutDraft = async () => {
+  try {
+    await db.runAsync(`DELETE FROM active_workout_draft WHERE id = 'current_draft';`);
+  } catch (err) {
+    console.error('Error clearing active workout draft:', err);
+  }
+};
+
+export const loadActiveWorkoutDraft = async () => {
+  try {
+    const row = await db.getFirstAsync<{
+      workout_title: string;
+      start_time_ms: number;
+      exercises_json: string;
+    }>(`SELECT workout_title, start_time_ms, exercises_json FROM active_workout_draft WHERE id = 'current_draft';`);
+
+    if (row && row.workout_title) {
+      return {
+        workoutTitle: row.workout_title,
+        startTimeMs: row.start_time_ms,
+        exercises: JSON.parse(row.exercises_json) as ExerciseItemInWorkout[]
+      };
+    }
+  } catch (err) {
+    console.error('Error loading active workout draft:', err);
+  }
+  return null;
+};
+
 export interface LiveWorkoutStatus {
   elapsedSeconds: number;
   isRestActive: boolean;
@@ -49,6 +95,7 @@ export interface ActiveWorkoutModalProps {
   visible: boolean;
   workoutName: string;
   initialExercises?: { exerciseId: string; exerciseName: string; category: string }[];
+  initialDraft?: { workoutTitle: string; startTimeMs: number; exercises: ExerciseItemInWorkout[] } | null;
   onClose: () => void;
   onFinish: () => void;
   onStatusChange?: (status: LiveWorkoutStatus) => void;
@@ -58,6 +105,7 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
   visible,
   workoutName,
   initialExercises = [],
+  initialDraft,
   onClose,
   onFinish,
   onStatusChange
@@ -106,19 +154,29 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
   const [workoutStartTimeMs, setWorkoutStartTimeMs] = useState<number | null>(null);
   const [restEndTimeMs, setRestEndTimeMs] = useState<number | null>(null);
 
-  // Iniciar timestamp cuando el entrenamiento se vuelve visible
+  // Restaurar borrador o iniciar nuevo timestamp
   useEffect(() => {
-    if (visible && !workoutStartTimeMs) {
+    if (initialDraft && initialDraft.exercises.length > 0 && exercisesInWorkout.length === 0) {
+      setExercisesInWorkout(initialDraft.exercises);
+      setWorkoutStartTimeMs(initialDraft.startTimeMs);
+    } else if (visible && !workoutStartTimeMs) {
       setWorkoutStartTimeMs(Date.now());
     }
-  }, [visible, workoutStartTimeMs]);
+  }, [visible, initialDraft, workoutStartTimeMs]);
 
-  // Cargar ejercicios iniciales solo una vez al iniciar la sesión
+  // Cargar ejercicios iniciales si es una nueva sesión vacía
   useEffect(() => {
-    if (visible && exercisesInWorkout.length === 0) {
+    if (visible && exercisesInWorkout.length === 0 && !initialDraft) {
       loadInitialExercises();
     }
-  }, [visible, initialExercises]);
+  }, [visible, initialExercises, initialDraft]);
+
+  // Auto-guardado en SQLite del borrador activo del entrenamiento
+  useEffect(() => {
+    if (workoutStartTimeMs && exercisesInWorkout.length > 0) {
+      saveActiveWorkoutDraft(workoutName, workoutStartTimeMs, exercisesInWorkout);
+    }
+  }, [workoutStartTimeMs, exercisesInWorkout, workoutName]);
 
   // Cronómetro continuo de la sesión y descanso (sigue ejecutándose aunque el modal esté minimizado)
   useEffect(() => {

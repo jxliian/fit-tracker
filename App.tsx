@@ -41,7 +41,7 @@ import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
 import { calculateStreak } from '@domain/streak';
-import { ActiveWorkoutModal, LiveWorkoutStatus } from '@features/workout/ui/components/ActiveWorkoutModal';
+import { ActiveWorkoutModal, LiveWorkoutStatus, loadActiveWorkoutDraft } from '@features/workout/ui/components/ActiveWorkoutModal';
 import { WorkoutHistoryModal } from '@features/workout/ui/components/WorkoutHistoryModal';
 import { ProgressionChart } from '@features/progression/ui/components/ProgressionChart';
 
@@ -525,6 +525,7 @@ export default function App() {
   const [isWorkoutActive, setIsWorkoutActive] = useState<boolean>(false);
   const [activeWorkoutTitle, setActiveWorkoutTitle] = useState<string>('Entrenamiento Libre');
   const [activeWorkoutInitialExercises, setActiveWorkoutInitialExercises] = useState<{ exerciseId: string; exerciseName: string; category: string }[]>([]);
+  const [activeWorkoutDraft, setActiveWorkoutDraft] = useState<any | null>(null);
   const [liveWorkoutStatus, setLiveWorkoutStatus] = useState<LiveWorkoutStatus>({
     elapsedSeconds: 0,
     isRestActive: false,
@@ -822,6 +823,14 @@ export default function App() {
         `SELECT id, name, category, equipment, gif_url, instructions FROM exercises ORDER BY name ASC;`
       );
       setAllExercises(exercises);
+
+      // 4. Restaurar Borrador de Entrenamiento Activo si la app fue cerrada o reiniciada
+      const draft = await loadActiveWorkoutDraft();
+      if (draft && draft.exercises && draft.exercises.length > 0) {
+        setActiveWorkoutTitle(draft.workoutTitle);
+        setActiveWorkoutDraft(draft);
+        setIsWorkoutActive(true);
+      }
 
       // 4. Calcular Estadísticas Reales desde SQLite
       const year = viewMonthDate.getFullYear();
@@ -1617,10 +1626,12 @@ export default function App() {
         visible={showActiveWorkout}
         workoutName={activeWorkoutTitle}
         initialExercises={activeWorkoutInitialExercises}
+        initialDraft={activeWorkoutDraft}
         onClose={() => setShowActiveWorkout(false)}
         onFinish={() => {
           setShowActiveWorkout(false);
           setIsWorkoutActive(false);
+          setActiveWorkoutDraft(null);
           loadDatabaseData();
         }}
         onStatusChange={setLiveWorkoutStatus}

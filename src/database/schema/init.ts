@@ -77,6 +77,13 @@ export async function initDatabase(): Promise<void> {
       weight_kg REAL NOT NULL,
       date INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS active_workout_draft (
+      id TEXT PRIMARY KEY NOT NULL,
+      workout_title TEXT NOT NULL,
+      start_time_ms INTEGER NOT NULL,
+      exercises_json TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
   `);
 
     try {
