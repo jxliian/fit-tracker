@@ -103,28 +103,44 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
     );
   };
 
-  // Cronómetro del entrenamiento
-  useEffect(() => {
-    let timer: any = null;
-    if (visible) {
-      setElapsedSeconds(0);
-      timer = setInterval(() => {
-        setElapsedSeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setElapsedSeconds(0);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [visible]);
+  const [workoutStartTimeMs, setWorkoutStartTimeMs] = useState<number | null>(null);
+  const [restEndTimeMs, setRestEndTimeMs] = useState<number | null>(null);
 
-  // Cargar ejercicios iniciales y sus recomendaciones
+  // Iniciar timestamp cuando el entrenamiento se vuelve visible
   useEffect(() => {
-    if (visible) {
+    if (visible && !workoutStartTimeMs) {
+      setWorkoutStartTimeMs(Date.now());
+    }
+  }, [visible, workoutStartTimeMs]);
+
+  // Cargar ejercicios iniciales solo una vez al iniciar la sesión
+  useEffect(() => {
+    if (visible && exercisesInWorkout.length === 0) {
       loadInitialExercises();
     }
   }, [visible, initialExercises]);
+
+  // Cronómetro continuo de la sesión y descanso (sigue ejecutándose aunque el modal esté minimizado)
+  useEffect(() => {
+    if (!workoutStartTimeMs) return;
+
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - workoutStartTimeMs) / 1000);
+      setElapsedSeconds(elapsed);
+
+      if (restEndTimeMs) {
+        const remaining = Math.max(0, Math.ceil((restEndTimeMs - now) / 1000));
+        setCurrentRestSecondsLeft(remaining);
+        if (remaining === 0) {
+          setShowRestTimer(false);
+          setRestEndTimeMs(null);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [workoutStartTimeMs, restEndTimeMs]);
 
   const loadInitialExercises = async () => {
     const list: ExerciseItemInWorkout[] = [];
@@ -350,12 +366,23 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
       // Si se marca como completada y antes no lo estaba, activar temporizador
       if (field === 'isCompleted' && val === true && !targetEx.sets[setIndex].isCompleted) {
         setShowRestTimer(true);
+        setRestEndTimeMs(Date.now() + restDuration * 1000);
       }
 
       targetEx.sets[setIndex] = targetSet;
       updated[exerciseIndex] = targetEx;
       return updated;
     });
+  };
+
+  const resetWorkoutSession = () => {
+    setExercisesInWorkout([]);
+    setWorkoutStartTimeMs(null);
+    setRestEndTimeMs(null);
+    setElapsedSeconds(0);
+    setWeekOffset(0);
+    setShowRestTimer(false);
+    setCurrentRestSecondsLeft(0);
   };
 
   const handleFinishWorkout = async () => {
@@ -378,7 +405,10 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
           {
             text: 'Descartar y Salir',
             style: 'destructive',
-            onPress: () => onFinish()
+            onPress: () => {
+              resetWorkoutSession();
+              onFinish();
+            }
           }
         ]
       );
@@ -412,6 +442,7 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
       }
 
       Alert.alert('¡Entrenamiento Guardado!', `Has completado ${totalCompletedSets} series efectivas. ¡Buen trabajo!`);
+      resetWorkoutSession();
       onFinish();
     } catch (error) {
       console.error('Error guardando el entrenamiento:', error);
