@@ -125,7 +125,7 @@ export default function App() {
   }
 
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
-  const bottomInset = Platform.OS === 'ios' ? 28 : 22;
+  const bottomInset = Platform.OS === 'ios' ? 36 : 32;
 
   return (
     <SafeAreaView style={styles.container}>
