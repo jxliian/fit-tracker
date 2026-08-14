@@ -60,3 +60,14 @@ The recommended load $w_{\text{next}}$ for the subsequent session is adjusted ba
 \end{equation}
 
 where $\Delta w$ is the standard weight increment ($2.5\,kg$ for compound lifts, $1.25\,kg$ for isolation exercises) and $\beta \in [0.05, 0.10]$ is the fatigue deload factor.
+
+\subsection{Gamification Strength Rank Formulation}
+
+To provide offline gamification without server dependencies, we calculate a normalized strength rank score $S_{\text{rank}}$ based on relative bodyweight performance:
+
+\begin{equation}
+    S_{\text{rank}} = \left( \frac{1RM_{\text{est}}}{BW} \right) \cdot \lambda_{\text{sex}} \cdot \mu_{\text{type}}
+\end{equation}
+
+where $BW$ represents body weight in $kg$, $\lambda_{\text{sex}} = 1.45$ for female athletes ($1.0$ for male), and $\mu_{\text{type}} = 2.2$ for isolation exercises ($1.0$ for compound lifts). The athlete's strength rank tier (Wood, Iron, Bronze, Silver, Gold, Platinum, Diamond) is assigned by mapped score thresholds $S_{\text{rank}} \in [0.0, 2.5]$.
+

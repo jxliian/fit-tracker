@@ -42,5 +42,33 @@ export async function initDatabase(): Promise<void> {
       FOREIGN KEY (session_id) REFERENCES workout_sessions (id) ON DELETE CASCADE,
       FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS user_profile (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      age INTEGER NOT NULL,
+      sex TEXT NOT NULL,
+      height_cm REAL NOT NULL,
+      body_weight_kg REAL NOT NULL,
+      experience_level TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS routines (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT,
+      is_predefined INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS routine_exercises (
+      id TEXT PRIMARY KEY NOT NULL,
+      routine_id TEXT NOT NULL,
+      exercise_id TEXT NOT NULL,
+      exercise_order INTEGER NOT NULL,
+      target_sets INTEGER NOT NULL,
+      target_rep_min INTEGER NOT NULL,
+      target_rep_max INTEGER NOT NULL,
+      rest_timer_seconds INTEGER NOT NULL DEFAULT 120,
+      FOREIGN KEY (routine_id) REFERENCES routines (id) ON DELETE CASCADE,
+      FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
+    );
   `);
 }

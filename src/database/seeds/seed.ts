@@ -38,5 +38,42 @@ export async function seedExercises(): Promise<void> {
     });
 
     console.log('Exercise catalog seeded successfully!');
+
+    // 3. Sembrar rutinas populares predefinidas
+    await seedPredefinedRoutines();
+}
+
+async function seedPredefinedRoutines(): Promise<void> {
+    const routineCount = await db.getFirstAsync<{ count: number }>(
+        'SELECT COUNT(*) as count FROM routines;'
+    );
+
+    if (routineCount && routineCount.count > 0) {
+        return;
+    }
+
+    console.log('Seeding predefined workout routines...');
+
+    await db.withTransactionAsync(async () => {
+        // Rutina 1: Push Day
+        await db.runAsync(
+            `INSERT INTO routines (id, name, description, is_predefined) VALUES (?, ?, ?, 1);`,
+            ['routine_push', 'Push Day (Empuje)', 'Enfoque hipertrofia en Pecho, Hombros y Tríceps']
+        );
+
+        // Rutina 2: Pull Day
+        await db.runAsync(
+            `INSERT INTO routines (id, name, description, is_predefined) VALUES (?, ?, ?, 1);`,
+            ['routine_pull', 'Pull Day (Tirón)', 'Enfoque hipertrofia en Espalda, Deltoides Posterior y Bíceps']
+        );
+
+        // Rutina 3: Leg Day
+        await db.runAsync(
+            `INSERT INTO routines (id, name, description, is_predefined) VALUES (?, ?, ?, 1);`,
+            ['routine_legs', 'Leg Day (Pierna)', 'Enfoque hipertrofia en Cuádriceps, Isquios y Gemelos']
+        );
+    });
+
+    console.log('Predefined workout routines seeded successfully!');
 }
 
