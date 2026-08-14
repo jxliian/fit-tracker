@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   pillBtnText: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
 
   // Streak badge
-  streakRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 5, paddingHorizontal: 12, marginBottom: 12 },
+  streakRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1, borderRadius: radii.full, paddingVertical: 5, paddingHorizontal: 12, marginTop: 8, marginBottom: 12 },
   streakTxt: { color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 13, marginLeft: 6, includeFontPadding: false },
 
   // Month navigation - icon buttons only, no text that can clip
@@ -578,9 +578,9 @@ const styles = StyleSheet.create({
   ringMiddle: { width: 66, height: 66, borderRadius: 33, borderWidth: 7, justifyContent: 'center', alignItems: 'center' },
   ringInner: { width: 46, height: 46, borderRadius: 23, borderWidth: 7 },
   metricsList: { flex: 1, marginLeft: 14 },
-  mItem: { marginBottom: 8, alignItems: 'center' },
-  mLabel: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 11, textAlign: 'center', includeFontPadding: false },
-  mVal: { fontFamily: fonts.headingBold, fontSize: 16, textAlign: 'center', includeFontPadding: false },
+  mItem: { marginBottom: 8 },
+  mLabel: { color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 11, includeFontPadding: false },
+  mVal: { fontFamily: fonts.headingBold, fontSize: 16, includeFontPadding: false },
 
   // Calendar
   weekRow: { flexDirection: 'row', alignSelf: 'stretch', marginBottom: 8 },
