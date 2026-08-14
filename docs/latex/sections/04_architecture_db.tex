@@ -1,7 +1,7 @@
-\section{Diseño de Arquitectura y Base de Datos}
+\section{Architecture and Database Design}
 
-\subsection{Arquitectura del Sistema (Clean Architecture)}
-FitTracker implementa la arquitectura limpia (\textit{Clean Architecture}) adaptada a módulos funcionales (\textit{Feature-First}).
+\subsection{System Architecture (Clean Architecture)}
+FitTracker implements Clean Architecture structured by functional feature modules (\textit{Feature-First}).
 
 \begin{figure}[h!]
 \centering
@@ -16,22 +16,24 @@ FitTracker implementa la arquitectura limpia (\textit{Clean Architecture}) adapt
     \draw [->, thick] (usecase) -- (db);
     \draw [->, thick] (db) -| (domain);
 \end{tikzpicture}
-\caption{Diagrama de Dependencias de Capas en Clean Architecture.}
+\caption{Layer Dependency Diagram in Clean Architecture.}
 \end{figure}
 
-\subsection{Modelo Entidad-Relación y Esquema SQLite}
+\subsection{Entity-Relationship Model and SQLite Schema}
 
-\begin{lstlisting}[language=SQL, caption={DDL del Esquema Relacional SQLite}]
--- Tabla de Ejercicios
+\begin{lstlisting}[language=SQL, caption={SQLite Relational DDL Schema}]
+-- Exercises Table
 CREATE TABLE exercises (
     id TEXT PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     category TEXT NOT NULL, -- Chest, Back, Legs, etc.
     exercise_type TEXT NOT NULL, -- Compound vs Isolation
+    equipment TEXT,
+    gif_url TEXT,
     created_at INTEGER NOT NULL
 );
 
--- Tabla de Sesiones de Entrenamiento
+-- Workout Sessions Table
 CREATE TABLE workout_sessions (
     id TEXT PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
@@ -39,7 +41,7 @@ CREATE TABLE workout_sessions (
     notes TEXT
 );
 
--- Tabla de Series Registradas
+-- Logged Exercise Sets Table
 CREATE TABLE exercise_sets (
     id TEXT PRIMARY KEY NOT NULL,
     session_id TEXT NOT NULL,

@@ -1,15 +1,15 @@
-## Descripción de los cambios
-<!--- Describe los cambios realizados y el motivo detras de ellos -->
+## Description of Changes
+<!--- Describe the changes made and the rationale behind them -->
 
-## Tipo de cambio
-- [ ] `feat`: Nueva funcionalidad
-- [ ] `fix`: Corrección de error
-- [ ] `docs`: Cambios en la documentación o memoria LaTeX
-- [ ] `refactor`: Refactorización de código sin cambio de comportamiento
-- [ ] `chore`: Tareas de mantenimiento o configuración
+## Change Type
+- [ ] `feat`: New feature
+- [ ] `fix`: Bug fix
+- [ ] `docs`: Documentation or LaTeX report updates
+- [ ] `refactor`: Code refactoring without behavior change
+- [ ] `chore`: Maintenance or configuration tasks
 
-## Checklist de Verificación
-- [ ] El código sigue las convenciones de estilo de ESLint/Prettier.
-- [ ] Se han añadido/actualizado los tests correspondientes.
-- [ ] La documentación en LaTeX ha sido actualizada (si aplica).
-- [ ] Se han probado las pantallas o lógica en dispositivos/emuladores.
+## Verification Checklist
+- [ ] Code complies with ESLint/Prettier style rules.
+- [ ] Corresponding tests have been added/updated.
+- [ ] LaTeX documentation has been updated (if applicable).
+- [ ] Tested on devices/emulators.

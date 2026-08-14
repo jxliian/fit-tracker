@@ -1,16 +1,16 @@
 ---
-name: Solicitud de Funcionalidad
-about: Sugiere una nueva idea o característica para FitTracker
+name: Feature Request
+about: Suggest a new idea or feature for FitTracker
 title: '[FEAT] '
 labels: 'enhancement'
 assignees: ''
 ---
 
-### Descripción del Requerimiento
-Una descripción clara y concisa de lo que se desea lograr.
+### Requirement Description
+A clear and concise description of what you want to accomplish.
 
-### Casos de Uso Afectados
-Indica qué flujos de la aplicación se ven involucrados.
+### Affected Use Cases
+Indicate which application flows are involved.
 
-### Solución Propuesta
-Describe el comportamiento o UI deseados.
+### Proposed Solution
+Describe the desired behavior or UI.

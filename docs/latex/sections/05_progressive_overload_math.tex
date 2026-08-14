@@ -1,62 +1,62 @@
-\section{Algoritmo de Sobrecarga Progresiva Automática}
+\section{Automatic Progressive Overload Algorithm}
 
-\subsection{Formulación Matemática de Estimación de 1RM}
+\subsection{Mathematical Formulations for 1RM Estimation}
 
-Para cuantificar la fuerza relativa en una serie de $r$ repeticiones ejecutadas con carga $w$ (expresada en $kg$) a una percepción de esfuerzo $RPE \in [6.0, 10.0]$, calculamos en primer lugar las repeticiones en recámara equivalentes (\textit{Repetitions in Reserve}, $RIR$):
+To quantify relative strength in a set of $r$ repetitions executed with load $w$ (expressed in $kg$) at a perceived exertion of $RPE \in [6.0, 10.0]$, we first calculate equivalent Repetitions in Reserve ($RIR$):
 \begin{equation}
     RIR = 10.0 - RPE
 \end{equation}
 
-Las repeticiones estimadas a fallo absoluto $r_{\text{max}}$ se determinan como:
+Estimated repetitions to absolute failure $r_{\text{max}}$ are calculated as:
 \begin{equation}
     r_{\text{max}} = r + RIR
 \end{equation}
 
-Utilizamos una combinación ponderada de los modelos no lineales de \textbf{Epley} y \textbf{Brzycki}:
+We use a weighted combination of classic non-linear models by \textbf{Epley} and \textbf{Brzycki}:
 
 \begin{enumerate}
-    \item \textbf{Fórmula de Epley:}
+    \item \textbf{Epley Formula:}
     \begin{equation}
         1RM_{\text{Epley}} = w \cdot \left(1 + \frac{r_{\text{max}}}{30}\right)
     \end{equation}
 
-    \item \textbf{Fórmula de Brzycki:}
+    \item \textbf{Brzycki Formula:}
     \begin{equation}
         1RM_{\text{Brzycki}} = w \cdot \frac{36}{37 - r_{\text{max}}}
     \end{equation}
 \end{enumerate}
 
-El 1RM estimado final de la serie $1RM_{\text{est}}$ se obtiene promediando ambos modelos:
+The final estimated set 1RM ($1RM_{\text{est}}$) is computed by averaging both models:
 \begin{equation}
     1RM_{\text{est}} = \frac{1RM_{\text{Epley}} + 1RM_{\text{Brzycki}}}{2}
 \end{equation}
 
-\subsection{Volumen Efectivo e Incremento Progresivo Automático}
+\subsection{Effective Volume and Automatic Progressive Overload}
 
-El \textbf{Volumen Efectivo Total} ($V_{\text{efectivo}}$) de una sesión para un ejercicio dado, considerando únicamente series efectivas ($is\_warmup = 0$), se expresa como:
+The \textbf{Total Effective Volume} ($V_{\text{effective}}$) of a session for a given exercise, considering working sets only ($is\_warmup = 0$), is expressed as:
 \begin{equation}
-    V_{\text{efectivo}} = \sum_{i=1}^{N} w_i \cdot r_i \cdot \alpha(RPE_i)
+    V_{\text{effective}} = \sum_{i=1}^{N} w_i \cdot r_i \cdot \alpha(RPE_i)
 \end{equation}
 
-donde $\alpha(RPE_i)$ es el coeficiente de ponderación de fatiga:
+where $\alpha(RPE_i)$ represents the fatigue weighting factor:
 \begin{equation}
     \alpha(RPE) = \begin{cases}
-        1.0 & \text{si } RPE \ge 8.0 \\
-        0.85 & \text{si } 7.0 \le RPE < 8.0 \\
-        0.70 & \text{si } RPE < 7.0
+        1.0 & \text{if } RPE \ge 8.0 \\
+        0.85 & \text{if } 7.0 \le RPE < 8.0 \\
+        0.70 & \text{if } RPE < 7.0
     \end{cases}
 \end{equation}
 
-\subsection{Regla de Incremento para la Siguiente Sesión}
+\subsection{Next Session Load Progression Rule}
 
-La recomendación de carga $w_{\text{next}}$ para la subsiguiente sesión se ajusta según la media de $RIR_{\text{prom}}$ de la sesión actual y el logro del límite superior del rango de repeticiones objetivo $[R_{\text{min}}, R_{\text{max}}]$:
+The recommended load $w_{\text{next}}$ for the subsequent session is adjusted based on session average $RIR_{\text{avg}}$ and target repetition range $[R_{\text{min}}, R_{\text{max}}]$ completion:
 
 \begin{equation}
     w_{\text{next}} = \begin{cases}
-        w_{\text{actual}} + \Delta w & \text{si } r_i \ge R_{\text{max}} \;\forall i \quad \text{y} \quad RIR_{\text{prom}} \ge 1.5 \\
-        w_{\text{actual}} & \text{si } R_{\text{min}} \le r_i < R_{\text{max}} \quad \text{o} \quad 0.5 \le RIR_{\text{prom}} < 1.5 \\
-        w_{\text{actual}} \cdot (1 - \beta) & \text{si } RIR_{\text{prom}} < 0.5 \quad \text{(deload o fatiga excesiva)}
+        w_{\text{current}} + \Delta w & \text{if } r_i \ge R_{\text{max}} \;\forall i \quad \text{and} \quad RIR_{\text{avg}} \ge 1.5 \\
+        w_{\text{current}} & \text{if } R_{\text{min}} \le r_i < R_{\text{max}} \quad \text{or} \quad 0.5 \le RIR_{\text{avg}} < 1.5 \\
+        w_{\text{current}} \cdot (1 - \beta) & \text{if } RIR_{\text{avg}} < 0.5 \quad \text{(deload or excessive fatigue)}
     \end{cases}
 \end{equation}
 
-donde $\Delta w$ es el incremento estándar ($2.5\,kg$ para ejercicios compuestos, $1.25\,kg$ para ejercicios de aislamiento) y $\beta \in [0.05, 0.10]$ es el factor de descarga por fatiga acumulada.
+where $\Delta w$ is the standard weight increment ($2.5\,kg$ for compound lifts, $1.25\,kg$ for isolation exercises) and $\beta \in [0.05, 0.10]$ is the fatigue deload factor.

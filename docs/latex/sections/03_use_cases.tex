@@ -1,34 +1,34 @@
-\section{Casos de Uso UML}
+\section{UML Use Cases}
 
-\subsection{Actores del Sistema}
+\subsection{System Actors}
 \begin{itemize}
-    \item \textbf{Atleta / Usuario Final:} Persona que ejecuta la rutina de entrenamiento, registra series y consulta las métricas de sobrecarga.
+    \item \textbf{Athlete / End User:} Individual executing workout routines, logging sets, and monitoring overload metrics.
 \end{itemize}
 
-\subsection{Especificación Detallada de Caso de Uso CU-01}
+\subsection{Detailed Use Case Specification UC-01}
 
 \begin{table}[h!]
 \centering
-\caption{Caso de Uso CU-01: Registrar Serie de Entrenamiento}
+\caption{Use Case UC-01: Log Workout Set and Compute Progression}
 \begin{tabularx}{\textwidth}{l X}
 \toprule
-\textbf{Caso de Uso} & \textbf{CU-01: Registrar Serie de Entrenamiento y Calcular Progresión} \\
+\textbf{Use Case} & \textbf{UC-01: Log Workout Set and Compute Automatic Progression} \\
 \midrule
-\textbf{Actor Principal} & Atleta / Usuario Final \\
-\textbf{Precondiciones} & Existe al menos un ejercicio en el catálogo y una rutina activa. \\
-\textbf{Flujo Principal} & 
-1. El usuario selecciona el ejercicio actual en la sesión activa.\newline
-2. El sistema muestra la sugerencia de peso y reps calculada previamente.\newline
-3. El usuario ingresa la carga efectuada ($kg$), reps ejecutadas y RPE ($6.0 - 10.0$).\newline
-4. El usuario presiona el botón "Completar Serie".\newline
-5. El sistema persiste la serie en SQLite, inicia el cronómetro de descanso e incrementa el indicador de series.\newline
-6. El motor de sobrecarga actualiza el 1RM estimado de la sesión. \\
-\textbf{Flujo Alternativo} & 
-\textit{3a. El usuario marca la serie como "Serie de Calentamiento":}\newline
-- El sistema guarda la serie pero la excluye de los cálculos de volumen efectivo y 1RM récord.\newline
-\textit{3b. El usuario indica fallo muscular (RPE 10 / RIR 0):}\newline
-- El sistema ajusta el factor de fatiga acumulada para el cálculo de la siguiente sesión. \\
-\textbf{Postcondiciones} & Serie guardada en SQLite; el temporizador de descanso emite notificación sonora/vibración. \\
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & At least one exercise exists in the catalog and an active workout session is started. \\
+\textbf{Main Flow} & 
+1. The user selects the current exercise in the active session.\newline
+2. The system displays previously calculated target weight and reps.\newline
+3. The user inputs performed load ($kg$), completed reps, and RPE ($6.0 - 10.0$).\newline
+4. The user taps "Complete Set".\newline
+5. The system persists the set to SQLite, starts the rest timer, and increments set counter.\newline
+6. The overload engine updates the session's estimated 1RM. \\
+\textbf{Alternative Flow} & 
+\textit{3a. User marks set as "Warmup Set":}\newline
+- System saves the set but excludes it from effective volume and record 1RM calculations.\newline
+\textit{3b. User indicates muscle failure (RPE 10 / RIR 0):}\newline
+- System adjusts fatigue accumulation factor for the next session calculation. \\
+\textbf{Postconditions} & Set persisted in SQLite; rest timer triggers audio/vibration notification upon expiration. \\
 \bottomrule
 \end{tabularx}
 \end{table}

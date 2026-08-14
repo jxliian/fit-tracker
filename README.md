@@ -1,42 +1,41 @@
-# FitTracker 
+# FitTracker 🏋️‍♂️📊
 
-Aplicación móvil local-first para el seguimiento de entrenamiento con **Sobrecarga Progresiva Automática**, nutrición y métricas corporales.
+Local-first mobile application for workout tracking with **Automatic Progressive Overload**, nutrition, and body metrics.
 
-## Arquitectura del Proyecto
+## Project Architecture
 
-FitTracker utiliza **Clean Architecture** estructurada por *Features*:
+FitTracker uses **Clean Architecture** structured by *Features*:
 
-- **`src/domain/`**: Entidades y objetos de valor independientes del framework.
-- **`src/database/`**: Capa de persistencia local-first utilizando SQLite.
-- **`src/features/`**: Módulos aislados (`workout`, `progression`, `nutrition`, `metrics`).
-- **`docs/latex/`**: Memoria técnica y académica del proyecto formalmente redactada en LaTeX.
+- **`src/domain/`**: Framework-independent domain entities and value objects.
+- **`src/database/`**: Local-first persistence layer using SQLite.
+- **`src/features/`**: Isolated feature modules (`workout`, `progression`, `nutrition`, `metrics`).
+- **`docs/latex/`**: Technical and academic report formally written in LaTeX.
 
-## Comandos Rápidos
+## Quick Start
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Iniciar servidor de desarrollo Expo
+# Start Expo development server
 npm start
 
-# Validar tipos de TypeScript
+# Validate TypeScript types
 npm run type-check
 
-# Ejecutar linters
+# Run linters
 npm run lint
 ```
 
-## Memoria Técnica (LaTeX)
+## Technical Documentation (LaTeX)
 
-Para compilar la documentación académica formal:
+To compile the formal academic documentation:
 
 ```bash
 cd docs/latex
 pdflatex main.tex
 ```
 
-## Agradecimientos y Créditos
+## Acknowledgments & Credits
 
-Expresamos nuestro agradecimiento a **Hasan Yıldırım** por su repositorio open-source [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), el cual provee la base de datos de ejercicios, metadatos e imágenes que nutren el catálogo local offline de FitTracker.
-
+We formally acknowledge **Hasan Yıldırım** for his open-source repository [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), which provides the dataset of exercises, metadata, and media powering the offline local catalog of FitTracker.

@@ -1,40 +1,40 @@
-\section{Especificación de Requerimientos de Software (SRS)}
+\section{Software Requirements Specification (SRS)}
 
-La presente especificación sigue la adaptación del estándar IEEE 830 para sistemas móviles offline-first.
+This specification adapts the IEEE 830 standard for offline-first mobile systems.
 
-\subsection{Requerimientos Funcionales (RF)}
+\subsection{Functional Requirements (FR)}
 
 \begin{table}[h!]
 \centering
-\caption{Requerimientos Funcionales del Sistema}
+\caption{System Functional Requirements}
 \begin{tabularx}{\textwidth}{l p{4.5cm} X}
 \toprule
-\textbf{Código} & \textbf{Nombre} & \textbf{Descripción} \\
+\textbf{Code} & \textbf{Name} & \textbf{Description} \\
 \midrule
-\textbf{RF-01} & Gestión de Catálogo de Ejercicios & El sistema permitirá crear, modificar y categorizar ejercicios por grupo muscular principal y secundario. \\
-\textbf{RF-02} & Configuración de Rutinas & El sistema permitirá definir rutinas compuestas por bloques de ejercicios, rango de reps objetivo y RPE deseado. \\
-\textbf{RF-03} & Registro de Series en Vivo & Permite registrar peso ($kg$), repeticiones ($r$) y RPE/RIR ($R$) en tiempo real con temporizador de descanso automatizado. \\
-\textbf{RF-04} & Cálculo de Sobrecarga Autómata & El sistema calculará al finalizar la rutina las sugerencias de carga/reps para la siguiente sesión del ejercicio. \\
-\textbf{RF-05} & Estimación de 1RM & El sistema calculará el 1RM histórico y actual por sesión mediante fórmulas validadas. \\
-\textbf{RF-06} & Registro Nutricional Offline & Registro diario de macronutrientes (proteínas, carbohidratos, grasas) y calorías totales sin requerir API externa. \\
-\textbf{RF-07} & Métricas Corporales & Registro de peso corporal, porcentaje de grasa y circunferencia de pliegues. \\
+\textbf{FR-01} & Exercise Catalog Management & The system shall allow creating, modifying, and categorizing exercises by primary and secondary muscle groups. \\
+\textbf{FR-02} & Routine Configuration & The system shall allow defining routines composed of exercise blocks, target rep ranges, and desired RPE. \\
+\textbf{FR-03} & Live Set Logging & Allows logging weight ($kg$), reps ($r$), and RPE/RIR ($R$) in real-time with an automated rest timer. \\
+\textbf{FR-04} & Automated Overload Calculation & The system shall compute weight/rep recommendations for the next session upon workout completion. \\
+\textbf{FR-05} & 1RM Estimation & The system shall compute current and historical estimated 1RM per session using validated mathematical models. \\
+\textbf{FR-06} & Offline Nutrition Tracking & Daily logging of macronutrients (protein, carbs, fats) and total calories without requiring external APIs. \\
+\textbf{FR-07} & Body Metrics Tracking & Tracking body weight, body fat percentage, and girth measurements. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\subsection{Requerimientos No Funcionales (RNF)}
+\subsection{Non-Functional Requirements (NFR)}
 
 \begin{table}[h!]
 \centering
-\caption{Requerimientos No Funcionales del Sistema}
+\caption{System Non-Functional Requirements}
 \begin{tabularx}{\textwidth}{l p{4.5cm} X}
 \toprule
-\textbf{Código} & \textbf{Nombre} & \textbf{Métrica / Criterio de Aceptación} \\
+\textbf{Code} & \textbf{Name} & \textbf{Metric / Acceptance Criteria} \\
 \midrule
-\textbf{RNF-01} & Operatividad Offline & El 100\% de las operaciones de lectura y escritura deben ejecutarse localmente sin conexión a red. \\
-\textbf{RNF-02} & Rendimiento de Escritura & La inserción de una serie completada en la DB debe tomar menos de $50\,ms$. \\
-\textbf{RNF-03} & Portabilidad & El código base en React Native (TypeScript) debe ser portable entre Android y iOS sin cambios de lógica. \\
-\textbf{RNF-04} & Integridad de Datos & La base de datos SQLite debe utilizar transacciones ACID para evitar corrupción ante cierres inesperados. \\
+\textbf{NFR-01} & Offline Operability & 100\% of read and write operations must execute locally without an internet connection. \\
+\textbf{NFR-02} & Write Performance & Inserting a completed set into SQLite must execute in under $50\,ms$. \\
+\textbf{NFR-03} & Portability & The React Native (TypeScript) codebase must be portable across Android and iOS without logic modifications. \\
+\textbf{NFR-04} & Data Integrity & SQLite database must use ACID transactions to prevent data corruption during unexpected app closures. \\
 \bottomrule
 \end{tabularx}
 \end{table}

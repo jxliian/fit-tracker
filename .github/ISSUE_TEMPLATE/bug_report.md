@@ -1,22 +1,22 @@
 ---
-name: Reporte de Error
-about: Informa sobre un comportamiento inesperado o bug
+name: Bug Report
+about: Report an unexpected behavior or bug
 title: '[BUG] '
 labels: 'bug'
 assignees: ''
 ---
 
-### Descripción del Bug
-Una descripción clara del problema.
+### Bug Description
+A clear description of the issue.
 
-### Pasos para Reproducir
-1. Ir a '...'
-2. Hacer clic en '....'
-3. Ver el error
+### Steps to Reproduce
+1. Go to '...'
+2. Click on '....'
+3. See error
 
-### Comportamiento Esperado
-Lo que se esperaba que sucediera.
+### Expected Behavior
+What was expected to happen.
 
-### Entorno
+### Environment
 - OS: [Android / iOS]
-- Versión de la app:
+- App Version:

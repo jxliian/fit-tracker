@@ -1,27 +1,26 @@
-\section{Introducción y Objetivos}
+\section{Introduction and Objectives}
 
-\subsection{Contexto y Justificación}
-En la disciplina del entrenamiento de fuerza y la hipertrofia muscular, el principio de \textbf{sobrecarga progresiva} constituye el pilar fundamental para desencadenar adaptaciones fisiológicas a largo plazo. No obstante, la inmensa mayoría de las aplicaciones móviles del mercado actual sufren de dos deficiencias críticas:
+\subsection{Context and Rationale}
+In resistance training and muscle hypertrophy, the principle of \textbf{progressive overload} serves as the core foundation for driving long-term physiological adaptations. However, the vast majority of mobile applications on the market currently suffer from two critical limitations:
 \begin{enumerate}
-    \item Dependencia estricta de conectividad a Internet y servidores en la nube (\textit{Cloud-First}), lo que degrada la experiencia de usuario en gimnasios con baja cobertura o zonas subterráneas.
-    \item Falta de algoritmos deterministas de sobrecarga progresiva automática basados en variables fisiológicas y métricas cuantitativas como el 1RM estimado y la escala RPE/RIR (\textit{Rating of Perceived Exertion} / \textit{Repetitions in Reserve}).
+    \item Strict reliance on Internet connectivity and cloud infrastructure (\textit{Cloud-First}), which degrades the user experience in gyms with weak coverage or underground facilities.
+    \item Lack of deterministic automatic progressive overload algorithms based on physiological variables and quantitative metrics such as estimated 1RM and the RPE/RIR scale (\textit{Rating of Perceived Exertion} / \textit{Repetitions in Reserve}).
 \end{enumerate}
 
-\textbf{FitTracker} nace como un sistema móvil orientado a solucionar ambas limitaciones mediante una arquitectura \textbf{Local-First} impulsada por una base de datos SQLite integrada y un motor algorítmico adaptativo de progresión.
+\textbf{FitTracker} is designed to solve both limitations through a \textbf{Local-First} mobile architecture powered by an embedded SQLite engine and an adaptive algorithmic progression model.
 
-\subsection{Objetivos del Sistema}
+\subsection{System Objectives}
 
-\subsubsection{Objetivo General}
-Diseñar, construir e implementar una aplicación móvil multiplataforma (React Native + Expo en TypeScript) caracterizada por un funcionamiento 100\% offline y una arquitectura limpia (\textit{Clean Architecture}), capaz de calcular e incrementar automáticamente la carga y volumen de trabajo de los atletas según su rendimiento histórico.
+\subsubsection{General Objective}
+Design, architect, and implement a cross-platform mobile application (React Native + Expo in TypeScript) characterized by 100\% offline operation and Clean Architecture, capable of calculating and automatically increasing workload and volume for athletes based on historical performance.
 
-\subsubsection{Objetivos Específicos}
+\subsubsection{Specific Objectives}
 \begin{itemize}
-    \item Implementar una capa de persistencia ultrarrápida local mediante SQLite, garantizando tolerancia a fallos de red y cero latencia en el registro de series.
-    \item Desarrollar el módulo matemático de estimación de 1RM ($1Repetition Maximum$) promediando los modelos clásicos de Epley y Brzycki con corrección por RIR.
-    \item Proveer un sistema de gestión modular separado estrictamente en capas de Dominio, Casos de Uso, Repositorios y UI.
-    \item Proporcionar una memoria técnica formal para auditoría e investigación académica.
+    \item Implement an ultra-fast local persistence layer using SQLite, ensuring zero network latency and fault tolerance.
+    \item Develop the mathematical 1RM ($1Repetition Maximum$) estimation module by averaging classic Epley and Brzycki models with RIR correction.
+    \item Provide a modular system architecture strictly separated into Domain, Use Cases, Repositories, and UI layers.
+    \item Deliver formal academic technical documentation for engineering audit and research.
 \end{itemize}
 
-\subsection{Agradecimientos y Fuentes de Datos}
-Agradecemos formalmente al desarrollador \textbf{Hasan Yıldırım} por la creación y mantenimiento del repositorio \textit{Open Source} \texttt{exercises-dataset}. Su dataset estructurado en JSON proporciona la base de datos completa de ejercicios, metadatos y elementos multimedia que nutren el sistema de siembra (\textit{seeding}) local offline en nuestra arquitectura de persistencia.
-
+\subsection{Acknowledgments and Data Sources}
+We formally acknowledge developer \textbf{Hasan Yıldırım} for creating and maintaining the open-source repository \texttt{exercises-dataset}. His structured JSON dataset provides the complete exercise database, metadata, and media elements powering the offline local seeding system in our persistence layer.
