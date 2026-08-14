@@ -41,7 +41,7 @@ import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
 import { calculateStreak } from '@domain/streak';
-import { ActiveWorkoutModal } from '@features/workout/ui/components/ActiveWorkoutModal';
+import { ActiveWorkoutModal, LiveWorkoutStatus } from '@features/workout/ui/components/ActiveWorkoutModal';
 import { WorkoutHistoryModal } from '@features/workout/ui/components/WorkoutHistoryModal';
 import { ProgressionChart } from '@features/progression/ui/components/ProgressionChart';
 
@@ -493,6 +493,16 @@ const SwipeableModalSheet: React.FC<SwipeableModalSheetProps> = ({ visible, onCl
   );
 };
 
+const formatTimer = (totalSecs: number) => {
+  const hrs = Math.floor(totalSecs / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+  const secs = totalSecs % 60;
+  if (hrs > 0) {
+    return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     ...Ionicons.font,
@@ -515,6 +525,15 @@ export default function App() {
   const [isWorkoutActive, setIsWorkoutActive] = useState<boolean>(false);
   const [activeWorkoutTitle, setActiveWorkoutTitle] = useState<string>('Entrenamiento Libre');
   const [activeWorkoutInitialExercises, setActiveWorkoutInitialExercises] = useState<{ exerciseId: string; exerciseName: string; category: string }[]>([]);
+  const [liveWorkoutStatus, setLiveWorkoutStatus] = useState<LiveWorkoutStatus>({
+    elapsedSeconds: 0,
+    isRestActive: false,
+    restSecondsLeft: 0,
+    currentExerciseName: '',
+    currentSetIndex: 0,
+    totalSetsInExercise: 0,
+    totalCompletedSets: 0
+  });
 
   // Estado para Rutinas desde SQLite
   const [routinesList, setRoutinesList] = useState<{ id: string; name: string; description: string }[]>([]);
@@ -1205,29 +1224,52 @@ export default function App() {
                   backgroundColor: 'rgba(0, 102, 204, 0.15)',
                   borderColor: colors.primary,
                   borderWidth: 1.5,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingVertical: 14,
-                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  paddingHorizontal: 14,
                   marginBottom: 12
                 }
               ]}
               activeOpacity={0.85}
               onPress={() => setShowActiveWorkout(true)}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
-                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#FF3B30', marginRight: 10 }} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 14, letterSpacing: 0.5 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF3B30', marginRight: 8 }} />
+                  <Text style={{ color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 13, letterSpacing: 0.5 }}>
                     {activeLang === 'es' ? 'ENTRENAMIENTO EN CURSO' : 'WORKOUT IN PROGRESS'}
                   </Text>
-                  <Text style={{ color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 12, marginTop: 2 }}>
-                    {activeWorkoutTitle} · {activeLang === 'es' ? 'Toca para continuar' : 'Tap to resume'}
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                  <Ionicons name="time-outline" size={12} color={colors.primary} style={{ marginRight: 4 }} />
+                  <Text style={{ color: colors.primary, fontFamily: fonts.bodyBold, fontSize: 12 }}>
+                    {formatTimer(liveWorkoutStatus.elapsedSeconds)}
                   </Text>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={{ color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 13 }} numberOfLines={1}>
+                    {liveWorkoutStatus.currentExerciseName || activeWorkoutTitle}
+                  </Text>
+                  <Text style={{ color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 11, marginTop: 1 }}>
+                    {liveWorkoutStatus.totalSetsInExercise > 0
+                      ? `${activeLang === 'es' ? 'Serie' : 'Set'} ${Math.min(liveWorkoutStatus.currentSetIndex, liveWorkoutStatus.totalSetsInExercise)}/${liveWorkoutStatus.totalSetsInExercise}`
+                      : activeLang === 'es' ? 'Listas para empezar' : 'Ready'}
+                  </Text>
+                </View>
+
+                {liveWorkoutStatus.isRestActive ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 210, 255, 0.18)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, borderWidth: 1, borderColor: colors.cyan }}>
+                    <Ionicons name="timer-outline" size={14} color={colors.cyan} style={{ marginRight: 4 }} />
+                    <Text style={{ color: colors.cyan, fontFamily: fonts.bodyBold, fontSize: 12 }}>
+                      {activeLang === 'es' ? 'Descanso' : 'Rest'}: {formatTimer(liveWorkoutStatus.restSecondsLeft)}
+                    </Text>
+                  </View>
+                ) : (
+                  <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                )}
+              </View>
             </TouchableOpacity>
           )}
           <View style={styles.widget}>
@@ -1581,6 +1623,7 @@ export default function App() {
           setIsWorkoutActive(false);
           loadDatabaseData();
         }}
+        onStatusChange={setLiveWorkoutStatus}
       />
 
       {/* Modal Crear Rutina */}

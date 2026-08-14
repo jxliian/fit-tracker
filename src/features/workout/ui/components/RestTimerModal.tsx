@@ -6,6 +6,7 @@ export interface RestTimerModalProps {
   visible: boolean;
   initialSeconds: number;
   onClose: () => void;
+  onTick?: (secondsLeft: number) => void;
   lang?: 'es' | 'en';
 }
 
@@ -13,6 +14,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   visible,
   initialSeconds,
   onClose,
+  onTick,
   lang = 'es'
 }) => {
   const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
@@ -21,6 +23,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   useEffect(() => {
     setSecondsLeft(initialSeconds);
     setIsRunning(true);
+    onTick?.(initialSeconds);
   }, [initialSeconds, visible]);
 
   useEffect(() => {
@@ -28,11 +31,16 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
     if (visible && isRunning && secondsLeft > 0) {
       interval = setInterval(() => {
-        setSecondsLeft((prev) => prev - 1);
+        setSecondsLeft((prev) => {
+          const next = prev - 1;
+          onTick?.(next);
+          return next;
+        });
       }, 1000);
     } else if (secondsLeft === 0 && visible) {
       // Al llegar a 0, hacer vibrar el teléfono
       Vibration.vibrate([0, 500, 200, 500]);
+      onTick?.(0);
     }
 
     return () => {

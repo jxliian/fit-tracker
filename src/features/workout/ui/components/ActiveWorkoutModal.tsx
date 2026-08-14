@@ -35,12 +35,23 @@ export interface ExerciseItemInWorkout {
   }[];
 }
 
+export interface LiveWorkoutStatus {
+  elapsedSeconds: number;
+  isRestActive: boolean;
+  restSecondsLeft: number;
+  currentExerciseName: string;
+  currentSetIndex: number;
+  totalSetsInExercise: number;
+  totalCompletedSets: number;
+}
+
 export interface ActiveWorkoutModalProps {
   visible: boolean;
   workoutName: string;
   initialExercises?: { exerciseId: string; exerciseName: string; category: string }[];
   onClose: () => void;
   onFinish: () => void;
+  onStatusChange?: (status: LiveWorkoutStatus) => void;
 }
 
 export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
@@ -48,12 +59,15 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
   workoutName,
   initialExercises = [],
   onClose,
-  onFinish
+  onFinish,
+  onStatusChange
 }) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [exercisesInWorkout, setExercisesInWorkout] = useState<ExerciseItemInWorkout[]>([]);
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [restDuration, setRestDuration] = useState(90);
+  const [currentRestSecondsLeft, setCurrentRestSecondsLeft] = useState<number>(0);
+  const [reorderHighlightIndex, setReorderHighlightIndex] = useState<number | null>(null);
 
   // Selector de ejercicio adicional
   const [showExercisePicker, setShowExercisePicker] = useState(false);
@@ -264,6 +278,60 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
     );
   };
 
+  const handleMoveExercise = (fromIndex: number, direction: -1 | 1) => {
+    const toIndex = fromIndex + direction;
+    if (toIndex < 0 || toIndex >= exercisesInWorkout.length) return;
+
+    setExercisesInWorkout((prev) => {
+      const updated = [...prev];
+      const temp = updated[fromIndex];
+      updated[fromIndex] = updated[toIndex];
+      updated[toIndex] = temp;
+      return updated;
+    });
+
+    setReorderHighlightIndex(toIndex);
+  };
+
+  // Informar del estado en directo al componente padre (App.tsx / Notificación)
+  useEffect(() => {
+    if (!onStatusChange) return;
+
+    let currentExName = workoutName;
+    let currentSetIdx = 1;
+    let totalSetsInEx = 0;
+    let totalCompleted = 0;
+
+    for (let i = 0; i < exercisesInWorkout.length; i++) {
+      const ex = exercisesInWorkout[i];
+      const completedInEx = ex.sets.filter((s) => s.isCompleted).length;
+      totalCompleted += completedInEx;
+
+      if (completedInEx < ex.sets.length && currentExName === workoutName) {
+        currentExName = ex.exerciseName;
+        currentSetIdx = completedInEx + 1;
+        totalSetsInEx = ex.sets.length;
+      }
+    }
+
+    if (currentExName === workoutName && exercisesInWorkout.length > 0) {
+      const lastEx = exercisesInWorkout[exercisesInWorkout.length - 1];
+      currentExName = lastEx.exerciseName;
+      currentSetIdx = lastEx.sets.length;
+      totalSetsInEx = lastEx.sets.length;
+    }
+
+    onStatusChange({
+      elapsedSeconds,
+      isRestActive: showRestTimer && currentRestSecondsLeft > 0,
+      restSecondsLeft: currentRestSecondsLeft,
+      currentExerciseName: currentExName,
+      currentSetIndex: currentSetIdx,
+      totalSetsInExercise: totalSetsInEx,
+      totalCompletedSets: totalCompleted
+    });
+  }, [elapsedSeconds, showRestTimer, currentRestSecondsLeft, exercisesInWorkout, workoutName]);
+
   const handleDeleteExercise = (exerciseIndex: number) => {
     setExercisesInWorkout((prev) => prev.filter((_, exIdx) => exIdx !== exerciseIndex));
   };
@@ -412,17 +480,66 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
 
         {/* Lista de Ejercicios y Series */}
         <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
-          {exercisesInWorkout.map((ex, exIdx) => (
-            <View key={`ex_${ex.exerciseId}_${exIdx}`} style={styles.exerciseCard}>
-              <View style={styles.exerciseHeader}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.exerciseTitle}>{ex.exerciseName}</Text>
-                  <Text style={styles.exerciseCategory}>{ex.category.toUpperCase()}</Text>
-                </View>
-                <TouchableOpacity onPress={() => handleDeleteExercise(exIdx)} style={{ padding: 6 }}>
-                  <Ionicons name="trash-outline" size={18} color="#FF453A" />
+          {exercisesInWorkout.map((ex, exIdx) => {
+            const isHighlighted = reorderHighlightIndex === exIdx;
+            return (
+              <View
+                key={`ex_${ex.exerciseId}_${exIdx}`}
+                style={[
+                  styles.exerciseCard,
+                  isHighlighted && {
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    shadowColor: '#FFFFFF',
+                    shadowRadius: 10,
+                    shadowOpacity: 0.4
+                  }
+                ]}
+              >
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onLongPress={() => setReorderHighlightIndex(isHighlighted ? null : exIdx)}
+                  style={styles.exerciseHeader}
+                >
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={[styles.exerciseTitle, isHighlighted && { color: '#FFFFFF', textDecorationLine: 'underline' }]}>
+                        {ex.exerciseName}
+                      </Text>
+                      {isHighlighted && (
+                        <View style={{ backgroundColor: '#FFFFFF', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 }}>
+                          <Text style={{ color: '#000000', fontFamily: fonts.bodyBold, fontSize: 10 }}>REORGANIZANDO</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.exerciseCategory}>
+                      {ex.category.toUpperCase()} · {isHighlighted ? 'Usa flechas para mover' : 'Mantén presionado para reordenar'}
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    {exIdx > 0 && (
+                      <TouchableOpacity
+                        onPress={() => handleMoveExercise(exIdx, -1)}
+                        style={{ padding: 6, backgroundColor: colors.surfaceLight, borderRadius: 8 }}
+                      >
+                        <Ionicons name="arrow-up" size={16} color={colors.primary} />
+                      </TouchableOpacity>
+                    )}
+                    {exIdx < exercisesInWorkout.length - 1 && (
+                      <TouchableOpacity
+                        onPress={() => handleMoveExercise(exIdx, 1)}
+                        style={{ padding: 6, backgroundColor: colors.surfaceLight, borderRadius: 8 }}
+                      >
+                        <Ionicons name="arrow-down" size={16} color={colors.primary} />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={() => handleDeleteExercise(exIdx)} style={{ padding: 6 }}>
+                      <Ionicons name="trash-outline" size={18} color="#FF453A" />
+                    </TouchableOpacity>
+                  </View>
                 </TouchableOpacity>
-              </View>
 
               {/* Banner de Sobrecarga Progresiva */}
               {ex.recommendation && (
@@ -519,7 +636,8 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                 <Text style={styles.addSetBtnText}>Añadir Serie</Text>
               </TouchableOpacity>
             </View>
-          ))}
+          );
+        })}
 
           {/* Botón para Añadir Otro Ejercicio al Entrenamiento */}
           <TouchableOpacity style={styles.addExerciseBtn} onPress={handleOpenPicker}>
@@ -533,6 +651,7 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
           visible={showRestTimer}
           initialSeconds={restDuration}
           onClose={() => setShowRestTimer(false)}
+          onTick={(sec) => setCurrentRestSecondsLeft(sec)}
         />
 
         {/* Modal para Buscar y Seleccionar Ejercicio */}
