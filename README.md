@@ -1,4 +1,4 @@
-# FitTracker 🏋️‍♂️📊
+# FitTracker 
 
 Aplicación móvil local-first para el seguimiento de entrenamiento con **Sobrecarga Progresiva Automática**, nutrición y métricas corporales.
 
@@ -35,3 +35,8 @@ Para compilar la documentación académica formal:
 cd docs/latex
 pdflatex main.tex
 ```
+
+## Agradecimientos y Créditos
+
+Expresamos nuestro agradecimiento a **Hasan Yıldırım** por su repositorio open-source [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset), el cual provee la base de datos de ejercicios, metadatos e imágenes que nutren el catálogo local offline de FitTracker.
+
