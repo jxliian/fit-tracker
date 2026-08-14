@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutChangeEvent } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@core/theme/colors';
 
 export interface DataPoint {
@@ -17,9 +18,11 @@ export interface ProgressionChartProps {
   unit: string;
   data: DataPoint[];
   color?: string;
+  chartType?: 'line' | 'bar';
   chips?: ChartChip[];
   activeChipId?: string;
   onSelectChip?: (id: string) => void;
+  onRemove?: () => void;
 }
 
 export const ProgressionChart: React.FC<ProgressionChartProps> = ({
@@ -27,9 +30,11 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
   unit,
   data,
   color = colors.primary,
+  chartType = 'line',
   chips,
   activeChipId,
-  onSelectChip
+  onSelectChip,
+  onRemove
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(300);
   const chartHeight = 140;
@@ -45,29 +50,43 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
 
   const hasData = data && data.length > 0;
   const maxValue = hasData ? Math.max(...data.map((d) => d.value), 1) : 1;
-  const minValue = hasData ? Math.min(...data.map((d) => d.value)) : 0;
 
-  // Calcular coordenadas de cada punto en el canvas 2D
+  // Calcular coordenadas de cada punto
   const points = hasData
     ? data.map((d, i) => {
         const x = data.length > 1 ? paddingH + (i * (chartWidth - paddingH * 2)) / (data.length - 1) : chartWidth / 2;
         const range = maxValue > 0 ? maxValue : 1;
-        const normalized = d.value / range;
+        const normalized = Math.max(0.05, d.value / range);
         const y = chartHeight - paddingV - normalized * (chartHeight - paddingV * 2);
-        return { x, y, value: d.value, label: d.label };
+        return { x, y, normalized, value: d.value, label: d.label };
       })
     : [];
 
   return (
     <View style={styles.container} onLayout={handleLayout}>
       <View style={styles.headerRow}>
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons
+            name={chartType === 'bar' ? 'bar-chart' : 'stats-chart'}
+            size={16}
+            color={color}
+            style={{ marginRight: 6 }}
+          />
+          <Text style={styles.title} numberOfLines={1}>
+            {title}
+          </Text>
+        </View>
+
         {hasData && (
-          <Text style={[styles.unitText, { color }]}>
+          <Text style={[styles.unitText, { color, marginRight: onRemove ? 8 : 0 }]}>
             Máx: {maxValue} {unit}
           </Text>
+        )}
+
+        {onRemove && (
+          <TouchableOpacity onPress={onRemove} style={styles.removeBtn}>
+            <Ionicons name="trash-outline" size={16} color="#FF453A" />
+          </TouchableOpacity>
         )}
       </View>
 
@@ -97,10 +116,37 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
       )}
 
       {!hasData ? (
-        <Text style={styles.emptyText}>Sin datos registrados para este ejercicio.</Text>
+        <Text style={styles.emptyText}>Sin datos registrados aún.</Text>
+      ) : chartType === 'bar' ? (
+        /* RENDERIZADO EN MODO BARRAS */
+        <View style={{ width: chartWidth, height: chartHeight, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around', paddingTop: 20 }}>
+          {points.map((pt, idx) => {
+            const barHeight = Math.max(12, pt.normalized * (chartHeight - 44));
+            const isMax = pt.value === maxValue;
+            return (
+              <View key={`bar_${idx}`} style={{ alignItems: 'center', flex: 1 }}>
+                <Text style={styles.valText}>{pt.value > 0 ? pt.value : ''}</Text>
+                <View
+                  style={{
+                    width: Math.min(28, (chartWidth / (data.length || 1)) * 0.5),
+                    height: barHeight,
+                    backgroundColor: isMax ? colors.cyan : color,
+                    borderRadius: 6,
+                    marginVertical: 4,
+                    borderWidth: isMax ? 1 : 0,
+                    borderColor: '#FFFFFF'
+                  }}
+                />
+                <Text style={styles.labelSub} numberOfLines={1}>
+                  {pt.label}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
       ) : (
+        /* RENDERIZADO EN MODO LÍNEA */
         <View style={{ width: chartWidth, height: chartHeight, position: 'relative' }}>
-          {/* Segmentos de Líneas puras en React Native */}
           {points.map((pt, idx) => {
             if (idx === points.length - 1) return null;
             const next = points[idx + 1];
@@ -128,13 +174,11 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
             );
           })}
 
-          {/* Puntos y valores */}
           {points.map((pt, idx) => {
             const isMax = pt.value === maxValue;
             const dotSize = isMax ? 12 : 9;
             return (
               <React.Fragment key={`node_${idx}`}>
-                {/* Punto circular */}
                 <View
                   style={{
                     position: 'absolute',
@@ -150,7 +194,6 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
                   }}
                 />
 
-                {/* Valor numérico encima */}
                 <View
                   style={{
                     position: 'absolute',
@@ -164,7 +207,6 @@ export const ProgressionChart: React.FC<ProgressionChartProps> = ({
                   <Text style={styles.valText}>{pt.value > 0 ? pt.value : ''}</Text>
                 </View>
 
-                {/* Fecha debajo */}
                 <View
                   style={{
                     position: 'absolute',
@@ -205,15 +247,17 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   title: {
-    flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: colors.textPrimary,
-    marginRight: 8
+    color: colors.textPrimary
   },
   unitText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700'
+  },
+  removeBtn: {
+    padding: 4,
+    marginLeft: 4
   },
   chipScrollView: {
     marginBottom: 12
@@ -253,7 +297,8 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 13,
     color: colors.textMuted,
-    marginTop: 8,
+    marginTop: 12,
+    marginBottom: 12,
     textAlign: 'center'
   }
 });

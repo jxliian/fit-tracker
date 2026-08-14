@@ -251,6 +251,23 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
     });
   };
 
+  const handleDeleteSet = (exerciseIndex: number, setIndex: number) => {
+    setExercisesInWorkout((prev) =>
+      prev.map((ex, exIdx) => {
+        if (exIdx !== exerciseIndex) return ex;
+        const updatedSets = ex.sets.filter((_, sIdx) => sIdx !== setIndex).map((s, idx) => ({
+          ...s,
+          setOrder: idx + 1
+        }));
+        return { ...ex, sets: updatedSets };
+      })
+    );
+  };
+
+  const handleDeleteExercise = (exerciseIndex: number) => {
+    setExercisesInWorkout((prev) => prev.filter((_, exIdx) => exIdx !== exerciseIndex));
+  };
+
   const handleUpdateSet = (
     exerciseIndex: number,
     setIndex: number,
@@ -394,6 +411,9 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                   <Text style={styles.exerciseTitle}>{ex.exerciseName}</Text>
                   <Text style={styles.exerciseCategory}>{ex.category.toUpperCase()}</Text>
                 </View>
+                <TouchableOpacity onPress={() => handleDeleteExercise(exIdx)} style={{ padding: 6 }}>
+                  <Ionicons name="trash-outline" size={18} color="#FF453A" />
+                </TouchableOpacity>
               </View>
 
               {/* Banner de Sobrecarga Progresiva */}
@@ -414,6 +434,7 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                 <Text style={[styles.setColLabel, { width: 44 }]}>RPE</Text>
                 <Text style={[styles.setColLabel, { width: 85, textAlign: 'center' }]}>TIPO</Text>
                 <Text style={[styles.setColLabel, { width: 36, textAlign: 'center' }]}>OK</Text>
+                <Text style={[styles.setColLabel, { width: 28, textAlign: 'center' }]}>DEL</Text>
               </View>
 
               {/* Lista de Series por Ejercicio */}
@@ -472,6 +493,14 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                       size={18}
                       color={s.isCompleted ? '#FFFFFF' : colors.textMuted}
                     />
+                  </TouchableOpacity>
+
+                  {/* Botón Borrar Serie */}
+                  <TouchableOpacity
+                    style={{ paddingHorizontal: 4, justifyContent: 'center', alignItems: 'center' }}
+                    onPress={() => handleDeleteSet(exIdx, setIdx)}
+                  >
+                    <Ionicons name="trash-outline" size={16} color="#FF453A" />
                   </TouchableOpacity>
                 </View>
               ))}

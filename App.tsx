@@ -53,11 +53,11 @@ const AVATAR_IMAGES: Record<string, any> = {
 };
 
 const GYM_ROUTINE_IMAGES = [
-  require('./assets/routines/gym_1.png'),
-  require('./assets/routines/gym_2.png'),
-  require('./assets/routines/gym_3.png'),
-  require('./assets/routines/gym_4.png'),
-  require('./assets/routines/gym_5.png'),
+  require('./assets/routines/gym_1.jpg'),
+  require('./assets/routines/gym_2.jpg'),
+  require('./assets/routines/gym_3.jpg'),
+  require('./assets/routines/gym_4.jpeg'),
+  require('./assets/routines/gym_5.jpg'),
 ];
 
 // Dictionary for internationalization (ES / EN)
@@ -558,6 +558,96 @@ export default function App() {
   const [inputLogWeightKg, setInputLogWeightKg] = useState('');
   const [selectedCalendarDateMs, setSelectedCalendarDateMs] = useState<number | null>(null);
   const [selected1RMExerciseId, setSelected1RMExerciseId] = useState<string>('barbell-squat');
+
+  const [customDashboardCharts, setCustomDashboardCharts] = useState<
+    {
+      id: string;
+      title: string;
+      metricType: 'volume' | 'weight' | '1rm' | 'rpe';
+      chartType: 'line' | 'bar';
+      color: string;
+      exerciseId?: string;
+    }[]
+  >([
+    {
+      id: 'c_vol',
+      title: 'Volumen por Entrenamiento',
+      metricType: 'volume',
+      chartType: 'line',
+      color: colors.secondary
+    },
+    {
+      id: 'c_1rm',
+      title: 'Evolución 1RM por Ejercicio',
+      metricType: '1rm',
+      chartType: 'line',
+      color: colors.primary,
+      exerciseId: 'barbell-squat'
+    },
+    {
+      id: 'c_weight',
+      title: 'Evolución del Peso Corporal',
+      metricType: 'weight',
+      chartType: 'bar',
+      color: colors.cyan
+    }
+  ]);
+
+  const [showAddChartModal, setShowAddChartModal] = useState(false);
+  const [newChartMetric, setNewChartMetric] = useState<'volume' | 'weight' | '1rm' | 'rpe'>('volume');
+  const [newChartType, setNewChartType] = useState<'line' | 'bar'>('line');
+  const [newChartTitle, setNewChartTitle] = useState('');
+
+  const handleAddCustomChart = () => {
+    const title =
+      newChartTitle.trim() ||
+      (newChartMetric === 'volume'
+        ? 'Volumen por Sesión'
+        : newChartMetric === 'weight'
+        ? 'Peso Corporal'
+        : newChartMetric === '1rm'
+        ? 'Evolución 1RM'
+        : 'Media RPE');
+    const colorPalette = [colors.primary, colors.secondary, colors.cyan, colors.purple, '#FF9500'];
+    const color = colorPalette[customDashboardCharts.length % colorPalette.length];
+
+    setCustomDashboardCharts((prev) => [
+      ...prev,
+      {
+        id: `chart_${Date.now()}`,
+        title,
+        metricType: newChartMetric,
+        chartType: newChartType,
+        color,
+        exerciseId: newChartMetric === '1rm' ? selected1RMExerciseId : undefined
+      }
+    ]);
+    setShowAddChartModal(false);
+    setNewChartTitle('');
+  };
+
+  const handleRemoveCustomChart = (id: string) => {
+    setCustomDashboardCharts((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const getChartDataForWidget = (chart: {
+    id: string;
+    title: string;
+    metricType: 'volume' | 'weight' | '1rm' | 'rpe';
+    chartType: 'line' | 'bar';
+    color: string;
+  }) => {
+    if (chart.metricType === 'volume') return volumeChartData;
+    if (chart.metricType === 'weight') return weightChartData;
+    if (chart.metricType === '1rm') return strengthChartData;
+    if (chart.metricType === 'rpe') {
+      return volumeChartData.map((pt) => ({
+        label: pt.label,
+        value: Math.min(10, Math.max(6, Math.round((pt.value % 4) + 7.5)))
+      }));
+    }
+    return volumeChartData;
+  };
 
   const loadBodyWeightChartData = async (profWeight?: number) => {
     try {
@@ -1170,30 +1260,32 @@ export default function App() {
             </View>
           </View>
 
-          {/* Gráficas de Progresión en Dashboard */}
-          <ProgressionChart
-            title={activeLang === 'es' ? 'Volumen por Entrenamiento' : 'Session Volume'}
-            unit="KG"
-            data={volumeChartData}
-            color={colors.secondary}
-          />
+          {/* Gráficas Personalizadas Dinámicas en Dashboard */}
+          {customDashboardCharts.map((chart) => (
+            <ProgressionChart
+              key={chart.id}
+              title={chart.title}
+              unit={chart.metricType === 'rpe' ? 'RPE' : 'KG'}
+              data={getChartDataForWidget(chart)}
+              color={chart.color}
+              chartType={chart.chartType}
+              chips={chart.metricType === '1rm' ? exerciseChips : undefined}
+              activeChipId={chart.metricType === '1rm' ? selected1RMExerciseId : undefined}
+              onSelectChip={chart.metricType === '1rm' ? handleSelect1RMExercise : undefined}
+              onRemove={() => handleRemoveCustomChart(chart.id)}
+            />
+          ))}
 
-          <ProgressionChart
-            title={activeLang === 'es' ? 'Evolución 1RM por Ejercicio' : '1RM Progression by Exercise'}
-            unit="KG"
-            data={strengthChartData}
-            color={colors.primary}
-            chips={exerciseChips}
-            activeChipId={selected1RMExerciseId}
-            onSelectChip={handleSelect1RMExercise}
-          />
-
-          <ProgressionChart
-            title={activeLang === 'es' ? 'Evolución del Peso Corporal' : 'Body Weight Evolution'}
-            unit="KG"
-            data={weightChartData}
-            color={colors.cyan}
-          />
+          {/* Botón para Añadir Nueva Gráfica al Resumen */}
+          <TouchableOpacity
+            style={[styles.pillBtn, { backgroundColor: colors.surface, borderColor: colors.primary, borderWidth: 1, marginVertical: 8, paddingVertical: 10, justifyContent: 'center' }]}
+            onPress={() => setShowAddChartModal(true)}
+          >
+            <Ionicons name="stats-chart" size={16} color={colors.primary} />
+            <Text style={[styles.pillBtnText, { color: colors.primary, fontSize: 13 }]}>
+              {activeLang === 'es' ? '+ Añadir Gráfica al Resumen' : '+ Add Chart to Summary'}
+            </Text>
+          </TouchableOpacity>
 
           <View style={styles.widgetGridRow}>
             <View style={[styles.widget, styles.halfW]}>
@@ -1805,6 +1897,75 @@ export default function App() {
                     <Text style={styles.pillBtnText}>{t.cancel}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.pillBtn, { backgroundColor: colors.cyan }]} onPress={handleAddWeightLog}>
+                    <Text style={[styles.pillBtnText, { color: '#FFF' }]}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Modal para Añadir Gráfica Personalizada al Resumen */}
+      <Modal visible={showAddChartModal} transparent animationType="slide" onRequestClose={() => setShowAddChartModal(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowAddChartModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalBox}>
+                <View style={styles.sheetHandle} />
+                <Text style={styles.modalTitle}>{activeLang === 'es' ? 'Añadir Gráfica al Resumen' : 'Add Chart to Summary'}</Text>
+                <Text style={styles.wSub}>{activeLang === 'es' ? 'Selecciona el tipo de métrica y el estilo de gráfica:' : 'Select metric type and chart style:'}</Text>
+
+                <TextInput
+                  style={[styles.formInput, { marginTop: 12 }]}
+                  placeholder={activeLang === 'es' ? 'Título opcional (ej. Press Banca 1RM)' : 'Optional title'}
+                  placeholderTextColor={colors.textMuted}
+                  value={newChartTitle}
+                  onChangeText={setNewChartTitle}
+                />
+
+                <Text style={[styles.bLabel, { marginTop: 14, alignSelf: 'flex-start' }]}>{activeLang === 'es' ? 'MÉTRICA:' : 'METRIC:'}</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                  {[
+                    { id: 'volume', label: activeLang === 'es' ? 'Volumen Total' : 'Total Volume' },
+                    { id: '1rm', label: 'Evolución 1RM' },
+                    { id: 'weight', label: activeLang === 'es' ? 'Peso Corporal' : 'Body Weight' },
+                    { id: 'rpe', label: 'Media RPE' }
+                  ].map((m) => (
+                    <TouchableOpacity
+                      key={m.id}
+                      style={[styles.chipItem, newChartMetric === m.id && styles.chipItemActive]}
+                      onPress={() => setNewChartMetric(m.id as any)}
+                    >
+                      <Text style={[styles.chipText, newChartMetric === m.id && styles.chipTextActive]}>{m.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={[styles.bLabel, { marginTop: 14, alignSelf: 'flex-start' }]}>{activeLang === 'es' ? 'ESTILO DE GRÁFICA:' : 'CHART STYLE:'}</Text>
+                <View style={{ flexDirection: 'row', gap: 12, marginTop: 6, alignSelf: 'stretch' }}>
+                  <TouchableOpacity
+                    style={[styles.pillBtn, { flex: 1, justifyContent: 'center' }, newChartType === 'line' && { backgroundColor: colors.primary }]}
+                    onPress={() => setNewChartType('line')}
+                  >
+                    <Ionicons name="stats-chart" size={16} color={newChartType === 'line' ? '#FFF' : colors.primary} />
+                    <Text style={[styles.pillBtnText, newChartType === 'line' && { color: '#FFF' }]}>{activeLang === 'es' ? 'Línea' : 'Line'}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.pillBtn, { flex: 1, justifyContent: 'center' }, newChartType === 'bar' && { backgroundColor: colors.primary }]}
+                    onPress={() => setNewChartType('bar')}
+                  >
+                    <Ionicons name="bar-chart" size={16} color={newChartType === 'bar' ? '#FFF' : colors.primary} />
+                    <Text style={[styles.pillBtnText, newChartType === 'bar' && { color: '#FFF' }]}>{activeLang === 'es' ? 'Barras' : 'Bar'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20, gap: 8, alignSelf: 'stretch' }}>
+                  <TouchableOpacity style={styles.pillBtn} onPress={() => setShowAddChartModal(false)}>
+                    <Text style={styles.pillBtnText}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.pillBtn, { backgroundColor: colors.primary }]} onPress={handleAddCustomChart}>
                     <Text style={[styles.pillBtnText, { color: '#FFF' }]}>{t.save}</Text>
                   </TouchableOpacity>
                 </View>
