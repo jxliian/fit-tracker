@@ -28,44 +28,125 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
 
-// Días simulados de entrenamiento para la rejilla mensual (local-first)
-const SAMPLE_WORKOUT_DAYS = [2, 4, 5, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 25];
+interface DashboardStats {
+  totalVolumeKg: number;
+  totalSessions: number;
+  totalSets: number;
+  avgRpe: number;
+  currentStreakDays: number;
+  bestStreakDays: number;
+  trainedDaysInSelectedMonth: number[];
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts(Ionicons.font);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  
+  // Estado para la navegación mensual del calendario
+  const [viewMonthDate, setViewMonthDate] = useState<Date>(new Date());
+  const [stats, setStats] = useState<DashboardStats>({
+    totalVolumeKg: 0,
+    totalSessions: 0,
+    totalSets: 0,
+    avgRpe: 0,
+    currentStreakDays: 0,
+    bestStreakDays: 0,
+    trainedDaysInSelectedMonth: []
+  });
+
   const scrollViewRef = useRef<ScrollView>(null);
 
-  useEffect(() => {
-    async function prepareApp() {
-      try {
-        await initDatabase();
-        await seedExercises();
+  // Cargar perfil y datos reales de la base de datos SQLite
+  const loadDatabaseData = async () => {
+    try {
+      await initDatabase();
+      await seedExercises();
 
-        const profile = await db.getFirstAsync<any>('SELECT * FROM user_profile LIMIT 1;');
-        if (profile) {
-          setUserProfile({
-            id: profile.id,
-            name: profile.name,
-            age: profile.age,
-            sex: profile.sex as Sex,
-            heightCm: profile.height_cm,
-            bodyWeightKg: profile.body_weight_kg,
-            experienceLevel: profile.experience_level as ExperienceLevel,
-            createdAt: profile.created_at
-          });
-        }
-      } catch (error) {
-        console.error('Error al inicializar la base de datos de FitTracker:', error);
-      } finally {
-        setIsInitializing(false);
+      // 1. Cargar Perfil
+      const profile = await db.getFirstAsync<any>('SELECT * FROM user_profile LIMIT 1;');
+      if (profile) {
+        setUserProfile({
+          id: profile.id,
+          name: profile.name,
+          age: profile.age,
+          sex: profile.sex as Sex,
+          heightCm: profile.height_cm,
+          bodyWeightKg: profile.body_weight_kg,
+          experienceLevel: profile.experience_level as ExperienceLevel,
+          createdAt: profile.created_at
+        });
       }
-    }
 
-    prepareApp();
-  }, []);
+      // 2. Calcular Estadísticas Reales desde SQLite
+      const year = viewMonthDate.getFullYear();
+      const month = viewMonthDate.getMonth();
+      const firstDayMs = new Date(year, month, 1).getTime();
+      const lastDayMs = new Date(year, month + 1, 0, 23, 59, 59).getTime();
+
+      // Sesiones del mes seleccionado
+      const monthSessions = await db.getAllAsync<{ date: number }>(
+        `SELECT date FROM workout_sessions WHERE date >= ? AND date <= ? ORDER BY date ASC;`,
+        [firstDayMs, lastDayMs]
+      );
+      const trainedDays = monthSessions.map((s) => new Date(s.date).getDate());
+
+      // Totales globales en la app
+      const totalVolumeRes = await db.getFirstAsync<{ total_vol: number }>(
+        `SELECT SUM(weight_kg * reps) as total_vol FROM exercise_sets WHERE is_warmup = 0;`
+      );
+      const totalSessionsRes = await db.getFirstAsync<{ cnt: number }>(
+        `SELECT COUNT(*) as cnt FROM workout_sessions;`
+      );
+      const totalSetsRes = await db.getFirstAsync<{ cnt: number }>(
+        `SELECT COUNT(*) as cnt FROM exercise_sets;`
+      );
+      const avgRpeRes = await db.getFirstAsync<{ avg_rpe: number }>(
+        `SELECT AVG(rpe) as avg_rpe FROM exercise_sets WHERE is_warmup = 0;`
+      );
+
+      // Cálculo de Rachas (Streaks) en base a sesiones registradas
+      const allSessions = await db.getAllAsync<{ date: number }>(
+        `SELECT date FROM workout_sessions ORDER BY date DESC;`
+      );
+
+      let currentStreak = 0;
+      let maxStreak = 0;
+
+      if (allSessions.length > 0) {
+        const uniqueDates = Array.from(
+          new Set(
+            allSessions.map((s) => {
+              const d = new Date(s.date);
+              return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            })
+          )
+        );
+
+        currentStreak = uniqueDates.length > 0 ? uniqueDates.length : 0;
+        maxStreak = currentStreak;
+      }
+
+      setStats({
+        totalVolumeKg: totalVolumeRes?.total_vol || 0,
+        totalSessions: totalSessionsRes?.cnt || 0,
+        totalSets: totalSetsRes?.cnt || 0,
+        avgRpe: avgRpeRes?.avg_rpe ? parseFloat((avgRpeRes.avg_rpe).toFixed(1)) : 0,
+        currentStreakDays: currentStreak,
+        bestStreakDays: maxStreak,
+        trainedDaysInSelectedMonth: trainedDays
+      });
+    } catch (error) {
+      console.error('Error cargando estadísticas reales de SQLite:', error);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseData();
+  }, [viewMonthDate]);
 
   const handleCompleteOnboarding = async (data: {
     name: string;
@@ -97,6 +178,16 @@ export default function App() {
     );
 
     setUserProfile(newProfile);
+    loadDatabaseData();
+  };
+
+  // Cambiar de mes en el calendario
+  const handlePrevMonth = () => {
+    setViewMonthDate(new Date(viewMonthDate.getFullYear(), viewMonthDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewMonthDate(new Date(viewMonthDate.getFullYear(), viewMonthDate.getMonth() + 1, 1));
   };
 
   const handleTabPress = (tab: TabType, index: number) => {
@@ -134,17 +225,30 @@ export default function App() {
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
   const bottomInset = Platform.OS === 'ios' ? 44 : 36;
 
-  // Formato fecha estilo Apple Fitness ("viernes, 14 ago")
+  // Formato de fecha actual
   const todayDate = new Date();
-  const currentDayNum = todayDate.getDate();
-  const formattedDate = todayDate.toLocaleDateString('es-ES', {
+  const isViewingCurrentMonth =
+    viewMonthDate.getFullYear() === todayDate.getFullYear() &&
+    viewMonthDate.getMonth() === todayDate.getMonth();
+
+  const formattedHeaderDate = todayDate.toLocaleDateString('es-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'short'
   });
 
-  // Generar días del mes actual para el Widget de Historial
-  const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
+  const monthYearLabel = viewMonthDate.toLocaleDateString('es-ES', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  // Generación de días del mes en vista
+  const daysInViewMonthCount = new Date(
+    viewMonthDate.getFullYear(),
+    viewMonthDate.getMonth() + 1,
+    0
+  ).getDate();
+  const daysInMonthArray = Array.from({ length: daysInViewMonthCount }, (_, i) => i + 1);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -154,7 +258,7 @@ export default function App() {
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
           <Text style={styles.greetingTitle}>Resumen</Text>
-          <Text style={styles.dateSubtitle}>{formattedDate}</Text>
+          <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
         <TouchableOpacity style={styles.avatarButton}>
           <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
@@ -170,11 +274,11 @@ export default function App() {
         onMomentumScrollEnd={handleScroll}
         style={styles.pagerStyle}
       >
-        {/* Pantalla 1: Resumen Dashboard (Estilo Apple Fitness Widgets) */}
+        {/* Pantalla 1: Resumen Dashboard (Estadísticas Reales SQLite) */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Widget Grande: Anillos / Resumen de Métricas */}
+          {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
           <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Resumen de Entrenamiento</Text>
+            <Text style={styles.widgetHeaderTitle}>Métricas Totales de Atleta</Text>
             
             <View style={styles.ringsRow}>
               {/* Indicador Visual Simulado */}
@@ -186,43 +290,67 @@ export default function App() {
                 </View>
               </View>
 
-              {/* Lista de Métricas Neon */}
+              {/* Lista de Métricas Reales de SQLite */}
               <View style={styles.metricsList}>
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Carga Levantada</Text>
+                  <Text style={styles.metricLabel}>Volumen Acumulado</Text>
                   <Text style={[styles.metricValue, { color: colors.secondary }]}>
-                    4,850 <Text style={styles.metricUnit}>KCAL / KG</Text>
+                    {stats.totalVolumeKg.toLocaleString()}{' '}
+                    <Text style={styles.metricUnit}>KG</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Tiempo de Sesión</Text>
+                  <Text style={styles.metricLabel}>Sesiones Completadas</Text>
                   <Text style={[styles.metricValue, { color: colors.primary }]}>
-                    45/60 <Text style={styles.metricUnit}>MIN</Text>
+                    {stats.totalSessions} <Text style={styles.metricUnit}>SESIONES</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Series Efectivas</Text>
+                  <Text style={styles.metricLabel}>Series Registradas</Text>
                   <Text style={[styles.metricValue, { color: colors.cyan }]}>
-                    16/20 <Text style={styles.metricUnit}>SERIES</Text>
+                    {stats.totalSets} <Text style={styles.metricUnit}>SERIES</Text>
                   </Text>
                 </View>
               </View>
             </View>
           </View>
 
-          {/* Widget Nuevo: Historial Mensual de Entrenamientos (Días completados) */}
+          {/* Widget de Historial Mensual Interactivo con Navegación de Meses y Rachas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
               <View>
-                <Text style={styles.widgetGridTitle}>Días Entrenados este Mes</Text>
-                <Text style={styles.widgetSubLabel}>Agosto 2026 · Registro Local</Text>
+                <Text style={styles.widgetGridTitle}>Días Entrenados</Text>
+                <Text style={styles.widgetSubLabel}>
+                  {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
+                </Text>
               </View>
+              
+              {/* Insignia de Racha */}
               <View style={styles.streakBadge}>
                 <Ionicons name="flame" size={14} color={colors.primary} />
-                <Text style={styles.streakText}>14 Días</Text>
+                <Text style={styles.streakText}>
+                  Racha: {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'Día' : 'Días'}
+                </Text>
               </View>
+            </View>
+
+            {/* Selector de Meses (Anterior / Siguiente) */}
+            <View style={styles.monthNavRow}>
+              <TouchableOpacity style={styles.monthNavBtn} onPress={handlePrevMonth}>
+                <Ionicons name="chevron-back" size={16} color={colors.textPrimary} />
+                <Text style={styles.monthNavBtnText}>Anterior</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.monthCurrentText}>
+                {stats.trainedDaysInSelectedMonth.length} días activos
+              </Text>
+
+              <TouchableOpacity style={styles.monthNavBtn} onPress={handleNextMonth}>
+                <Text style={styles.monthNavBtnText}>Siguiente</Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.textPrimary} />
+              </TouchableOpacity>
             </View>
 
             {/* Días de la Semana Header */}
@@ -232,11 +360,11 @@ export default function App() {
               ))}
             </View>
 
-            {/* Matriz Mensual de Puntos de Entrenamiento */}
+            {/* Matriz Mensual Dinámica */}
             <View style={styles.calendarGrid}>
-              {daysInMonth.map((day) => {
-                const trained = SAMPLE_WORKOUT_DAYS.includes(day);
-                const isToday = day === currentDayNum;
+              {daysInMonthArray.map((day) => {
+                const trained = stats.trainedDaysInSelectedMonth.includes(day);
+                const isToday = isViewingCurrentMonth && day === todayDate.getDate();
 
                 return (
                   <View
@@ -261,31 +389,33 @@ export default function App() {
             </View>
           </View>
 
-          {/* Fila de 2 Widgets Secundarios */}
+          {/* Fila de 2 Widgets Secundarios: Reps & Esfuerzo RPE */}
           <View style={styles.widgetGridRow}>
-            {/* Widget Izquierda: Volumen */}
+            {/* Widget Izquierda: Total Series */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
-              <Text style={styles.widgetGridTitle}>Conteo de Reps</Text>
-              <Text style={styles.widgetSubLabel}>Hoy</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>148</Text>
+              <Text style={styles.widgetGridTitle}>Total Series</Text>
+              <Text style={styles.widgetSubLabel}>Histórico Local</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>
+                {stats.totalSets}
+              </Text>
               
-              {/* Gráfica de Barras Minimalista */}
               <View style={styles.miniBarChart}>
-                <View style={[styles.bar, { height: '30%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '65%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '100%', backgroundColor: colors.purple }]} />
                 <View style={[styles.bar, { height: '40%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '80%', backgroundColor: colors.purple }]} />
+                <View style={[styles.bar, { height: '70%', backgroundColor: colors.purple + '60' }]} />
+                <View style={[styles.bar, { height: '100%', backgroundColor: colors.purple }]} />
+                <View style={[styles.bar, { height: '60%', backgroundColor: colors.purple + '60' }]} />
+                <View style={[styles.bar, { height: '85%', backgroundColor: colors.purple }]} />
               </View>
             </View>
 
-            {/* Widget Derecha: Intensidad RPE */}
+            {/* Widget Derecha: Intensidad RPE Medio */}
             <View style={[styles.appleWidget, styles.halfWidget]}>
               <Text style={styles.widgetGridTitle}>Esfuerzo (RPE)</Text>
               <Text style={styles.widgetSubLabel}>Promedio</Text>
-              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>8.5</Text>
+              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>
+                {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
+              </Text>
 
-              {/* Gráfica de Barras Minimalista */}
               <View style={styles.miniBarChart}>
                 <View style={[styles.bar, { height: '50%', backgroundColor: colors.cyan + '60' }]} />
                 <View style={[styles.bar, { height: '90%', backgroundColor: colors.cyan }]} />
@@ -295,17 +425,6 @@ export default function App() {
               </View>
             </View>
           </View>
-
-          {/* Widget Destacado: Rutina Recomendada */}
-          <View style={styles.appleWidget}>
-            <Text style={[styles.widgetHeaderTitle, { color: colors.primary }]}>Entrenamiento Sugerido</Text>
-            <Text style={styles.routineTitle}>Torso / Sobrecarga Progresiva</Text>
-            <Text style={styles.routineDesc}>4 Ejercicios · Recomienda +2.5kg en Press de Banca</Text>
-            
-            <TouchableOpacity style={styles.appleButton}>
-              <Text style={styles.appleButtonText}>Iniciar Entrenamiento</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
 
         {/* Pantalla 2: Rutinas */}
@@ -313,7 +432,7 @@ export default function App() {
           <View style={styles.appleWidget}>
             <Text style={styles.widgetHeaderTitle}>Rutinas Prediseñadas</Text>
             <Text style={styles.routineDesc}>
-              Rutinas Push, Pull y Legs integradas con el motor matemático de sobrecarga determinista.
+              Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.
             </Text>
           </View>
         </ScrollView>
@@ -358,7 +477,7 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Barra Flotante Translucida con Iconos Vectoriales Garantizados */}
+      {/* Barra Flotante Translucida de Navegación */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
           <TouchableOpacity
@@ -503,7 +622,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 14
+    marginBottom: 10
   },
   streakBadge: {
     flexDirection: 'row',
@@ -520,6 +639,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     marginLeft: 4
+  },
+  monthNavRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceLight,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: radii.md,
+    marginBottom: 14
+  },
+  monthNavBtn: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  monthNavBtnText: {
+    color: colors.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+    marginHorizontal: 4
+  },
+  monthCurrentText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600'
   },
   weekDaysHeader: {
     flexDirection: 'row',
@@ -655,29 +799,11 @@ const styles = StyleSheet.create({
     width: 6,
     borderRadius: 3
   },
-  routineTitle: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 4
-  },
   routineDesc: {
     color: colors.textSecondary,
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 14
-  },
-  appleButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 13,
-    borderRadius: radii.md,
-    alignItems: 'center'
-  },
-  appleButtonText: {
-    color: '#000000',
-    fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 0.3
   },
   profileRow: {
     flexDirection: 'row',
