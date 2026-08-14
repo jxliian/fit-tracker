@@ -1,10 +1,18 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
-    "resolveJsonModule": true,
+    "target": "es2022",
+    "lib": [
+      "es2022"
+    ],
     "module": "esnext",
-    "types": ["jest"],
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "jest"
+    ],
     "paths": {
       "@core/*": [
         "./src/core/*"
@@ -35,5 +43,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }
