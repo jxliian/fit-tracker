@@ -25,6 +25,9 @@ import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// Ancho exacto de cada celda para 7 columnas perfectas
+const GRID_PADDING = 40;
+const DAY_CELL_WIDTH = Math.floor((SCREEN_WIDTH - GRID_PADDING - 40) / 7);
 
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
@@ -257,7 +260,7 @@ export default function App() {
     year: 'numeric'
   });
 
-  // Cálculo exacto del alineamiento del calendario europeo (Lunes a Domingo)
+  // Cálculo exacto de 7 columnas perfectas (Lunes a Domingo)
   const viewYear = viewMonthDate.getFullYear();
   const viewMonth = viewMonthDate.getMonth();
   const daysInViewMonthCount = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -297,10 +300,10 @@ export default function App() {
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
           {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
           <View style={styles.appleWidget}>
-            <View style={styles.widgetTopHeader}>
-              <Text style={styles.widgetHeaderTitle}>Métricas Totales de Atleta</Text>
+            <View style={styles.widgetHeaderRow}>
+              <Text style={styles.widgetHeaderTitleCompact}>Métricas de Atleta</Text>
               <TouchableOpacity
-                style={styles.moreStatsBtn}
+                style={styles.moreStatsBtnVisible}
                 onPress={() => setShowStatsModal(true)}
               >
                 <Ionicons name="analytics" size={14} color={colors.primary} />
@@ -345,7 +348,7 @@ export default function App() {
             </View>
           </View>
 
-          {/* Widget de Historial Mensual Interactivo con Alineamiento Corregido de Días */}
+          {/* Widget de Historial Mensual Interactivo en Rejilla de 7 Columnas Estrictas */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
               <View>
@@ -382,41 +385,46 @@ export default function App() {
             </View>
 
             {/* Días de la Semana Header (L, M, X, J, V, S, D) */}
-            <View style={styles.weekDaysHeader}>
+            <View style={styles.weekDaysHeaderGrid}>
               {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                <Text key={idx} style={styles.weekDayText}>{day}</Text>
+                <Text key={idx} style={[styles.weekDayTextGrid, { width: DAY_CELL_WIDTH }]}>
+                  {day}
+                </Text>
               ))}
             </View>
 
-            {/* Matriz Mensual Dinámica Alineada numéricamente */}
-            <View style={styles.calendarGrid}>
-              {/* Huecos vacíos de alineación de inicio de mes */}
+            {/* Matriz Mensual Dinámica Estricta de 7 Columnas Exactas */}
+            <View style={styles.calendarGridStrict}>
+              {/* Huecos vacíos de inicio de mes */}
               {paddingSlotsArray.map((p) => (
-                <View key={`pad_${p}`} style={styles.calendarDotBlank} />
+                <View key={`pad_${p}`} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
+                  <View style={styles.calendarDotBlank} />
+                </View>
               ))}
 
-              {/* Días del mes */}
+              {/* Días del mes en celdas de ancho exacto */}
               {daysInMonthArray.map((day) => {
                 const trained = stats.trainedDaysInSelectedMonth.includes(day);
                 const isToday = isViewingCurrentMonth && day === todayDate.getDate();
 
                 return (
-                  <View
-                    key={day}
-                    style={[
-                      styles.calendarDot,
-                      trained && styles.calendarDotTrained,
-                      isToday && styles.calendarDotToday
-                    ]}
-                  >
-                    <Text
+                  <View key={day} style={[styles.calendarCellContainer, { width: DAY_CELL_WIDTH }]}>
+                    <View
                       style={[
-                        styles.calendarDotText,
-                        (trained || isToday) && styles.calendarDotTextWhite
+                        styles.calendarDot,
+                        trained && styles.calendarDotTrained,
+                        isToday && styles.calendarDotToday
                       ]}
                     >
-                      {day}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.calendarDotText,
+                          (trained || isToday) && styles.calendarDotTextWhite
+                        ]}
+                      >
+                        {day}
+                      </Text>
+                    </View>
                   </View>
                 );
               })}
@@ -695,32 +703,54 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16
   },
+  widgetHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16
+  },
   widgetHeaderTitle: {
     color: colors.textPrimary,
     fontSize: 18,
     fontWeight: '800'
   },
+  widgetHeaderTitleCompact: {
+    color: colors.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+    flex: 1
+  },
+  moreStatsBtnVisible: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary + '25',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: colors.primary
+  },
+  moreStatsBtnText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 4
+  },
   widgetTopHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14
+    marginBottom: 10
   },
-  moreStatsBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceLight,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: colors.border
+  widgetGridTitle: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '800'
   },
-  moreStatsBtnText: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '700',
-    marginLeft: 4
+  widgetSubLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2
   },
   streakBadge: {
     flexDirection: 'row',
@@ -763,35 +793,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600'
   },
-  weekDaysHeader: {
+  weekDaysHeaderGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     marginBottom: 8
   },
-  weekDayText: {
+  weekDayTextGrid: {
     color: colors.textSecondary,
     fontSize: 11,
     fontWeight: '700',
-    width: 32,
     textAlign: 'center'
   },
-  calendarGrid: {
+  calendarGridStrict: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around'
+    justifyContent: 'flex-start'
+  },
+  calendarCellContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 3
   },
   calendarDotBlank: {
-    width: 34,
-    height: 34,
-    marginVertical: 4
+    width: 32,
+    height: 32
   },
   calendarDot: {
-    width: 34,
-    height: 34,
+    width: 32,
+    height: 32,
     borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 4
+    alignItems: 'center'
   },
   calendarDotTrained: {
     backgroundColor: colors.primary,
@@ -875,16 +907,6 @@ const styles = StyleSheet.create({
   halfWidget: {
     width: (SCREEN_WIDTH - 52) / 2,
     marginBottom: 0
-  },
-  widgetGridTitle: {
-    color: colors.textPrimary,
-    fontSize: 15,
-    fontWeight: '800'
-  },
-  widgetSubLabel: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 2
   },
   widgetBigNumber: {
     fontSize: 32,
