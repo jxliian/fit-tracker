@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   Dimensions,
+  Modal,
   NativeSyntheticEvent,
   NativeScrollEvent
 } from 'react-native';
@@ -33,6 +34,8 @@ interface DashboardStats {
   totalSessions: number;
   totalSets: number;
   avgRpe: number;
+  max1RM: number;
+  avgVolumePerSession: number;
   currentStreakDays: number;
   bestStreakDays: number;
   trainedDaysInSelectedMonth: number[];
@@ -43,6 +46,7 @@ export default function App() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   
   // Estado para la navegación mensual del calendario
   const [viewMonthDate, setViewMonthDate] = useState<Date>(new Date());
@@ -51,6 +55,8 @@ export default function App() {
     totalSessions: 0,
     totalSets: 0,
     avgRpe: 0,
+    max1RM: 0,
+    avgVolumePerSession: 0,
     currentStreakDays: 0,
     bestStreakDays: 0,
     trainedDaysInSelectedMonth: []
@@ -105,8 +111,11 @@ export default function App() {
       const avgRpeRes = await db.getFirstAsync<{ avg_rpe: number }>(
         `SELECT AVG(rpe) as avg_rpe FROM exercise_sets WHERE is_warmup = 0;`
       );
+      const max1RMRes = await db.getFirstAsync<{ max_1rm: number }>(
+        `SELECT MAX(estimated_1rm) as max_1rm FROM exercise_sets;`
+      );
 
-      // Cálculo de Rachas (Streaks) en base a sesiones registradas
+      // Rachas de entrenamiento
       const allSessions = await db.getAllAsync<{ date: number }>(
         `SELECT date FROM workout_sessions ORDER BY date DESC;`
       );
@@ -128,11 +137,17 @@ export default function App() {
         maxStreak = currentStreak;
       }
 
+      const totalVol = totalVolumeRes?.total_vol || 0;
+      const totalSess = totalSessionsRes?.cnt || 0;
+      const avgVolPerSession = totalSess > 0 ? Math.round(totalVol / totalSess) : 0;
+
       setStats({
-        totalVolumeKg: totalVolumeRes?.total_vol || 0,
-        totalSessions: totalSessionsRes?.cnt || 0,
+        totalVolumeKg: totalVol,
+        totalSessions: totalSess,
         totalSets: totalSetsRes?.cnt || 0,
         avgRpe: avgRpeRes?.avg_rpe ? parseFloat((avgRpeRes.avg_rpe).toFixed(1)) : 0,
+        max1RM: max1RMRes?.max_1rm ? Math.round(max1RMRes.max_1rm) : 0,
+        avgVolumePerSession: avgVolPerSession,
         currentStreakDays: currentStreak,
         bestStreakDays: maxStreak,
         trainedDaysInSelectedMonth: trainedDays
@@ -242,13 +257,17 @@ export default function App() {
     year: 'numeric'
   });
 
-  // Generación de días del mes en vista
-  const daysInViewMonthCount = new Date(
-    viewMonthDate.getFullYear(),
-    viewMonthDate.getMonth() + 1,
-    0
-  ).getDate();
+  // Cálculo exacto del alineamiento del calendario europeo (Lunes a Domingo)
+  const viewYear = viewMonthDate.getFullYear();
+  const viewMonth = viewMonthDate.getMonth();
+  const daysInViewMonthCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const daysInMonthArray = Array.from({ length: daysInViewMonthCount }, (_, i) => i + 1);
+
+  // 0: Domingo, 1: Lunes, ... 6: Sábado
+  const rawFirstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+  // Convertir a formato Europeo (0: Lunes, 1: Martes, ... 6: Domingo)
+  const startPaddingSlotsCount = (rawFirstDayOfWeek + 6) % 7;
+  const paddingSlotsArray = Array.from({ length: startPaddingSlotsCount }, (_, i) => i);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -278,7 +297,16 @@ export default function App() {
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
           {/* Widget Grande: Anillos / Resumen de Métricas Reales */}
           <View style={styles.appleWidget}>
-            <Text style={styles.widgetHeaderTitle}>Métricas Totales de Atleta</Text>
+            <View style={styles.widgetTopHeader}>
+              <Text style={styles.widgetHeaderTitle}>Métricas Totales de Atleta</Text>
+              <TouchableOpacity
+                style={styles.moreStatsBtn}
+                onPress={() => setShowStatsModal(true)}
+              >
+                <Ionicons name="analytics" size={14} color={colors.primary} />
+                <Text style={styles.moreStatsBtnText}>Más Stats</Text>
+              </TouchableOpacity>
+            </View>
             
             <View style={styles.ringsRow}>
               {/* Indicador Visual Simulado */}
@@ -317,7 +345,7 @@ export default function App() {
             </View>
           </View>
 
-          {/* Widget de Historial Mensual Interactivo con Navegación de Meses y Rachas */}
+          {/* Widget de Historial Mensual Interactivo con Alineamiento Corregido de Días */}
           <View style={styles.appleWidget}>
             <View style={styles.widgetTopHeader}>
               <View>
@@ -353,15 +381,21 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            {/* Días de la Semana Header */}
+            {/* Días de la Semana Header (L, M, X, J, V, S, D) */}
             <View style={styles.weekDaysHeader}>
               {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
                 <Text key={idx} style={styles.weekDayText}>{day}</Text>
               ))}
             </View>
 
-            {/* Matriz Mensual Dinámica */}
+            {/* Matriz Mensual Dinámica Alineada numéricamente */}
             <View style={styles.calendarGrid}>
+              {/* Huecos vacíos de alineación de inicio de mes */}
+              {paddingSlotsArray.map((p) => (
+                <View key={`pad_${p}`} style={styles.calendarDotBlank} />
+              ))}
+
+              {/* Días del mes */}
               {daysInMonthArray.map((day) => {
                 const trained = stats.trainedDaysInSelectedMonth.includes(day);
                 const isToday = isViewingCurrentMonth && day === todayDate.getDate();
@@ -476,6 +510,55 @@ export default function App() {
           </View>
         </ScrollView>
       </ScrollView>
+
+      {/* Modal de Estadísticas Detalladas (Informe de Atleta) */}
+      <Modal
+        visible={showStatsModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowStatsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <BlurView intensity={Platform.OS === 'ios' ? 90 : 100} tint="dark" style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Informe de Atleta</Text>
+              <TouchableOpacity onPress={() => setShowStatsModal(false)} style={styles.closeBtn}>
+                <Ionicons name="close" size={20} color={colors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.statGridCard}>
+                <Text style={styles.statGridLabel}>1RM Máximo Estimado</Text>
+                <Text style={[styles.statGridValue, { color: colors.primary }]}>
+                  {stats.max1RM > 0 ? `${stats.max1RM} KG` : 'N/A'}
+                </Text>
+              </View>
+
+              <View style={styles.statGridCard}>
+                <Text style={styles.statGridLabel}>Volumen Promedio por Sesión</Text>
+                <Text style={[styles.statGridValue, { color: colors.cyan }]}>
+                  {stats.avgVolumePerSession > 0 ? `${stats.avgVolumePerSession.toLocaleString()} KG` : '0 KG'}
+                </Text>
+              </View>
+
+              <View style={styles.statGridCard}>
+                <Text style={styles.statGridLabel}>Racha Más Larga</Text>
+                <Text style={[styles.statGridValue, { color: colors.purple }]}>
+                  {stats.bestStreakDays} Días
+                </Text>
+              </View>
+
+              <View style={styles.statGridCard}>
+                <Text style={styles.statGridLabel}>Intensidad RPE Medio</Text>
+                <Text style={[styles.statGridValue, { color: colors.secondary }]}>
+                  {stats.avgRpe > 0 ? `${stats.avgRpe} RPE` : '0.0'}
+                </Text>
+              </View>
+            </ScrollView>
+          </BlurView>
+        </View>
+      </Modal>
 
       {/* Barra Flotante Translucida de Navegación */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
@@ -615,14 +698,29 @@ const styles = StyleSheet.create({
   widgetHeaderTitle: {
     color: colors.textPrimary,
     fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 16
+    fontWeight: '800'
   },
   widgetTopHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 10
+    alignItems: 'center',
+    marginBottom: 14
+  },
+  moreStatsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceLight,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: colors.border
+  },
+  moreStatsBtnText: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 4
   },
   streakBadge: {
     flexDirection: 'row',
@@ -681,6 +779,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around'
+  },
+  calendarDotBlank: {
+    width: 34,
+    height: 34,
+    marginVertical: 4
   },
   calendarDot: {
     width: 34,
@@ -820,6 +923,57 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '700',
     fontSize: 14
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end'
+  },
+  modalContainer: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    padding: 24,
+    maxHeight: '75%',
+    borderColor: colors.border,
+    borderWidth: 1
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20
+  },
+  modalTitle: {
+    color: colors.textPrimary,
+    fontSize: 22,
+    fontWeight: '900'
+  },
+  closeBtn: {
+    padding: 6,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: radii.full
+  },
+  modalBody: {
+    marginBottom: 20
+  },
+  statGridCard: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: radii.lg,
+    padding: 16,
+    marginBottom: 12,
+    borderColor: colors.border,
+    borderWidth: 1
+  },
+  statGridLabel: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 4
+  },
+  statGridValue: {
+    fontSize: 22,
+    fontWeight: '900'
   },
   floatingNavContainer: {
     position: 'absolute',
