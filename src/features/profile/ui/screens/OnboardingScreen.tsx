@@ -15,10 +15,10 @@ import { colors } from '@core/theme/colors';
 import { Sex, ExperienceLevel } from '@domain/entities/user-profile';
 
 const AVATAR_OPTIONS = [
-  { key: 'lion', label: 'León', image: require('../../../../../assets/avatars/lion.png') },
-  { key: 'bear', label: 'Oso', image: require('../../../../../assets/avatars/bear.png') },
-  { key: 'panther', label: 'Pantera', image: require('../../../../../assets/avatars/panther.png') },
-  { key: 'eagle', label: 'Águila', image: require('../../../../../assets/avatars/eagle.png') }
+  { key: 'lion', labelEs: '🦁 León', labelEn: '🦁 Lion', image: require('../../../../../assets/avatars/lion.png') },
+  { key: 'bear', labelEs: '🐻 Oso', labelEn: '🐻 Bear', image: require('../../../../../assets/avatars/bear.png') },
+  { key: 'panther', labelEs: '🐆 Pantera', labelEn: '🐆 Panther', image: require('../../../../../assets/avatars/panther.png') },
+  { key: 'eagle', labelEs: '🦅 Águila', labelEn: '🦅 Eagle', image: require('../../../../../assets/avatars/eagle.png') }
 ];
 
 export interface OnboardingScreenProps {
@@ -29,11 +29,13 @@ export interface OnboardingScreenProps {
     heightCm: number;
     bodyWeightKg: number;
     experienceLevel: ExperienceLevel;
+    language: 'es' | 'en';
     avatarKey?: string | null;
   }) => void;
 }
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+  const [language, setLanguage] = useState<'es' | 'en'>('es');
   const [name, setName] = useState('');
   const [age, setAge] = useState('24');
   const [sex, setSex] = useState<Sex>('male');
@@ -43,9 +45,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const isEs = language === 'es';
+
   const handleSubmit = () => {
     if (!name.trim()) {
-      setErrorMessage('Por favor introduce tu nombre.');
+      setErrorMessage(isEs ? 'Por favor introduce tu nombre.' : 'Please enter your name.');
       return;
     }
 
@@ -54,16 +58,16 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
     const parsedWeight = parseFloat(bodyWeightKg);
 
     if (isNaN(parsedAge) || parsedAge < 10 || parsedAge > 100) {
-      setErrorMessage('Por favor introduce una edad válida.');
+      setErrorMessage(isEs ? 'Por favor introduce una edad válida.' : 'Please enter a valid age.');
       return;
     }
 
     if (isNaN(parsedWeight) || parsedWeight < 30 || parsedWeight > 300) {
-      setErrorMessage('Por favor introduce un peso corporal válido.');
+      setErrorMessage(isEs ? 'Por favor introduce un peso corporal válido.' : 'Please enter a valid body weight.');
       return;
     }
 
-    // Si no ha elegido avatar explícitamente (o iniciales), se asigna uno aleatorio
+    // Si no ha elegido avatar explícitamente, se asigna uno aleatorio
     let finalAvatarKey = selectedAvatar;
     if (finalAvatarKey === undefined || finalAvatarKey === null) {
       const keys = ['lion', 'bear', 'panther', 'eagle'];
@@ -77,6 +81,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       heightCm: parsedHeight,
       bodyWeightKg: parsedWeight,
       experienceLevel,
+      language,
       avatarKey: finalAvatarKey === 'initials' ? null : finalAvatarKey
     });
   };
@@ -89,21 +94,41 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={[styles.container, { paddingTop: topInset }]}>
+        {/* Selector de Idioma */}
+        <View style={styles.langSelectorRow}>
+          <TouchableOpacity
+            style={[styles.langChip, language === 'es' && styles.langChipActive]}
+            onPress={() => setLanguage('es')}
+          >
+            <Text style={[styles.langChipText, language === 'es' && styles.langChipTextActive]}>🇪🇸 Español</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.langChip, language === 'en' && styles.langChipActive]}
+            onPress={() => setLanguage('en')}
+          >
+            <Text style={[styles.langChipText, language === 'en' && styles.langChipTextActive]}>🇬🇧 English</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.header}>
           <View style={styles.brandBadge}>
             <Text style={styles.brandBadgeText}>FITTRACKER</Text>
           </View>
-          <Text style={styles.title}>Configuración de Perfil</Text>
+          <Text style={styles.title}>{isEs ? 'Configuración de Perfil' : 'Profile Setup'}</Text>
           <Text style={styles.subtitle}>
-            Personaliza tus datos y elige tu Avatar Memoji de animal gym para comenzar.
+            {isEs
+              ? 'Personaliza tus datos y elige tu Avatar Animoji de animal gym para comenzar.'
+              : 'Customize your stats and pick your Gym Animoji avatar to get started.'}
           </Text>
         </View>
 
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-        {/* Selector de Avatar Memoji */}
+        {/* Selector de Avatar Animoji */}
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Elige tu Avatar de Animal Memoji (Requerido)</Text>
+          <Text style={styles.label}>
+            {isEs ? 'Elige tu Avatar de Animal Animoji (Requerido)' : 'Choose your Animoji Animal Avatar (Required)'}
+          </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.avatarScroll}>
             {AVATAR_OPTIONS.map((av) => (
               <TouchableOpacity
@@ -117,7 +142,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               >
                 <Image source={av.image} style={styles.avatarImg} />
                 <Text style={[styles.avatarLabel, selectedAvatar === av.key && styles.avatarLabelSelected]}>
-                  {av.label}
+                  {isEs ? av.labelEs : av.labelEn}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -135,17 +160,17 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 <Text style={styles.initialsText}>{name.trim() ? name.trim().substring(0, 2).toUpperCase() : 'AA'}</Text>
               </View>
               <Text style={[styles.avatarLabel, selectedAvatar === 'initials' && styles.avatarLabelSelected]}>
-                Iniciales
+                {isEs ? 'Iniciales' : 'Initials'}
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Nombre o Apodo</Text>
+          <Text style={styles.label}>{isEs ? 'Nombre o Apodo' : 'Name or Nickname'}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej. Alexander"
+            placeholder={isEs ? 'Ej. Alexander' : 'e.g. Alexander'}
             placeholderTextColor={colors.textMuted}
             value={name}
             onChangeText={setName}
@@ -154,7 +179,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
         <View style={styles.row}>
           <View style={[styles.formGroup, styles.half]}>
-            <Text style={styles.label}>Edad</Text>
+            <Text style={styles.label}>{isEs ? 'Edad' : 'Age'}</Text>
             <TextInput
               style={styles.input}
               keyboardType="number-pad"
@@ -164,7 +189,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           </View>
 
           <View style={[styles.formGroup, styles.half]}>
-            <Text style={styles.label}>Peso Corporal (kg)</Text>
+            <Text style={styles.label}>{isEs ? 'Peso Corporal (kg)' : 'Body Weight (kg)'}</Text>
             <TextInput
               style={styles.input}
               keyboardType="decimal-pad"
@@ -175,14 +200,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Sexo biológico (Cálculo de Percentiles)</Text>
+          <Text style={styles.label}>{isEs ? 'Sexo biológico (Cálculo de Percentiles)' : 'Biological Sex (Percentiles Calculation)'}</Text>
           <View style={styles.segmentedControl}>
             <TouchableOpacity
               style={[styles.segment, sex === 'male' && styles.segmentActive]}
               onPress={() => setSex('male')}
             >
               <Text style={[styles.segmentText, sex === 'male' && styles.segmentTextActive]}>
-                Masculino
+                {isEs ? 'Masculino' : 'Male'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -190,14 +215,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               onPress={() => setSex('female')}
             >
               <Text style={[styles.segmentText, sex === 'female' && styles.segmentTextActive]}>
-                Femenino
+                {isEs ? 'Femenino' : 'Female'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Nivel de experiencia</Text>
+          <Text style={styles.label}>{isEs ? 'Nivel de experiencia' : 'Experience Level'}</Text>
           <View style={styles.levelRow}>
             {(['beginner', 'intermediate', 'advanced'] as ExperienceLevel[]).map((lvl) => (
               <TouchableOpacity
@@ -212,10 +237,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   ]}
                 >
                   {lvl === 'beginner'
-                    ? 'Principiante'
+                    ? (isEs ? 'Principiante' : 'Beginner')
                     : lvl === 'intermediate'
-                    ? 'Intermedio'
-                    : 'Avanzado'}
+                    ? (isEs ? 'Intermedio' : 'Intermediate')
+                    : (isEs ? 'Avanzado' : 'Advanced')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -223,7 +248,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </View>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Comenzar Entrenamiento</Text>
+          <Text style={styles.submitButtonText}>{isEs ? 'Comenzar Entrenamiento' : 'Start Workout'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -233,7 +258,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { paddingHorizontal: 24, paddingBottom: 40 },
-  header: { alignItems: 'center', marginBottom: 20 },
+  langSelectorRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 12 },
+  langChip: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginHorizontal: 4 },
+  langChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  langChipText: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  langChipTextActive: { color: '#FFFFFF', fontWeight: '700' },
+  header: { alignItems: 'center', marginBottom: 18 },
   brandBadge: {
     backgroundColor: colors.surfaceLight,
     borderColor: colors.border,
@@ -241,7 +271,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 12,
-    marginBottom: 12
+    marginBottom: 10
   },
   brandBadgeText: {
     color: colors.primary,
@@ -250,7 +280,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5
   },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
-  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 6, lineHeight: 20 },
   errorText: { color: colors.danger, fontWeight: '600', textAlign: 'center', marginBottom: 16 },
   formGroup: { marginBottom: 18 },
   label: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8 },
@@ -258,7 +288,7 @@ const styles = StyleSheet.create({
   // Avatares Scroll & Cards
   avatarScroll: { paddingVertical: 4, paddingRight: 10 },
   avatarCard: {
-    width: 78,
+    width: 82,
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -272,13 +302,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: colors.primary + '20'
   },
-  avatarImg: { width: 56, height: 56, borderRadius: 28, marginBottom: 4 },
-  avatarLabel: { fontSize: 11, color: colors.textSecondary, fontWeight: '600' },
+  avatarImg: { width: 58, height: 58, borderRadius: 29, marginBottom: 4 },
+  avatarLabel: { fontSize: 11, color: colors.textSecondary, fontWeight: '600', textAlign: 'center' },
   avatarLabelSelected: { color: colors.primary, fontWeight: '700' },
   initialsPlaceholder: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: colors.surfaceLight,
     justifyContent: 'center',
     alignItems: 'center',

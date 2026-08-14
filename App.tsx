@@ -107,7 +107,22 @@ const i18n = {
     accumulatedVolume: 'Volumen Acumulado',
     currentStreak: 'Racha Actual',
     weekDays: ['L','M','X','J','V','S','D'],
-    noRecords: 'Sin registro'
+    noRecords: 'Sin registro',
+    avatarModalTitle: 'Elige tu Avatar Animoji IA',
+    avatarModalSub: 'Selecciona uno de los 4 avatares de animales fitness estilo Animoji de Apple:',
+    lionName: '🦁 León Fuerza',
+    bearName: '🐻 Oso Mass',
+    pantherName: '🐆 Pantera Agilidad',
+    eagleName: '🦅 Águila Élite',
+    useInitials: 'Usar Iniciales Predeterminadas',
+    changeAvatar: 'Cambiar Avatar IA (4 Animales)',
+    privacySectionTitle: '🛡️ Privacidad, Seguridad y Créditos',
+    privacyTitle: 'Privacidad 100% Local-First',
+    privacySub: 'Tus datos de entrenamiento, series, pesos y notas residen exclusivamente en la base de datos cifrada SQLite de tu dispositivo. No se envían ni se rastrean en servidores externos.',
+    securityTitle: 'Seguridad y Control de Datos',
+    securitySub: 'Tienes el control absoluto. Puedes exportar una copia completa de tus entrenamientos en formato JSON en cualquier momento desde la pantalla de Historial.',
+    creditsTitle: 'Créditos y Creador',
+    creditsSub: 'FitTracker v1.0.0 (Expo SDK 54). Diseñado e impulsado por tecnología de vanguardia para atletas de alto rendimiento.'
   },
   en: {
     tabs: { home: 'Home', routines: 'Routines', catalog: 'Exercises', profile: 'Profile' },
@@ -163,7 +178,22 @@ const i18n = {
     accumulatedVolume: 'Accumulated Volume',
     currentStreak: 'Current Streak',
     weekDays: ['M','T','W','T','F','S','S'],
-    noRecords: 'No record'
+    noRecords: 'No record',
+    avatarModalTitle: 'Choose your AI Animoji Avatar',
+    avatarModalSub: 'Select one of the 4 Apple Animoji-style fitness animal avatars:',
+    lionName: '🦁 Strength Lion',
+    bearName: '🐻 Mass Bear',
+    pantherName: '🐆 Agility Panther',
+    eagleName: '🦅 Elite Eagle',
+    useInitials: 'Use Default Initials',
+    changeAvatar: 'Change AI Avatar (4 Animals)',
+    privacySectionTitle: '🛡️ Privacy, Security & Credits',
+    privacyTitle: '100% Local-First Privacy',
+    privacySub: 'Your workout logs, sets, weights, and notes remain exclusively in your device encrypted SQLite database. Nothing is sent to or tracked on external servers.',
+    securityTitle: 'Data Security & Control',
+    securitySub: 'You have complete control. You can export a full JSON backup of your workouts at any time from the History screen.',
+    creditsTitle: 'Credits & Creator',
+    creditsSub: 'FitTracker v1.0.0 (Expo SDK 54). Built and powered by cutting-edge technology for high-performance athletes.'
   }
 };
 
@@ -1201,7 +1231,7 @@ export default function App() {
               <Text style={[styles.greetingTitle, { marginTop: 12, fontSize: 20 }]}>{userProfile.name}</Text>
               <TouchableOpacity style={[styles.pillBtn, { marginTop: 10 }]} onPress={() => setShowAvatarModal(true)}>
                 <Ionicons name="images-outline" size={14} color={colors.primary} />
-                <Text style={styles.pillBtnText}>{activeLang === 'es' ? 'Cambiar Avatar IA (4 Animales)' : 'Change AI Avatar (4 Animals)'}</Text>
+                <Text style={styles.pillBtnText}>{t.changeAvatar}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1244,35 +1274,35 @@ export default function App() {
 
           {/* Widget Privacidad, Seguridad, Créditos y Creador */}
           <View style={styles.widget}>
-            <Text style={styles.wTitle}>🛡️ Privacidad, Seguridad y Créditos</Text>
+            <Text style={styles.wTitle}>{t.privacySectionTitle}</Text>
             
             <View style={styles.blockCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <Ionicons name="shield-checkmark" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                <Text style={[styles.bVal, { fontSize: 14 }]}>Privacidad 100% Local-First</Text>
+                <Text style={[styles.bVal, { fontSize: 14 }]}>{t.privacyTitle}</Text>
               </View>
               <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
-                Tus datos de entrenamiento, series, pesos y notas residen exclusivamente en la base de datos cifrada SQLite de tu dispositivo. No se envían ni se rastrean en servidores externos.
+                {t.privacySub}
               </Text>
             </View>
 
             <View style={styles.blockCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <Ionicons name="lock-closed" size={16} color={colors.cyan} style={{ marginRight: 6 }} />
-                <Text style={[styles.bVal, { fontSize: 14 }]}>Seguridad y Control de Datos</Text>
+                <Text style={[styles.bVal, { fontSize: 14 }]}>{t.securityTitle}</Text>
               </View>
               <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
-                Tienes el control absoluto. Puedes exportar una copia completa de tus entrenamientos en formato JSON en cualquier momento desde la pantalla de Historial.
+                {t.securitySub}
               </Text>
             </View>
 
             <View style={styles.blockCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <Ionicons name="code-slash" size={16} color="#FF9500" style={{ marginRight: 6 }} />
-                <Text style={[styles.bVal, { fontSize: 14 }]}>Créditos y Creador</Text>
+                <Text style={[styles.bVal, { fontSize: 14 }]}>{t.creditsTitle}</Text>
               </View>
               <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
-                FitTracker v1.0.0 (Expo SDK 54). Diseñado e impulsado por tecnología de vanguardia para atletas de alto rendimiento.
+                {t.creditsSub}
               </Text>
             </View>
           </View>
@@ -1448,8 +1478,8 @@ export default function App() {
             <TouchableWithoutFeedback>
               <View style={[styles.modalBox, { maxHeight: '85%' }]}>
                 <View style={styles.sheetHandle} />
-                <Text style={styles.modalTitle}>Elige tu Avatar de Animal IA</Text>
-                <Text style={[styles.wSub, { marginBottom: 12 }]}>Selecciona uno de los 4 avatares de animales fitness generados por IA:</Text>
+                <Text style={styles.modalTitle}>{t.avatarModalTitle}</Text>
+                <Text style={[styles.wSub, { marginBottom: 12 }]}>{t.avatarModalSub}</Text>
 
                 <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
@@ -1460,7 +1490,7 @@ export default function App() {
                       activeOpacity={0.8}
                     >
                       <Image source={AVATAR_IMAGES.lion} style={styles.avatarChoiceImg} />
-                      <Text style={styles.avatarChoiceName}>🦁 León Fuerza</Text>
+                      <Text style={styles.avatarChoiceName}>{t.lionName}</Text>
                     </TouchableOpacity>
 
                     {/* Oso */}
@@ -1470,7 +1500,7 @@ export default function App() {
                       activeOpacity={0.8}
                     >
                       <Image source={AVATAR_IMAGES.bear} style={styles.avatarChoiceImg} />
-                      <Text style={styles.avatarChoiceName}>🐻 Oso Mass</Text>
+                      <Text style={styles.avatarChoiceName}>{t.bearName}</Text>
                     </TouchableOpacity>
 
                     {/* Pantera */}
@@ -1480,7 +1510,7 @@ export default function App() {
                       activeOpacity={0.8}
                     >
                       <Image source={AVATAR_IMAGES.panther} style={styles.avatarChoiceImg} />
-                      <Text style={styles.avatarChoiceName}>🐆 Pantera Agilidad</Text>
+                      <Text style={styles.avatarChoiceName}>{t.pantherName}</Text>
                     </TouchableOpacity>
 
                     {/* Águila */}
@@ -1490,7 +1520,7 @@ export default function App() {
                       activeOpacity={0.8}
                     >
                       <Image source={AVATAR_IMAGES.eagle} style={styles.avatarChoiceImg} />
-                      <Text style={styles.avatarChoiceName}>🦅 Águila Élite</Text>
+                      <Text style={styles.avatarChoiceName}>{t.eagleName}</Text>
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
@@ -1501,7 +1531,7 @@ export default function App() {
                   onPress={() => handleSelectAvatar(null)}
                 >
                   <Ionicons name="person-outline" size={16} color={colors.textPrimary} />
-                  <Text style={[styles.pillBtnText, { color: colors.textPrimary, marginLeft: 6 }]}>Usar Iniciales Predeterminadas</Text>
+                  <Text style={[styles.pillBtnText, { color: colors.textPrimary, marginLeft: 6 }]}>{t.useInitials}</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
