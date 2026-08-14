@@ -14,6 +14,7 @@ import {
   NativeScrollEvent
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
 import { db } from '@database/client';
@@ -25,6 +26,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const TABS = ['home', 'routines', 'catalog', 'profile'] as const;
 type TabType = typeof TABS[number];
+
+// Días simulados de entrenamiento para la rejilla mensual (local-first)
+const SAMPLE_WORKOUT_DAYS = [2, 4, 5, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 25];
 
 export default function App() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
@@ -126,7 +130,7 @@ export default function App() {
   }
 
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
-  const bottomInset = Platform.OS === 'ios' ? 24 : 16;
+  const bottomInset = Platform.OS === 'ios' ? 44 : 36;
 
   // Formato fecha estilo Apple Fitness ("viernes, 14 ago")
   const formattedDate = new Date().toLocaleDateString('es-ES', {
@@ -134,6 +138,9 @@ export default function App() {
     day: 'numeric',
     month: 'short'
   });
+
+  // Generar días del mes actual para el Widget de Historial
+  const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -198,6 +205,47 @@ export default function App() {
                   </Text>
                 </View>
               </View>
+            </View>
+          </View>
+
+          {/* Widget Nuevo: Historial Mensual de Entrenamientos (Días completados) */}
+          <View style={styles.appleWidget}>
+            <View style={styles.widgetTopHeader}>
+              <View>
+                <Text style={styles.widgetGridTitle}>Días Entrenados este Mes</Text>
+                <Text style={styles.widgetSubLabel}>Agosto 2026 · Registro Local</Text>
+              </View>
+              <View style={styles.streakBadge}>
+                <Ionicons name="flame" size={14} color={colors.primary} />
+                <Text style={styles.streakText}>14 Días</Text>
+              </View>
+            </View>
+
+            {/* Días de la Semana Header */}
+            <View style={styles.weekDaysHeader}>
+              {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, idx) => (
+                <Text key={idx} style={styles.weekDayText}>{day}</Text>
+              ))}
+            </View>
+
+            {/* Matriz Mensual de Puntos de Entrenamiento */}
+            <View style={styles.calendarGrid}>
+              {daysInMonth.map((day) => {
+                const trained = SAMPLE_WORKOUT_DAYS.includes(day);
+                return (
+                  <View
+                    key={day}
+                    style={[
+                      styles.calendarDot,
+                      trained ? styles.calendarDotTrained : styles.calendarDotRest
+                    ]}
+                  >
+                    <Text style={[styles.calendarDotText, trained && styles.calendarDotTextTrained]}>
+                      {day}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -298,13 +346,18 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Barra Flotante Translucida de Navegación Estilo Glassmorphism Apple con Visibilidad Alta */}
+      {/* Barra Flotante Translucida con Iconos vectoriales Ionicons y Elevación Añadida */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
           <TouchableOpacity
             style={[styles.glassNavItem, activeTab === 'home' && styles.glassNavItemActive]}
             onPress={() => handleTabPress('home', 0)}
           >
+            <Ionicons
+              name={activeTab === 'home' ? 'grid' : 'grid-outline'}
+              size={18}
+              color={activeTab === 'home' ? colors.primary : '#8E8E93'}
+            />
             <Text style={[styles.glassNavLabel, activeTab === 'home' && styles.glassNavLabelActive]}>
               Resumen
             </Text>
@@ -314,6 +367,11 @@ export default function App() {
             style={[styles.glassNavItem, activeTab === 'routines' && styles.glassNavItemActive]}
             onPress={() => handleTabPress('routines', 1)}
           >
+            <Ionicons
+              name={activeTab === 'routines' ? 'flame' : 'flame-outline'}
+              size={18}
+              color={activeTab === 'routines' ? colors.primary : '#8E8E93'}
+            />
             <Text style={[styles.glassNavLabel, activeTab === 'routines' && styles.glassNavLabelActive]}>
               Rutinas
             </Text>
@@ -323,6 +381,11 @@ export default function App() {
             style={[styles.glassNavItem, activeTab === 'catalog' && styles.glassNavItemActive]}
             onPress={() => handleTabPress('catalog', 2)}
           >
+            <Ionicons
+              name={activeTab === 'catalog' ? 'barbell' : 'barbell-outline'}
+              size={18}
+              color={activeTab === 'catalog' ? colors.primary : '#8E8E93'}
+            />
             <Text style={[styles.glassNavLabel, activeTab === 'catalog' && styles.glassNavLabelActive]}>
               Ejercicios
             </Text>
@@ -332,6 +395,11 @@ export default function App() {
             style={[styles.glassNavItem, activeTab === 'profile' && styles.glassNavItemActive]}
             onPress={() => handleTabPress('profile', 3)}
           >
+            <Ionicons
+              name={activeTab === 'profile' ? 'person' : 'person-outline'}
+              size={18}
+              color={activeTab === 'profile' ? colors.primary : '#8E8E93'}
+            />
             <Text style={[styles.glassNavLabel, activeTab === 'profile' && styles.glassNavLabelActive]}>
               Perfil
             </Text>
@@ -403,7 +471,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 120
+    paddingBottom: 140
   },
   appleWidget: {
     backgroundColor: colors.surface,
@@ -418,6 +486,74 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     marginBottom: 16
+  },
+  widgetTopHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary + '20',
+    borderColor: colors.primary,
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radii.full
+  },
+  streakText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 4
+  },
+  weekDaysHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 8
+  },
+  weekDayText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    width: 32,
+    textAlign: 'center'
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around'
+  },
+  calendarDot: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 4
+  },
+  calendarDotTrained: {
+    backgroundColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4
+  },
+  calendarDotRest: {
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder
+  },
+  calendarDotText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textMuted
+  },
+  calendarDotTextTrained: {
+    color: '#000000',
+    fontWeight: '800'
   },
   ringsRow: {
     flexDirection: 'row',
@@ -573,7 +709,7 @@ const styles = StyleSheet.create({
   },
   glassNavItem: {
     flex: 1,
-    paddingVertical: 11,
+    paddingVertical: 8,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center'
@@ -583,8 +719,9 @@ const styles = StyleSheet.create({
   },
   glassNavLabel: {
     color: '#8E8E93',
-    fontSize: 12,
-    fontWeight: '700'
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2
   },
   glassNavLabelActive: {
     color: colors.primary,
