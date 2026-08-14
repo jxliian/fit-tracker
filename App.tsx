@@ -11,6 +11,7 @@ import {
   ScrollView,
   Dimensions,
   Modal,
+  TextInput,
   NativeSyntheticEvent,
   NativeScrollEvent
 } from 'react-native';
@@ -34,7 +35,7 @@ import { colors, radii, fonts } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
-// Shadcn components inlined - Metro can't resolve @components/ui alias without babel plugin
+import { ActiveWorkoutModal } from '@features/workout/ui/components/ActiveWorkoutModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_PADDING = 36;
@@ -88,6 +89,29 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   
+  // Modales de Entrenamiento, Rutinas, Ejercicios y Perfil
+  const [showActiveWorkout, setShowActiveWorkout] = useState<boolean>(false);
+  const [activeWorkoutTitle, setActiveWorkoutTitle] = useState<string>('Entrenamiento Libre');
+  const [activeWorkoutInitialExercises, setActiveWorkoutInitialExercises] = useState<{ exerciseId: string; exerciseName: string; category: string }[]>([]);
+
+  // Estado para Rutinas desde SQLite
+  const [routinesList, setRoutinesList] = useState<{ id: string; name: string; description: string }[]>([]);
+  const [showCreateRoutineModal, setShowCreateRoutineModal] = useState(false);
+  const [newRoutineName, setNewRoutineName] = useState('');
+  const [newRoutineDesc, setNewRoutineDesc] = useState('');
+
+  // Estado para Catálogo de Ejercicios
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [selectedMuscleFilter, setSelectedMuscleFilter] = useState('Todos');
+  const [allExercises, setAllExercises] = useState<{ id: string; name: string; category: string; equipment: string; instructions?: string }[]>([]);
+  const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<any | null>(null);
+
+  // Estado para Editar Perfil
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAge, setEditAge] = useState('');
+  const [editBodyWeight, setEditBodyWeight] = useState('');
+
   // Estado para la navegación mensual del calendario
   const [viewMonthDate, setViewMonthDate] = useState<Date>(new Date());
   const [stats, setStats] = useState<DashboardStats>({
@@ -128,20 +152,30 @@ export default function App() {
         setUserProfile(userProf);
       }
 
-      // 2. Calcular Estadísticas Reales desde SQLite
+      // 2. Cargar Rutinas
+      const routines = await db.getAllAsync<{ id: string; name: string; description: string }>(
+        `SELECT id, name, description FROM routines;`
+      );
+      setRoutinesList(routines);
+
+      // 3. Cargar Ejercicios
+      const exercises = await db.getAllAsync<any>(
+        `SELECT id, name, category, equipment, instructions FROM exercises ORDER BY name ASC;`
+      );
+      setAllExercises(exercises);
+
+      // 4. Calcular Estadísticas Reales desde SQLite
       const year = viewMonthDate.getFullYear();
       const month = viewMonthDate.getMonth();
       const firstDayMs = new Date(year, month, 1).getTime();
       const lastDayMs = new Date(year, month + 1, 0, 23, 59, 59).getTime();
 
-      // Sesiones del mes seleccionado
       const monthSessions = await db.getAllAsync<{ date: number }>(
         `SELECT date FROM workout_sessions WHERE date >= ? AND date <= ? ORDER BY date ASC;`,
         [firstDayMs, lastDayMs]
       );
       const trainedDays = monthSessions.map((s) => new Date(s.date).getDate());
 
-      // Totales globales en la app
       const totalVolumeRes = await db.getFirstAsync<{ total_vol: number }>(
         `SELECT SUM(weight_kg * reps) as total_vol FROM exercise_sets WHERE is_warmup = 0;`
       );
@@ -158,7 +192,6 @@ export default function App() {
         `SELECT MAX(estimated_1rm) as max_1rm FROM exercise_sets;`
       );
 
-      // Records Adaptativos por Ejercicio Clave
       const exercisePRsRaw = await db.getAllAsync<{
         exercise_id: string;
         exercise_name: string;
@@ -192,14 +225,11 @@ export default function App() {
         };
       });
 
-      // Rachas de entrenamiento
       const allSessions = await db.getAllAsync<{ date: number }>(
         `SELECT date FROM workout_sessions ORDER BY date DESC;`
       );
 
       let currentStreak = 0;
-      let maxStreak = 0;
-
       if (allSessions.length > 0) {
         const uniqueDates = Array.from(
           new Set(
@@ -209,9 +239,7 @@ export default function App() {
             })
           )
         );
-
-        currentStreak = uniqueDates.length > 0 ? uniqueDates.length : 0;
-        maxStreak = currentStreak;
+        currentStreak = uniqueDates.length;
       }
 
       const totalVol = totalVolumeRes?.total_vol || 0;
@@ -222,11 +250,11 @@ export default function App() {
         totalVolumeKg: totalVol,
         totalSessions: totalSess,
         totalSets: totalSetsRes?.cnt || 0,
-        avgRpe: avgRpeRes?.avg_rpe ? parseFloat((avgRpeRes.avg_rpe).toFixed(1)) : 0,
+        avgRpe: avgRpeRes?.avg_rpe ? parseFloat(avgRpeRes.avg_rpe.toFixed(1)) : 0,
         max1RM: max1RMRes?.max_1rm ? Math.round(max1RMRes.max_1rm) : 0,
         avgVolumePerSession: avgVolPerSession,
         currentStreakDays: currentStreak,
-        bestStreakDays: maxStreak,
+        bestStreakDays: currentStreak,
         trainedDaysInSelectedMonth: trainedDays,
         exercisePRs: prs
       });
@@ -240,6 +268,97 @@ export default function App() {
   useEffect(() => {
     loadDatabaseData();
   }, [viewMonthDate]);
+
+  const handleStartFreeWorkout = () => {
+    setActiveWorkoutTitle('Entrenamiento Libre');
+    setActiveWorkoutInitialExercises([]);
+    setShowActiveWorkout(true);
+  };
+
+  const handleStartRoutineWorkout = async (routine: { id: string; name: string }) => {
+    try {
+      const routineExs = await db.getAllAsync<{ exercise_id: string; exercise_name: string; category: string }>(
+        `SELECT re.exercise_id, e.name as exercise_name, e.category 
+         FROM routine_exercises re
+         JOIN exercises e ON re.exercise_id = e.id
+         WHERE re.routine_id = ?
+         ORDER BY re.exercise_order ASC;`,
+        [routine.id]
+      );
+
+      // Si es una rutina recién sembrada sin ejercicios guardados en routine_exercises, mapear sugerencias
+      let initialList = routineExs.map((r) => ({
+        exerciseId: r.exercise_id,
+        exerciseName: r.exercise_name,
+        category: r.category
+      }));
+
+      if (initialList.length === 0) {
+        if (routine.id === 'routine_push') {
+          initialList = [
+            { exerciseId: 'press-banca', exerciseName: 'Press de Banca', category: 'chest' },
+            { exerciseId: 'press-militar', exerciseName: 'Press Militar', category: 'shoulders' },
+            { exerciseId: 'fondos-triceps', exerciseName: 'Fondos de Tríceps', category: 'triceps' }
+          ];
+        } else if (routine.id === 'routine_pull') {
+          initialList = [
+            { exerciseId: 'dominadas', exerciseName: 'Dominadas', category: 'back' },
+            { exerciseId: 'remo-con-barra', exerciseName: 'Remo con Barra', category: 'back' },
+            { exerciseId: 'curl-biceps', exerciseName: 'Curl de Bíceps', category: 'biceps' }
+          ];
+        } else if (routine.id === 'routine_legs') {
+          initialList = [
+            { exerciseId: 'sentadilla-trasera', exerciseName: 'Sentadilla Trasera', category: 'quads' },
+            { exerciseId: 'peso-muerto-rumano', exerciseName: 'Peso Muerto Rumano', category: 'hamstrings' },
+            { exerciseId: 'prensa-pierna', exerciseName: 'Prensa de Piernas', category: 'quads' }
+          ];
+        }
+      }
+
+      setActiveWorkoutTitle(routine.name);
+      setActiveWorkoutInitialExercises(initialList);
+      setShowActiveWorkout(true);
+    } catch (err) {
+      console.error('Error al cargar la rutina:', err);
+    }
+  };
+
+  const handleCreateRoutineSave = async () => {
+    if (!newRoutineName.trim()) return;
+    const newId = `routine_${Date.now()}`;
+    await db.runAsync(
+      `INSERT INTO routines (id, name, description, is_predefined) VALUES (?, ?, ?, 0);`,
+      [newId, newRoutineName.trim(), newRoutineDesc.trim() || 'Rutina personalizada']
+    );
+    setNewRoutineName('');
+    setNewRoutineDesc('');
+    setShowCreateRoutineModal(false);
+    loadDatabaseData();
+  };
+
+  const handleSaveEditProfile = async () => {
+    if (!userProfile) return;
+    const newName = editName.trim() || userProfile.name;
+    const newAge = parseInt(editAge, 10) || userProfile.age;
+    const newWeight = parseFloat(editBodyWeight) || userProfile.bodyWeightKg;
+
+    await db.runAsync(
+      `UPDATE user_profile SET name = ?, age = ?, body_weight_kg = ? WHERE id = ?;`,
+      [newName, newAge, newWeight, userProfile.id]
+    );
+
+    setShowEditProfileModal(false);
+    loadDatabaseData();
+  };
+
+  const openEditProfile = () => {
+    if (userProfile) {
+      setEditName(userProfile.name);
+      setEditAge(String(userProfile.age));
+      setEditBodyWeight(String(userProfile.bodyWeightKg));
+      setShowEditProfileModal(true);
+    }
+  };
 
   const handleCompleteOnboarding = async (data: {
     name: string;
@@ -274,7 +393,6 @@ export default function App() {
     loadDatabaseData();
   };
 
-  // Cambiar de mes en el calendario
   const handlePrevMonth = () => {
     setViewMonthDate(new Date(viewMonthDate.getFullYear(), viewMonthDate.getMonth() - 1, 1));
   };
@@ -305,7 +423,6 @@ export default function App() {
     );
   }
 
-  // Si no hay perfil, mostramos el Onboarding
   if (!userProfile) {
     return (
       <SafeAreaView style={styles.container}>
@@ -318,7 +435,6 @@ export default function App() {
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
   const bottomInset = Platform.OS === 'ios' ? 44 : 36;
 
-  // Formato de fecha actual
   const todayDate = new Date();
   const isViewingCurrentMonth =
     viewMonthDate.getFullYear() === todayDate.getFullYear() &&
@@ -335,17 +451,29 @@ export default function App() {
     year: 'numeric'
   });
 
-  // Cálculo exacto de 7 columnas perfectas (Lunes a Domingo)
   const viewYear = viewMonthDate.getFullYear();
   const viewMonth = viewMonthDate.getMonth();
   const daysInViewMonthCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const daysInMonthArray = Array.from({ length: daysInViewMonthCount }, (_, i) => i + 1);
 
-  // 0: Domingo, 1: Lunes, ... 6: Sábado
   const rawFirstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
-  // Convertir a formato Europeo (0: Lunes, 1: Martes, ... 6: Domingo)
   const startPaddingSlotsCount = (rawFirstDayOfWeek + 6) % 7;
   const paddingSlotsArray = Array.from({ length: startPaddingSlotsCount }, (_, i) => i);
+
+  // Filtrado de ejercicios por categoría y búsqueda
+  const muscleCategories = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Hombros', 'Bíceps', 'Tríceps'];
+  const filteredExercises = allExercises.filter((ex) => {
+    const matchesSearch = ex.name.toLowerCase().includes(catalogSearch.toLowerCase());
+    if (selectedMuscleFilter === 'Todos') return matchesSearch;
+    const cat = ex.category.toLowerCase();
+    if (selectedMuscleFilter === 'Pecho') return matchesSearch && cat.includes('chest');
+    if (selectedMuscleFilter === 'Espalda') return matchesSearch && cat.includes('back');
+    if (selectedMuscleFilter === 'Piernas') return matchesSearch && (cat.includes('quad') || cat.includes('leg') || cat.includes('glute'));
+    if (selectedMuscleFilter === 'Hombros') return matchesSearch && cat.includes('shoulder');
+    if (selectedMuscleFilter === 'Bíceps') return matchesSearch && cat.includes('bicep');
+    if (selectedMuscleFilter === 'Tríceps') return matchesSearch && cat.includes('tricep');
+    return matchesSearch;
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -362,8 +490,14 @@ export default function App() {
       </View>
 
       <ScrollView ref={scrollViewRef} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={handleScroll} style={styles.pagerStyle}>
-        {/* P1: Resumen */}
+        {/* P1: Resumen Dashboard */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
+          {/* Botón Principal para Iniciar Entrenamiento */}
+          <TouchableOpacity style={styles.startWorkoutCta} onPress={handleStartFreeWorkout}>
+            <Ionicons name="play" size={22} color="#FFFFFF" />
+            <Text style={styles.startWorkoutCtaText}>INICIAR ENTRENAMIENTO LIBRE</Text>
+          </TouchableOpacity>
+
           <View style={styles.widget}>
             <Text style={styles.wTitle}>Métricas de Atleta</Text>
             <TouchableOpacity style={styles.pillBtn} onPress={() => setShowStatsModal(true)}>
@@ -428,42 +562,95 @@ export default function App() {
             <View style={[styles.widget, styles.halfW]}>
               <Text style={styles.wTitleSm}>Total Series</Text>
               <Text style={[styles.bigNum, { color: colors.purple }]}>{stats.totalSets}</Text>
-              <View style={styles.miniBarChart}>
-                <View style={[styles.bar, { height: '40%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '70%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '100%', backgroundColor: colors.purple }]} />
-                <View style={[styles.bar, { height: '60%', backgroundColor: colors.purple + '60' }]} />
-                <View style={[styles.bar, { height: '85%', backgroundColor: colors.purple }]} />
-              </View>
             </View>
             <View style={[styles.widget, styles.halfW]}>
               <Text style={styles.wTitleSm}>RPE Medio</Text>
               <Text style={[styles.bigNum, { color: colors.cyan }]}>{stats.avgRpe > 0 ? stats.avgRpe : '0.0'}</Text>
-              <View style={styles.miniBarChart}>
-                <View style={[styles.bar, { height: '50%', backgroundColor: colors.cyan + '60' }]} />
-                <View style={[styles.bar, { height: '90%', backgroundColor: colors.cyan }]} />
-                <View style={[styles.bar, { height: '70%', backgroundColor: colors.cyan + '60' }]} />
-                <View style={[styles.bar, { height: '100%', backgroundColor: colors.cyan }]} />
-                <View style={[styles.bar, { height: '85%', backgroundColor: colors.cyan }]} />
-              </View>
             </View>
           </View>
         </ScrollView>
 
-        {/* P2: Rutinas */}
+        {/* P2: Rutinas Prediseñadas y Creador */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.widget}><Text style={styles.wTitle}>Rutinas Prediseñadas</Text><Text style={styles.wSub}>Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.</Text></View>
+          <TouchableOpacity style={styles.startWorkoutCta} onPress={() => setShowCreateRoutineModal(true)}>
+            <Ionicons name="add-circle" size={22} color="#FFFFFF" />
+            <Text style={styles.startWorkoutCtaText}>CREAR RUTINA PERSONALIZADA</Text>
+          </TouchableOpacity>
+
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Rutinas Disponibles</Text>
+            <Text style={styles.wSub}>Selecciona una rutina para iniciar el seguimiento en vivo.</Text>
+          </View>
+
+          {routinesList.map((r) => (
+            <View key={r.id} style={styles.widget}>
+              <Text style={styles.wTitle}>{r.name}</Text>
+              <Text style={styles.wSub}>{r.description}</Text>
+              <TouchableOpacity
+                style={[styles.pillBtn, { marginTop: 12, backgroundColor: colors.primary }]}
+                onPress={() => handleStartRoutineWorkout(r)}
+              >
+                <Ionicons name="play" size={14} color="#FFFFFF" />
+                <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>INICIAR RUTINA</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
         </ScrollView>
 
-        {/* P3: Ejercicios */}
+        {/* P3: Catálogo de Ejercicios con Buscador y Filtros */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.widget}><Text style={styles.wTitle}>Catálogo de Ejercicios</Text><Text style={styles.wSub}>Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.</Text></View>
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>Catálogo de Ejercicios</Text>
+            <Text style={styles.wSub}>Busca entre +1.500 ejercicios filtrables por grupo muscular.</Text>
+          </View>
+
+          {/* Buscador */}
+          <View style={styles.searchBoxContainer}>
+            <Ionicons name="search" size={18} color={colors.textMuted} style={{ marginRight: 8 }} />
+            <TextInput
+              style={styles.searchTextInput}
+              placeholder="Buscar ejercicio..."
+              placeholderTextColor={colors.textMuted}
+              value={catalogSearch}
+              onChangeText={setCatalogSearch}
+            />
+          </View>
+
+          {/* Chips de Categorías */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+            {muscleCategories.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.chipItem, selectedMuscleFilter === cat && styles.chipItemActive]}
+                onPress={() => setSelectedMuscleFilter(cat)}
+              >
+                <Text style={[styles.chipText, selectedMuscleFilter === cat && styles.chipTextActive]}>{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Lista de Ejercicios */}
+          {filteredExercises.slice(0, 40).map((ex) => (
+            <TouchableOpacity
+              key={ex.id}
+              style={styles.blockCard}
+              onPress={() => setSelectedExerciseDetail(ex)}
+            >
+              <Text style={styles.bVal}>{ex.name}</Text>
+              <Text style={styles.bLabel}>{ex.category.toUpperCase()} · {ex.equipment.toUpperCase()}</Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
-        {/* P4: Perfil */}
+        {/* P4: Perfil de Atleta y Edición */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
           <View style={styles.widget}>
             <Text style={styles.wTitle}>Perfil de Atleta</Text>
+            <TouchableOpacity style={styles.pillBtn} onPress={openEditProfile}>
+              <Ionicons name="create-outline" size={14} color={colors.primary} />
+              <Text style={styles.pillBtnText}>Editar Perfil</Text>
+            </TouchableOpacity>
+
             <View style={styles.blockCard}><Text style={styles.bLabel}>Nombre</Text><Text style={styles.bVal}>{userProfile.name}</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>Edad</Text><Text style={styles.bVal}>{userProfile.age} años</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>Sexo</Text><Text style={styles.bVal}>{userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}</Text></View>
@@ -492,6 +679,109 @@ export default function App() {
           </View>
         </ScrollView>
       </ScrollView>
+
+      {/* Modal Entrenamiento Activo */}
+      <ActiveWorkoutModal
+        visible={showActiveWorkout}
+        workoutName={activeWorkoutTitle}
+        initialExercises={activeWorkoutInitialExercises}
+        onClose={() => setShowActiveWorkout(false)}
+        onFinish={() => {
+          setShowActiveWorkout(false);
+          loadDatabaseData();
+        }}
+      />
+
+      {/* Modal Crear Rutina */}
+      <Modal visible={showCreateRoutineModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Nueva Rutina</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Nombre (ej. Torso Pesado)"
+              placeholderTextColor={colors.textMuted}
+              value={newRoutineName}
+              onChangeText={setNewRoutineName}
+            />
+            <TextInput
+              style={styles.formInput}
+              placeholder="Descripción opcional"
+              placeholderTextColor={colors.textMuted}
+              value={newRoutineDesc}
+              onChangeText={setNewRoutineDesc}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 14 }}>
+              <TouchableOpacity style={[styles.pillBtn, { marginRight: 8 }]} onPress={() => setShowCreateRoutineModal(false)}>
+                <Text style={styles.pillBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.pillBtn, { backgroundColor: colors.primary }]} onPress={handleCreateRoutineSave}>
+                <Text style={[styles.pillBtnText, { color: '#FFF' }]}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal Editar Perfil */}
+      <Modal visible={showEditProfileModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Editar Perfil</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Nombre"
+              placeholderTextColor={colors.textMuted}
+              value={editName}
+              onChangeText={setEditName}
+            />
+            <TextInput
+              style={styles.formInput}
+              placeholder="Edad"
+              keyboardType="numeric"
+              placeholderTextColor={colors.textMuted}
+              value={editAge}
+              onChangeText={setEditAge}
+            />
+            <TextInput
+              style={styles.formInput}
+              placeholder="Peso Corporal (kg)"
+              keyboardType="numeric"
+              placeholderTextColor={colors.textMuted}
+              value={editBodyWeight}
+              onChangeText={setEditBodyWeight}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 14 }}>
+              <TouchableOpacity style={[styles.pillBtn, { marginRight: 8 }]} onPress={() => setShowEditProfileModal(false)}>
+                <Text style={styles.pillBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.pillBtn, { backgroundColor: colors.primary }]} onPress={handleSaveEditProfile}>
+                <Text style={[styles.pillBtnText, { color: '#FFF' }]}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal Detalle Ejercicio */}
+      <Modal visible={!!selectedExerciseDetail} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            {selectedExerciseDetail && (
+              <>
+                <Text style={styles.modalTitle}>{selectedExerciseDetail.name}</Text>
+                <Text style={[styles.wSub, { color: colors.primary, marginBottom: 12 }]}>
+                  {selectedExerciseDetail.category.toUpperCase()} · {selectedExerciseDetail.equipment.toUpperCase()}
+                </Text>
+                <Text style={styles.wSub}>{selectedExerciseDetail.instructions || 'Instrucciones no disponibles.'}</Text>
+                <TouchableOpacity style={[styles.pillBtn, { marginTop: 16, alignSelf: 'center' }]} onPress={() => setSelectedExerciseDetail(null)}>
+                  <Text style={styles.pillBtnText}>Cerrar</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal Estadísticas */}
       <Modal visible={showStatsModal} animationType="slide" transparent statusBarTranslucent onRequestClose={() => setShowStatsModal(false)}>
@@ -612,6 +902,21 @@ const styles = StyleSheet.create({
   modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   modalTitle: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 20, includeFontPadding: false },
   closeBtn: { padding: 8, backgroundColor: colors.surfaceLight, borderRadius: radii.full },
+
+  // CTA Start Workout button
+  startWorkoutCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, borderRadius: radii.xl, paddingVertical: 15, paddingHorizontal: 20, marginBottom: 14, alignSelf: 'stretch', elevation: 4 },
+  startWorkoutCtaText: { color: '#FFFFFF', fontFamily: fonts.headingBold, fontSize: 15, marginLeft: 8, includeFontPadding: false },
+
+  // Catalog search & category chips
+  searchBoxContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, borderRadius: radii.md, paddingHorizontal: 12, paddingVertical: 8, marginBottom: 12 },
+  searchTextInput: { flex: 1, color: colors.textPrimary, fontFamily: fonts.bodyRegular, fontSize: 14 },
+  chipItem: { backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, borderRadius: radii.full, paddingVertical: 6, paddingHorizontal: 14, marginRight: 8 },
+  chipItemActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { color: colors.textSecondary, fontFamily: fonts.bodyBold, fontSize: 12 },
+  chipTextActive: { color: '#FFFFFF' },
+
+  // Form inputs for modals
+  formInput: { backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, borderRadius: radii.md, color: colors.textPrimary, fontFamily: fonts.bodyRegular, fontSize: 14, paddingVertical: 10, paddingHorizontal: 14, marginTop: 10 },
 
   // Floating Nav
   floatingNav: { position: 'absolute', left: 14, right: 14, borderRadius: 32, overflow: 'hidden', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)', backgroundColor: 'rgba(28,28,30,0.94)', zIndex: 9999, elevation: 10 },
