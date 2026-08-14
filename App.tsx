@@ -365,7 +365,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Contenido Deslizable (Swipe Pager) con Componentes Shadcn */}
+      {/* Contenido Deslizable (Swipe Pager) con Componentes Shadcn Centrados */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -376,18 +376,20 @@ export default function App() {
       >
         {/* Pantalla 1: Resumen Dashboard (Estadísticas Reales SQLite) */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Shadcn Card 1: Métricas de Atleta */}
+          {/* Shadcn Card 1: Métricas de Atleta con Encabezado Centrado */}
           <Card>
-            <CardHeader>
-              <CardTitle style={{ flex: 1, marginRight: 8 }}>Métricas de Atleta</CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                label="Stats"
-                icon={<Ionicons name="analytics" size={14} color={colors.primary} />}
-                onPress={() => setShowStatsModal(true)}
-              />
-            </CardHeader>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Métricas de Atleta</CardTitle>
+              <View style={styles.centeredBadgeContainer}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  label="Estadísticas"
+                  icon={<Ionicons name="analytics" size={14} color={colors.primary} />}
+                  onPress={() => setShowStatsModal(true)}
+                />
+              </View>
+            </View>
 
             <CardContent style={styles.ringsRow}>
               {/* Indicador Visual Simulado */}
@@ -399,25 +401,25 @@ export default function App() {
                 </View>
               </View>
 
-              {/* Lista de Métricas Reales de SQLite */}
+              {/* Lista de Métricas Reales de SQLite Centradas */}
               <View style={styles.metricsList}>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Volumen Acumulado</Text>
-                  <Text style={[styles.metricValue, { color: colors.secondary }]}>
+                <View style={styles.metricItemCentered}>
+                  <Text style={styles.metricLabelCentered}>Volumen Acumulado</Text>
+                  <Text style={[styles.metricValueCentered, { color: colors.secondary }]}>
                     {stats.totalVolumeKg.toLocaleString()} <Text style={styles.metricUnit}>KG</Text>
                   </Text>
                 </View>
 
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Sesiones Completadas</Text>
-                  <Text style={[styles.metricValue, { color: colors.primary }]}>
+                <View style={styles.metricItemCentered}>
+                  <Text style={styles.metricLabelCentered}>Sesiones Completadas</Text>
+                  <Text style={[styles.metricValueCentered, { color: colors.primary }]}>
                     {stats.totalSessions} <Text style={styles.metricUnit}>SESIONES</Text>
                   </Text>
                 </View>
 
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Series Registradas</Text>
-                  <Text style={[styles.metricValue, { color: colors.cyan }]}>
+                <View style={styles.metricItemCentered}>
+                  <Text style={styles.metricLabelCentered}>Series Registradas</Text>
+                  <Text style={[styles.metricValueCentered, { color: colors.cyan }]}>
                     {stats.totalSets} <Text style={styles.metricUnit}>SERIES</Text>
                   </Text>
                 </View>
@@ -425,43 +427,45 @@ export default function App() {
             </CardContent>
           </Card>
 
-          {/* Shadcn Card 2: Historial Mensual Interactivo de Días Entrenados */}
+          {/* Shadcn Card 2: Historial Mensual Interactivo Totalmente Centrado */}
           <Card>
-            <CardHeader>
-              <View style={{ flex: 1, marginRight: 6 }}>
-                <CardTitle>Días Entrenados</CardTitle>
-                <CardDescription>
-                  {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
-                </CardDescription>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Días Entrenados</CardTitle>
+              <CardDescription style={styles.centeredSub}>
+                {monthYearLabel.charAt(0).toUpperCase() + monthYearLabel.slice(1)}
+              </CardDescription>
+              <View style={styles.centeredBadgeContainer}>
+                <Badge
+                  variant="streak"
+                  label={`Racha: ${stats.currentStreakDays} ${stats.currentStreakDays === 1 ? 'día' : 'días'}`}
+                  icon={<Ionicons name="flame" size={14} color={colors.primary} />}
+                />
               </View>
-              
-              <Badge
-                variant="streak"
-                label={`${stats.currentStreakDays} ${stats.currentStreakDays === 1 ? 'día' : 'días'}`}
-                icon={<Ionicons name="flame" size={13} color={colors.primary} />}
-              />
-            </CardHeader>
+            </View>
 
             <CardContent>
-              {/* Selector de Meses Shadcn Icon Buttons */}
-              <View style={styles.monthNavRow}>
+              {/* Selector de Meses Centrado con Botones Shadcn Explícitos (Anterior / Siguiente) */}
+              <View style={styles.monthNavRowCentered}>
                 <Button
                   variant="secondary"
-                  size="icon"
-                  icon={<Ionicons name="chevron-back" size={18} color={colors.primary} />}
+                  size="sm"
+                  label="Anterior"
+                  icon={<Ionicons name="chevron-back" size={14} color={colors.primary} />}
                   onPress={handlePrevMonth}
                 />
 
                 <View style={styles.monthCurrentCenterContainer}>
                   <Text style={styles.monthCurrentText}>
-                    {stats.trainedDaysInSelectedMonth.length} días activos
+                    {stats.trainedDaysInSelectedMonth.length} días
                   </Text>
                 </View>
 
                 <Button
                   variant="secondary"
-                  size="icon"
-                  icon={<Ionicons name="chevron-forward" size={18} color={colors.primary} />}
+                  size="sm"
+                  label="Siguiente"
+                  iconPosition="right"
+                  icon={<Ionicons name="chevron-forward" size={14} color={colors.primary} />}
                   onPress={handleNextMonth}
                 />
               </View>
@@ -514,11 +518,11 @@ export default function App() {
 
           {/* Fila de 2 Widgets Secundarios: Reps & Esfuerzo RPE */}
           <View style={styles.widgetGridRow}>
-            {/* Shadcn Card Izquierda: Total Series */}
+            {/* Shadcn Card Izquierda: Total Series Centradas */}
             <Card style={styles.halfWidget}>
-              <CardTitle style={styles.widgetGridTitle}>Total Series</CardTitle>
-              <CardDescription style={styles.widgetSubLabel}>Histórico Local</CardDescription>
-              <Text style={[styles.widgetBigNumber, { color: colors.purple }]}>
+              <CardTitle style={styles.widgetGridTitleCentered}>Total Series</CardTitle>
+              <CardDescription style={styles.widgetSubLabelCentered}>Histórico Local</CardDescription>
+              <Text style={[styles.widgetBigNumberCentered, { color: colors.purple }]}>
                 {stats.totalSets}
               </Text>
               
@@ -531,11 +535,11 @@ export default function App() {
               </View>
             </Card>
 
-            {/* Shadcn Card Derecha: Intensidad RPE Medio */}
+            {/* Shadcn Card Derecha: Intensidad RPE Medio Centrado */}
             <Card style={styles.halfWidget}>
-              <CardTitle style={styles.widgetGridTitle}>Esfuerzo (RPE)</CardTitle>
-              <CardDescription style={styles.widgetSubLabel}>Promedio</CardDescription>
-              <Text style={[styles.widgetBigNumber, { color: colors.cyan }]}>
+              <CardTitle style={styles.widgetGridTitleCentered}>Esfuerzo (RPE)</CardTitle>
+              <CardDescription style={styles.widgetSubLabelCentered}>Promedio</CardDescription>
+              <Text style={[styles.widgetBigNumberCentered, { color: colors.cyan }]}>
                 {stats.avgRpe > 0 ? stats.avgRpe : '0.0'}
               </Text>
 
@@ -553,121 +557,121 @@ export default function App() {
         {/* Pantalla 2: Rutinas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
           <Card>
-            <CardHeader>
-              <CardTitle>Rutinas Prediseñadas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Rutinas Prediseñadas</CardTitle>
+              <CardDescription style={styles.centeredSub}>
                 Selecciona una rutina para iniciar una sesión con pesos e incrementos automatizados.
               </CardDescription>
-            </CardContent>
+            </View>
           </Card>
         </ScrollView>
 
         {/* Pantalla 3: Catálogo de Ejercicios */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
           <Card>
-            <CardHeader>
-              <CardTitle>Catálogo de Ejercicios</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Catálogo de Ejercicios</CardTitle>
+              <CardDescription style={styles.centeredSub}>
                 Buscador con más de 1.500 ejercicios filtrables por grupo muscular y equipamiento.
               </CardDescription>
-            </CardContent>
+            </View>
           </Card>
         </ScrollView>
 
-        {/* Pantalla 4: Perfil de Atleta + Estadísticas Integradas */}
+        {/* Pantalla 4: Perfil de Atleta + Estadísticas Integradas Totalmente Centradas */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent}>
-          {/* Shadcn Card 1: Datos Personales */}
+          {/* Shadcn Card 1: Datos Personales Centrados en Bloques */}
           <Card>
-            <CardHeader>
-              <CardTitle>Perfil de Atleta</CardTitle>
-            </CardHeader>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Perfil de Atleta</CardTitle>
+            </View>
             <CardContent>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>Nombre</Text>
-                <Text style={styles.profileValue}>{userProfile.name}</Text>
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Nombre</Text>
+                <Text style={styles.profileBlockValueCentered}>{userProfile.name}</Text>
               </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>Edad</Text>
-                <Text style={styles.profileValue}>{userProfile.age} años</Text>
+
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Edad</Text>
+                <Text style={styles.profileBlockValueCentered}>{userProfile.age} años</Text>
               </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>Sexo</Text>
-                <Text style={styles.profileValue}>
+
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Sexo</Text>
+                <Text style={styles.profileBlockValueCentered}>
                   {userProfile.sex === 'male' ? 'Masculino' : 'Femenino'}
                 </Text>
               </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>Peso Corporal</Text>
-                <Text style={styles.profileValue}>{userProfile.bodyWeightKg} kg</Text>
+
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Peso Corporal</Text>
+                <Text style={styles.profileBlockValueCentered}>{userProfile.bodyWeightKg} kg</Text>
               </View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>Nivel</Text>
-                <Text style={styles.profileValue}>{userProfile.experienceLevel.toUpperCase()}</Text>
+
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Nivel</Text>
+                <Text style={styles.profileBlockValueCentered}>{userProfile.experienceLevel.toUpperCase()}</Text>
               </View>
             </CardContent>
           </Card>
 
-          {/* Shadcn Card 2: Estadísticas del Perfil en Tarjetas de Bloque Amplio */}
+          {/* Shadcn Card 2: Estadísticas del Perfil Totalmente Centradas */}
           <Card>
-            <CardHeader>
-              <CardTitle style={{ color: colors.primary }}>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={[styles.centeredTitle, { color: colors.primary }]}>
                 Estadísticas & Récords (PRs)
               </CardTitle>
-            </CardHeader>
+            </View>
 
             <CardContent>
-              <View style={styles.profileBlockCard}>
-                <Text style={styles.profileBlockLabel}>Volumen Acumulado</Text>
-                <Text style={[styles.profileBlockValue, { color: colors.secondary }]}>
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Volumen Acumulado</Text>
+                <Text style={[styles.profileBlockValueCentered, { color: colors.secondary }]}>
                   {stats.totalVolumeKg.toLocaleString()} kg
                 </Text>
               </View>
               
-              <View style={styles.profileBlockCard}>
-                <Text style={styles.profileBlockLabel}>1RM Máximo Histórico</Text>
-                <Text style={[styles.profileBlockValue, { color: colors.primary }]}>
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>1RM Máximo Histórico</Text>
+                <Text style={[styles.profileBlockValueCentered, { color: colors.primary }]}>
                   {stats.max1RM > 0 ? `${stats.max1RM} kg` : 'Sin registro'}
                 </Text>
               </View>
 
-              <View style={styles.profileBlockCard}>
-                <Text style={styles.profileBlockLabel}>Racha Actual</Text>
-                <Text style={[styles.profileBlockValue, { color: colors.cyan }]}>
+              <View style={styles.profileBlockCardCentered}>
+                <Text style={styles.profileBlockLabelCentered}>Racha Actual</Text>
+                <Text style={[styles.profileBlockValueCentered, { color: colors.cyan }]}>
                   {stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'día' : 'días'}
                 </Text>
               </View>
             </CardContent>
           </Card>
 
-          {/* Shadcn Card 3: Marcas Adaptativas por Ejercicio Clave */}
+          {/* Shadcn Card 3: Marcas Adaptativas Centradas */}
           <Card>
-            <CardHeader>
-              <CardTitle>Mejores Marcas por Ejercicio</CardTitle>
-            </CardHeader>
+            <View style={styles.centeredHeaderBlock}>
+              <CardTitle style={styles.centeredTitle}>Mejores Marcas por Ejercicio</CardTitle>
+            </View>
 
             <CardContent>
               {stats.exercisePRs.length > 0 ? (
                 stats.exercisePRs.map((pr) => (
-                  <View key={pr.exerciseId} style={styles.prRowItem}>
-                    <View style={{ flex: 1, marginRight: 8 }}>
-                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
-                      <Text style={styles.prSubText}>
-                        Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
-                      </Text>
+                  <View key={pr.exerciseId} style={styles.prRowItemCentered}>
+                    <Text style={styles.prExerciseNameCentered}>{pr.exerciseName}</Text>
+                    <Text style={styles.prSubTextCentered}>
+                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
+                    </Text>
+                    <View style={styles.prBadgeCenterWrapper}>
+                      <Badge
+                        variant="primary"
+                        label={`${pr.rankEmoji} ${pr.rankLabel}`}
+                      />
                     </View>
-                    <Badge
-                      variant="primary"
-                      label={`${pr.rankEmoji} ${pr.rankLabel}`}
-                    />
                   </View>
                 ))
               ) : (
                 <View style={styles.emptyPrContainer}>
-                  <Text style={styles.emptyPrText}>
+                  <Text style={styles.emptyPrTextCentered}>
                     Aún no has registrado series completadas. Tus mejores marcas por ejercicio aparecerán aquí automáticamente.
                   </Text>
                 </View>
@@ -677,7 +681,7 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Modal de Estadísticas Translúcido que CUBRE 100% HASTA EL BORDE INFERIOR */}
+      {/* Modal de Estadísticas Translúcido Centrado */}
       <Modal
         visible={showStatsModal}
         animationType="slide"
@@ -698,56 +702,56 @@ export default function App() {
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              <View style={styles.statGridCard}>
-                <Text style={styles.statGridLabel}>1RM Máximo Estimado</Text>
-                <Text style={[styles.statGridValue, { color: colors.primary }]}>
+              <View style={styles.statGridCardCentered}>
+                <Text style={styles.statGridLabelCentered}>1RM Máximo Estimado</Text>
+                <Text style={[styles.statGridValueCentered, { color: colors.primary }]}>
                   {stats.max1RM > 0 ? `${stats.max1RM} KG` : 'Sin registro'}
                 </Text>
               </View>
 
-              <View style={styles.statGridCard}>
-                <Text style={styles.statGridLabel}>Volumen Promedio por Sesión</Text>
-                <Text style={[styles.statGridValue, { color: colors.cyan }]}>
+              <View style={styles.statGridCardCentered}>
+                <Text style={styles.statGridLabelCentered}>Volumen Promedio por Sesión</Text>
+                <Text style={[styles.statGridValueCentered, { color: colors.cyan }]}>
                   {stats.avgVolumePerSession > 0 ? `${stats.avgVolumePerSession.toLocaleString()} KG` : '0 KG'}
                 </Text>
               </View>
 
-              <View style={styles.statGridCard}>
-                <Text style={styles.statGridLabel}>Racha Más Larga</Text>
-                <Text style={[styles.statGridValue, { color: colors.purple }]}>
+              <View style={styles.statGridCardCentered}>
+                <Text style={styles.statGridLabelCentered}>Racha Más Larga</Text>
+                <Text style={[styles.statGridValueCentered, { color: colors.purple }]}>
                   {stats.bestStreakDays} Días
                 </Text>
               </View>
 
-              <View style={styles.statGridCard}>
-                <Text style={styles.statGridLabel}>Intensidad RPE Medio</Text>
-                <Text style={[styles.statGridValue, { color: colors.secondary }]}>
+              <View style={styles.statGridCardCentered}>
+                <Text style={styles.statGridLabelCentered}>Intensidad RPE Medio</Text>
+                <Text style={[styles.statGridValueCentered, { color: colors.secondary }]}>
                   {stats.avgRpe > 0 ? `${stats.avgRpe} RPE` : '0.0'}
                 </Text>
               </View>
 
-              {/* Récords Adaptativos por Ejercicio dentro del Modal */}
-              <Text style={[styles.widgetHeaderTitle, { marginTop: 12, marginBottom: 12 }]}>
+              {/* Récords Adaptativos por Ejercicio dentro del Modal Centrados */}
+              <Text style={[styles.centeredTitle, { marginTop: 16, marginBottom: 12 }]}>
                 Marcas Personales (PRs)
               </Text>
 
               {stats.exercisePRs.length > 0 ? (
                 stats.exercisePRs.map((pr) => (
-                  <View key={`modal_${pr.exerciseId}`} style={styles.prRowItem}>
-                    <View style={{ flex: 1, marginRight: 8 }}>
-                      <Text style={styles.prExerciseName}>{pr.exerciseName}</Text>
-                      <Text style={styles.prSubText}>
-                        Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
-                      </Text>
+                  <View key={`modal_${pr.exerciseId}`} style={styles.prRowItemCentered}>
+                    <Text style={styles.prExerciseNameCentered}>{pr.exerciseName}</Text>
+                    <Text style={styles.prSubTextCentered}>
+                      Max Peso: {pr.maxWeightKg} kg · 1RM: {pr.maxEstimated1RM} kg
+                    </Text>
+                    <View style={styles.prBadgeCenterWrapper}>
+                      <Badge
+                        variant="primary"
+                        label={`${pr.rankEmoji} ${pr.rankLabel}`}
+                      />
                     </View>
-                    <Badge
-                      variant="primary"
-                      label={`${pr.rankEmoji} ${pr.rankLabel}`}
-                    />
                   </View>
                 ))
               ) : (
-                <Text style={styles.emptyPrText}>
+                <Text style={styles.emptyPrTextCentered}>
                   Completa tu primera sesión de entrenamiento para calcular tus marcas en tiempo real.
                 </Text>
               )}
@@ -899,12 +903,37 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 140
   },
-  monthNavRow: {
+  centeredHeaderBlock: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14
+  },
+  centeredTitle: {
+    color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+    textAlign: 'center',
+    includeFontPadding: false
+  },
+  centeredSub: {
+    color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    marginTop: 2,
+    textAlign: 'center',
+    includeFontPadding: false
+  },
+  centeredBadgeContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  monthNavRowCentered: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surfaceLight,
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: radii.md,
     marginBottom: 14
@@ -913,12 +942,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8
+    paddingHorizontal: 6
   },
   monthCurrentText: {
     color: colors.textPrimary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 12,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
     textAlign: 'center',
     includeFontPadding: false
   },
@@ -1011,19 +1040,22 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 14
   },
-  metricItem: {
-    marginBottom: 6
+  metricItemCentered: {
+    marginBottom: 8,
+    alignItems: 'center'
   },
-  metricLabel: {
+  metricLabelCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  metricValue: {
+  metricValueCentered: {
     fontFamily: fonts.headingBold,
     fontSize: 16,
     marginTop: 1,
+    textAlign: 'center',
     includeFontPadding: false
   },
   metricUnit: {
@@ -1039,23 +1071,26 @@ const styles = StyleSheet.create({
     width: (SCREEN_WIDTH - 44) / 2,
     marginBottom: 0
   },
-  widgetGridTitle: {
+  widgetGridTitleCentered: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
     fontSize: 15,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  widgetSubLabel: {
+  widgetSubLabelCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 12,
     marginTop: 2,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  widgetBigNumber: {
+  widgetBigNumberCentered: {
     fontFamily: fonts.headingBold,
     fontSize: 26,
     marginVertical: 4,
+    textAlign: 'center',
     includeFontPadding: false
   },
   miniBarChart: {
@@ -1069,90 +1104,72 @@ const styles = StyleSheet.create({
     width: 5,
     borderRadius: 3
   },
-  widgetHeaderTitle: {
-    color: colors.textPrimary,
-    fontFamily: fonts.headingBold,
-    fontSize: 17,
-    marginBottom: 12,
-    includeFontPadding: false
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surfaceLight
-  },
-  profileLabel: {
-    color: colors.textSecondary,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    flex: 1,
-    marginRight: 8,
-    includeFontPadding: false
-  },
-  profileValue: {
-    color: colors.textPrimary,
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    textAlign: 'right',
-    includeFontPadding: false
-  },
-  profileBlockCard: {
+  profileBlockCardCentered: {
     backgroundColor: colors.surfaceLight,
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: radii.md,
     marginBottom: 10,
     borderColor: colors.border,
-    borderWidth: 1
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  profileBlockLabel: {
+  profileBlockLabelCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodySemiBold,
     fontSize: 12,
     marginBottom: 2,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  profileBlockValue: {
+  profileBlockValueCentered: {
     fontFamily: fonts.headingBold,
     fontSize: 18,
+    color: colors.textPrimary,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  prRowItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  prRowItemCentered: {
     backgroundColor: colors.surfaceLight,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: radii.md,
-    marginBottom: 8,
+    marginBottom: 10,
     borderColor: colors.border,
-    borderWidth: 1
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  prExerciseName: {
+  prExerciseNameCentered: {
     color: colors.textPrimary,
     fontFamily: fonts.headingBold,
-    fontSize: 13,
+    fontSize: 14,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  prSubText: {
+  prSubTextCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 11,
     marginTop: 2,
+    textAlign: 'center',
     includeFontPadding: false
+  },
+  prBadgeCenterWrapper: {
+    marginTop: 8,
+    alignItems: 'center'
   },
   emptyPrContainer: {
     paddingVertical: 12
   },
-  emptyPrText: {
+  emptyPrTextCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
     lineHeight: 18,
-    fontStyle: 'italic'
+    fontStyle: 'italic',
+    textAlign: 'center'
   },
   modalOverlayFullBottom: {
     flex: 1,
@@ -1190,24 +1207,28 @@ const styles = StyleSheet.create({
     fontSize: 20,
     includeFontPadding: false
   },
-  statGridCard: {
+  statGridCardCentered: {
     backgroundColor: colors.surfaceLight,
     borderRadius: radii.lg,
     padding: 14,
     marginBottom: 10,
     borderColor: colors.border,
-    borderWidth: 1
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  statGridLabel: {
+  statGridLabelCentered: {
     color: colors.textSecondary,
     fontFamily: fonts.bodySemiBold,
     fontSize: 12,
     marginBottom: 4,
+    textAlign: 'center',
     includeFontPadding: false
   },
-  statGridValue: {
+  statGridValueCentered: {
     fontFamily: fonts.headingBold,
     fontSize: 20,
+    textAlign: 'center',
     includeFontPadding: false
   },
   floatingNavContainer: {
