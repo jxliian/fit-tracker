@@ -3,12 +3,41 @@
 % --- LANGUAGE AND ENCODING ---
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage[margin=2.5cm]{geometry}
+\usepackage[margin=2.3cm,top=2.5cm,bottom=2.5cm]{geometry}
 
-% --- TYPOGRAPHY AND MATHEMATICS ---
+% --- COLOR DEFINITIONS ---
+\usepackage{xcolor}
+\definecolor{primaryblue}{RGB}{0, 102, 204}
+\definecolor{darkgray}{RGB}{40, 40, 40}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
+
+% --- TYPOGRAPHY AND MICROTYPOGRAPHY ---
 \usepackage{lmodern}
+\usepackage{microtype}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{mathtools}
+
+% --- HEADERS AND FOOTERS ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\bfseries\color{darkgray} FitTracker System Specification}
+\fancyhead[R]{\small\sffamily\color{gray} IEEE 830 Architecture}
+\fancyfoot[C]{\small\sffamily Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% --- SECTION TITLE STYLING ---
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\sffamily\bfseries\color{primaryblue}}{\thesection}{1em}{}[{\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\normalfont\large\sffamily\bfseries\color{darkgray}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\sffamily\bfseries\color{darkgray}}{\thesubsubsection}{1em}{}
 
 % --- TABLES AND DIAGRAMS ---
 \usepackage{booktabs}
@@ -19,12 +48,6 @@
 
 % --- SOURCE CODE LISTINGS ---
 \usepackage{listings}
-\usepackage{xcolor}
-
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
 
 \lstdefinestyle{mystyle}{
     backgroundcolor=\color{backcolour},   
@@ -46,21 +69,30 @@
 }
 \lstset{style=mystyle}
 
-% --- HYPERLINKS ---
+% --- HYPERLINKS & CITATIONS ---
+\usepackage{cite}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
-    linkcolor=blue,
+    linkcolor=primaryblue,
+    citecolor=primaryblue,
     filecolor=magenta,      
-    urlcolor=cyan,
-    pdftitle={FitTracker - Technical Specification},
+    urlcolor=primaryblue,
+    pdftitle={FitTracker - Technical Architecture Specification},
+    pdfauthor={Lead Software Architect},
     pdfpagemode=UseOutlines,
 }
 
 % --- DOCUMENT METADATA ---
-\title{\textbf{\Huge FitTracker}\\[0.5em] 
-\Large Technical Architecture Specification, SRS Specification, and Mathematical Model of Automatic Progressive Overload}
-\author{\textbf{Lead Software Architect \& Tech Lead}}
+\title{
+  \vspace{-1.5cm}
+  \begin{center}
+    {\Huge\sffamily\bfseries\color{primaryblue} FitTracker}\\[0.4em] 
+    {\Large\sffamily Executive Technical Architecture Specification, SRS Standard, and Mathematical Model of Progressive Overload}\\[0.6em]
+    \rule{\linewidth}{1.2pt}
+  \end{center}
+}
+\author{\textbf{Lead Software Architect \& Mobile Tech Lead}}
 \date{\today}
 
 \begin{document}
@@ -68,9 +100,10 @@
 \maketitle
 
 \begin{abstract}
-This document serves as the formal software engineering specification for the mobile system \textbf{FitTracker}. Engineered under a \textit{Local-First} paradigm and modular \textit{Clean Architecture}, FitTracker automates resistance training management using an adaptive progressive overload engine based on mathematical 1RM ($1Repetition Maximum$) estimation formulas and RPE/RIR autoregulation. It provides the Software Requirements Specification (SRS), UML use cases, SQLite database design, and the progressive algorithm mathematical model.
+\noindent This document serves as the comprehensive software engineering specification for the mobile application \textbf{FitTracker} \cite{reactnative2024, expo2024sdk}. Engineered under a strict \textit{Local-First} architecture \cite{kleppmann2019localfirst}, FitTracker automates resistance training progression through mathematical 1RM ($1Repetition Maximum$) estimations \cite{epley1985poundage, brzycki1993strength} and RPE/RIR autoregulation \cite{zourdos2016rpe, helms2016rpe}. Adhering to the IEEE 830 SRS standard \cite{ieee830}, this specification details functional and non-functional requirements, UML use cases, SQLite relational DDL schema, UI design token system, automated test suite verification, and deployment readiness.
 \end{abstract}
 
+\vspace{0.5cm}
 \tableofcontents
 \newpage
 
@@ -88,5 +121,14 @@ This document serves as the formal software engineering specification for the mo
 \input{sections/06_ui_design_system.tex}
 \newpage
 \input{sections/07_session_features_and_analytics.tex}
+\newpage
+\input{sections/08_testing_and_verification.tex}
+\newpage
+\input{sections/09_conclusion_and_future_work.tex}
+
+\newpage
+% --- BIBLIOGRAPHY ---
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}

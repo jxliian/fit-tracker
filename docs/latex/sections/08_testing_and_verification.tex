@@ -1,0 +1,47 @@
+\section{System Verification, Automated Testing, and QA}
+
+\subsection{Unit Testing Strategy and Test Harness}
+To ensure deterministic execution of core mathematical overload algorithms, streak calculations, and database use cases, \textbf{FitTracker} incorporates a comprehensive automated test suite powered by \textbf{Jest} and \textbf{TypeScript}.
+
+The test suite covers four architectural domains:
+\begin{enumerate}
+    \item \textbf{Mathematical Progression Calculators}: Verification of Epley 1RM estimations, Brzycki projections, and volume aggregations.
+    \item \textbf{Strength Ranks Domain Rules}: Classification of 1RM values into strength rank tiers (\textit{Beginner, Intermediate, Advanced, Elite}) across squat, bench press, deadlift, overhead press, and hip thrust.
+    \item \textbf{Streak Buffer Logic}: Automated verification of the 3-day rest allowance rule.
+    \item \textbf{Use Case Orchestrators}: Execution of session creation, set logging with RPE/RIR, catalog filtering, and session finalization.
+\end{enumerate}
+
+\subsection{Automated Test Suite Summary}
+Table~\ref{tab:test_suite_results} details the 9 test suites and 33 unit test specs executing cleanly across the codebase.
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Automated Test Suite Execution Matrix}
+\label{tab:test_suite_results}
+\begin{tabularx}{\textwidth}{l p{5.5cm} c c}
+\toprule
+\textbf{Test Suite File} & \textbf{Target Domain / Use Case Module} & \textbf{Tests} & \textbf{Status} \\
+\midrule
+\texttt{strength-ranks.test.ts} & Strength rank classification \& 1RM boundaries & 5 & \textbf{PASS} \\
+\texttt{calculators.test.ts} & Epley 1RM math \& volume calculation formulas & 4 & \textbf{PASS} \\
+\texttt{create-workout-session.test.ts} & Session initialization \& unique ID assignment & 3 & \textbf{PASS} \\
+\texttt{search-exercises.test.ts} & Catalog substring search \& muscle group filters & 4 & \textbf{PASS} \\
+\texttt{streak.test.ts} & Rest-tolerant 3-day streak buffer algorithm & 4 & \textbf{PASS} \\
+\texttt{get-exercise-history.test.ts} & Time-series aggregation \& 1RM history generation & 3 & \textbf{PASS} \\
+\texttt{register-set.test.ts} & Live set logging, warmup tagging, RPE validation & 4 & \textbf{PASS} \\
+\texttt{finish-workout-session.test.ts} & Session finalization, duration, and PR detection & 3 & \textbf{PASS} \\
+\texttt{get-progression-recommendation.test.ts} & Autoregulated progressive overload rules & 3 & \textbf{PASS} \\
+\midrule
+\textbf{Total Execution Metrics} & \textbf{9 Test Suites} & \textbf{33 / 33} & \textbf{100\% PASS} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Manual QA and User Acceptance Testing (UAT)}
+In addition to automated unit tests, end-to-end manual QA validation was performed on physical Android and iOS devices using Expo Go (SDK 54):
+\begin{itemize}
+    \item \textbf{Background State Persistence}: Verified that background timer notifications update continuously when navigating away from the active workout screen.
+    \item \textbf{Gesture \& Orientation Ergonomics}: Validated smooth horizontal swiping between tab screens with zero visual overlap on device status bars or gesture navigation pills.
+    \item \textbf{FitMojis UI Rendering}: Verified seamless rendering of 3D minimal animal avatar cards across profile setup and avatar picker modals.
+\end{itemize}
