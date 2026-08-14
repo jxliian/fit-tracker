@@ -1,0 +1,51 @@
+\section{UI Architecture and Design System (Apple Fitness \& Glassmorphism Specification)}
+
+\subsection{Design System Philosophy and OLED Aesthetics}
+The user interface layer of \textbf{FitTracker} transitions from generic UI patterns to an executive, high-performance visual system modeled after the \textbf{Apple iOS Fitness} design guidelines and standardized through \textbf{shadcn/ui} design token principles.
+
+The UI architecture adheres to four primary design standards:
+\begin{enumerate}
+    \item \textbf{True OLED Pitch Black Base (\#000000)}: Minimizes power consumption on OLED mobile displays while establishing high metric contrast ratio ($> 15:1$).
+    \item \textbf{Squircle Widget Containers (\#1C1C1E)}: Rounded rectangular widget containers ($r = 20\text{--}26\text{px}$) with subtle border delimiters (\#2C2C2E) providing visual hierarchy.
+    \item \textbf{Neon Functional Accent Palette}: Visual telemetry using vivid neon accents:
+    \begin{itemize}
+        \item \textbf{Neon Pink / Red (\#FF2D55)}: Total Volume / Tonnage target.
+        \item \textbf{Neon Green (\#30D158)}: Session duration, rest timer completion, and active states.
+        \item \textbf{Neon Cyan (\#64D2FF)}: Autoregulated intensity, RPE, and set volume.
+        \item \textbf{Neon Purple (\#BF5AF2)}: Repetition counts and strength records.
+    \end{itemize}
+    \item \textbf{Glassmorphism Translucent Floating Navigation}: Floating navigation bar utilizing \texttt{expo-blur} \texttt{BlurView} with dark frosted glass tint, layered above the active content pager.
+\end{enumerate}
+
+\subsection{Design Tokens Specification}
+Table~\ref{tab:design_tokens} documents the exact color palette and radius tokens implemented in \texttt{src/core/theme/colors.ts}.
+
+\begin{table}[h!]
+\centering
+\caption{FitTracker Design Tokens Specification}
+\label{tab:design_tokens}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Token Identifier} & \textbf{Hex / RGBA Value} & \textbf{Design System Function} \\
+\midrule
+\texttt{background} & \texttt{\#000000} & Primary OLED canvas background. \\
+\texttt{surface} & \texttt{\#1C1C1E} & Standard widget container background. \\
+\texttt{surfaceLight} & \texttt{\#2C2C2E} & Elevated cards, inputs, and active glass pills. \\
+\texttt{border} & \texttt{\#38383A} & Structural card borders and dividers. \\
+\texttt{primary} & \texttt{\#30D158} & Apple Fitness Neon Green (Workout / Active). \\
+\texttt{secondary} & \texttt{\#FF2D55} & Apple Fitness Neon Pink/Red (Volume / Move). \\
+\texttt{cyan} & \texttt{\#64D2FF} & Apple Fitness Neon Cyan (RPE / Sets). \\
+\texttt{purple} & \texttt{\#BF5AF2} & Apple Fitness Neon Purple (Reps / Stats). \\
+\texttt{glassBackground} & \texttt{rgba(28,28,30,0.94)} & High-contrast frosted glass backdrop. \\
+\texttt{glassBorder} & \texttt{rgba(255,255,255,0.18)} & Glass edge light reflection border. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Cross-Platform Navigation and Safe Area Insets}
+To guarantee zero UI clipping against device physical notches, camera punch-holes, and gesture navigation bars across Android and iOS platforms:
+\begin{itemize}
+    \item \textbf{Top Status Bar Inset}: Dynamically computed via \texttt{StatusBar.currentHeight} with a top offset of $12\text{--}16\text{px}$.
+    \item \textbf{Bottom Gesture Inset}: Positioned with an explicit elevation level ($\text{elevation} = 10, zIndex = 9999$) and bottom offset ($16\text{--}24\text{px}$) preventing collision with Android three-button or gesture pill navigation.
+    \item \textbf{Horizontal Gesture Pager}: Implemented using a native \texttt{ScrollView} with \texttt{pagingEnabled} and \texttt{onMomentumScrollEnd} event listeners, allowing seamless bidirectional swiping synchronized with the floating bottom tab bar.
+\end{itemize}

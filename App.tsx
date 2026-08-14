@@ -126,7 +126,7 @@ export default function App() {
   }
 
   const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 36) + 12 : 16;
-  const bottomInset = Platform.OS === 'ios' ? 36 : 30;
+  const bottomInset = Platform.OS === 'ios' ? 24 : 16;
 
   // Formato fecha estilo Apple Fitness ("viernes, 14 ago")
   const formattedDate = new Date().toLocaleDateString('es-ES', {
@@ -298,7 +298,7 @@ export default function App() {
         </ScrollView>
       </ScrollView>
 
-      {/* Barra Flotante Translucida de Navegación Estilo Glassmorphism Apple */}
+      {/* Barra Flotante Translucida de Navegación Estilo Glassmorphism Apple con Visibilidad Alta */}
       <View style={[styles.floatingNavContainer, { bottom: bottomInset }]}>
         <BlurView intensity={Platform.OS === 'ios' ? 80 : 100} tint="dark" style={styles.glassBar}>
           <TouchableOpacity
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 110
+    paddingBottom: 120
   },
   appleWidget: {
     backgroundColor: colors.surface,
@@ -550,31 +550,39 @@ const styles = StyleSheet.create({
   },
   floatingNavContainer: {
     position: 'absolute',
-    left: 20,
-    right: 20,
-    borderRadius: 36,
+    left: 18,
+    right: 18,
+    borderRadius: 32,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.glassBorder
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(28, 28, 30, 0.94)',
+    zIndex: 9999,
+    elevation: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12
   },
   glassBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    backgroundColor: colors.glassBackground
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    backgroundColor: 'transparent'
   },
   glassNavItem: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 28,
-    alignItems: 'center'
+    paddingVertical: 11,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   glassNavItemActive: {
-    backgroundColor: colors.glassPillActive
+    backgroundColor: '#3A3A3C'
   },
   glassNavLabel: {
-    color: colors.textSecondary,
+    color: '#8E8E93',
     fontSize: 12,
     fontWeight: '700'
   },
