@@ -1,15 +1,46 @@
-\section{UML Use Cases}
+\section{UML Use Cases Specification}
 
 \subsection{System Actors}
 \begin{itemize}
-    \item \textbf{Athlete / End User:} Individual executing workout routines, logging sets, and monitoring overload metrics.
+    \item \textbf{Athlete / End User:} Individual executing workout routines, logging sets, managing rest timers, and analyzing overload analytics offline.
 \end{itemize}
 
-\subsection{Detailed Use Case Specification UC-01}
+\subsection{System Use Case Diagram}
 
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, every node/.style={fill=white, font=\sffamily\small}]
+    % Actor
+    \node (actor) [draw, circle, minimum size=1cm] {User};
+    
+    % Use Cases
+    \node (uc1) [draw, rounded corners, right=2.5cm of actor, yshift=3cm] {UC-01: Log Workout Set};
+    \node (uc2) [draw, rounded corners, right=2.5cm of actor, yshift=2cm] {UC-02: Get Overload Rec.};
+    \node (uc3) [draw, rounded corners, right=2.5cm of actor, yshift=1cm] {UC-03: Start Workout Session};
+    \node (uc4) [draw, rounded corners, right=2.5cm of actor, yshift=0cm] {UC-04: Finish Workout Session};
+    \node (uc5) [draw, rounded corners, right=2.5cm of actor, yshift=-1cm] {UC-05: Search Catalog};
+    \node (uc6) [draw, rounded corners, right=2.5cm of actor, yshift=-2cm] {UC-06: 1RM Progress Analytics};
+    \node (uc7) [draw, rounded corners, right=2.5cm of actor, yshift=-3cm] {UC-07: Rest Timer Management};
+
+    % Connections
+    \draw (actor) -- (uc1);
+    \draw (actor) -- (uc2);
+    \draw (actor) -- (uc3);
+    \draw (actor) -- (uc4);
+    \draw (actor) -- (uc5);
+    \draw (actor) -- (uc6);
+    \draw (actor) -- (uc7);
+\end{tikzpicture}
+\caption{UML Use Case Overview for FitTracker Domain Architecture.}
+\label{fig:use_cases}
+\end{figure}
+
+\subsection{Detailed Specifications}
+
+\subsubsection{UC-01: Log Workout Set and Compute Progression}
 \begin{table}[h!]
 \centering
-\caption{Use Case UC-01: Log Workout Set and Compute Progression}
+\small
 \begin{tabularx}{\textwidth}{l X}
 \toprule
 \textbf{Use Case} & \textbf{UC-01: Log Workout Set and Compute Automatic Progression} \\
@@ -18,17 +49,112 @@
 \textbf{Preconditions} & At least one exercise exists in the catalog and an active workout session is started. \\
 \textbf{Main Flow} & 
 1. The user selects the current exercise in the active session.\newline
-2. The system displays previously calculated target weight and reps.\newline
-3. The user inputs performed load ($kg$), completed reps, and RPE ($6.0 - 10.0$).\newline
-4. The user taps "Complete Set".\newline
-5. The system persists the set to SQLite, starts the rest timer, and increments set counter.\newline
-6. The overload engine updates the session's estimated 1RM. \\
+2. The system displays target weight ($kg$) and reps calculated by UC-02.\newline
+3. The user inputs load, completed reps, and RPE ($6.0 - 10.0$).\newline
+4. The user confirms set registration.\newline
+5. The system calculates estimated 1RM, persists the set to SQLite, and updates session effective volume. \\
 \textbf{Alternative Flow} & 
-\textit{3a. User marks set as "Warmup Set":}\newline
-- System saves the set but excludes it from effective volume and record 1RM calculations.\newline
-\textit{3b. User indicates muscle failure (RPE 10 / RIR 0):}\newline
-- System adjusts fatigue accumulation factor for the next session calculation. \\
-\textbf{Postconditions} & Set persisted in SQLite; rest timer triggers audio/vibration notification upon expiration. \\
+\textit{3a. User marks set as Warmup Set:}\newline
+- System records the set but excludes it from effective volume and 1RM calculation. \\
+\textbf{Postconditions} & Set recorded in SQLite with calculated 1RM. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-02: Get Automatic Overload Recommendation}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-02: Get Automatic Overload Recommendation} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & Exercise selected from catalog. \\
+\textbf{Main Flow} & 
+1. System fetches last working sets logged for the exercise.\newline
+2. System calculates average $RIR$ and completion rate against target rep range.\newline
+3. System applies load rule ($+2.5\,kg$ compound / $+1.25\,kg$ isolation / $MAINTAIN$ / $DELOAD$).\newline
+4. System presents recommended load and target reps with mathematical justification. \\
+\textbf{Postconditions} & Recommendation generated deterministically without side effects. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-03: Create \& Start Workout Session}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-03: Create \& Start Workout Session} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & Application initialized with SQLite schema. \\
+\textbf{Main Flow} & 
+1. User enters session title (e.g., "Leg Day - Heavy") and optional notes.\newline
+2. System generates unique session identifier and records start timestamp.\newline
+3. System transitions session state to active. \\
+\textbf{Postconditions} & New session record persisted in SQLite database. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-04: Finish \& Finalize Workout Session}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-04: Finish \& Finalize Workout Session} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & Active workout session in progress. \\
+\textbf{Main Flow} & 
+1. User taps "Finish Workout".\newline
+2. System calculates session duration, total tonnage, and total effective volume.\newline
+3. System identifies any Personal Records (PRs) set during the session.\newline
+4. System updates session metadata and displays workout summary. \\
+\textbf{Postconditions} & Session state marked complete; summary metrics stored. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-05: Filter \& Search Exercise Catalog}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-05: Filter \& Search Exercise Catalog} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & SQLite exercise table populated with dataset. \\
+\textbf{Main Flow} & 
+1. User types search query or selects filter parameters (muscle group, equipment, type).\newline
+2. System executes SQL query with substring matching and filter constraints.\newline
+3. System returns sorted list of matching exercises. \\
+\textbf{Postconditions} & Filtered exercise list displayed to user. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{UC-06: Get Exercise Historic Metrics \& 1RM Evolution}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Use Case} & \textbf{UC-06: Get Exercise Historic Metrics \& 1RM Evolution} \\
+\midrule
+\textbf{Primary Actor} & Athlete / End User \\
+\textbf{Preconditions} & Exercise selected by user. \\
+\textbf{Main Flow} & 
+1. System queries SQLite for all historical sets of the target exercise.\newline
+2. System aggregates peak estimated 1RM per session date.\newline
+3. System calculates historical max weight, max volume, and total sets logged.\newline
+4. System returns time-series data suitable for charting. \\
+\textbf{Postconditions} & Analytics DTO generated for visual rendering. \\
 \bottomrule
 \end{tabularx}
 \end{table}
