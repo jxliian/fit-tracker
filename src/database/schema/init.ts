@@ -72,6 +72,11 @@ export async function initDatabase(): Promise<void> {
       FOREIGN KEY (routine_id) REFERENCES routines (id) ON DELETE CASCADE,
       FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS body_weight_logs (
+      id TEXT PRIMARY KEY NOT NULL,
+      weight_kg REAL NOT NULL,
+      date INTEGER NOT NULL
+    );
   `);
 
     try {

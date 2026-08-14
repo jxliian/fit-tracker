@@ -13,6 +13,7 @@ import {
   Modal,
   TextInput,
   Image,
+  Alert,
   TouchableWithoutFeedback,
   PanResponder,
   Animated,
@@ -50,6 +51,14 @@ const AVATAR_IMAGES: Record<string, any> = {
   panther: require('./assets/avatars/panther.png'),
   eagle: require('./assets/avatars/eagle.png')
 };
+
+const GYM_ROUTINE_IMAGES = [
+  require('./assets/routines/gym_1.png'),
+  require('./assets/routines/gym_2.png'),
+  require('./assets/routines/gym_3.png'),
+  require('./assets/routines/gym_4.png'),
+  require('./assets/routines/gym_5.png'),
+];
 
 // Dictionary for internationalization (ES / EN)
 const i18n = {
@@ -544,8 +553,71 @@ export default function App() {
   const [viewMonthDate, setViewMonthDate] = useState<Date>(new Date());
   const [volumeChartData, setVolumeChartData] = useState<{ label: string; value: number }[]>([]);
   const [strengthChartData, setStrengthChartData] = useState<{ label: string; value: number }[]>([]);
+  const [weightChartData, setWeightChartData] = useState<{ label: string; value: number }[]>([]);
+  const [showWeightModal, setShowWeightModal] = useState(false);
+  const [inputLogWeightKg, setInputLogWeightKg] = useState('');
   const [selectedCalendarDateMs, setSelectedCalendarDateMs] = useState<number | null>(null);
   const [selected1RMExerciseId, setSelected1RMExerciseId] = useState<string>('barbell-squat');
+
+  const loadBodyWeightChartData = async (profWeight?: number) => {
+    try {
+      const logs = await db.getAllAsync<{ date: number; weight_kg: number }>(
+        'SELECT date, weight_kg FROM body_weight_logs ORDER BY date ASC;'
+      );
+
+      if (logs && logs.length > 0) {
+        const points = logs.map((lg) => {
+          const d = new Date(lg.date);
+          return {
+            label: `${d.getDate()}/${d.getMonth() + 1}`,
+            value: Math.round(lg.weight_kg * 10) / 10
+          };
+        });
+        setWeightChartData(points);
+      } else {
+        const fallbackWeight = profWeight || userProfile?.bodyWeightKg || 75;
+        const today = new Date();
+        setWeightChartData([
+          {
+            label: `${today.getDate()}/${today.getMonth() + 1}`,
+            value: fallbackWeight
+          }
+        ]);
+      }
+    } catch (err) {
+      console.warn('Error loading body weight chart data:', err);
+    }
+  };
+
+  const handleAddWeightLog = async () => {
+    const parsedWeight = parseFloat(inputLogWeightKg);
+    if (isNaN(parsedWeight) || parsedWeight <= 0) {
+      Alert.alert('Error', 'Por favor ingresa un peso corporal válido.');
+      return;
+    }
+
+    try {
+      const logId = `bw_${Date.now()}`;
+      const nowMs = Date.now();
+      await db.runAsync(
+        'INSERT INTO body_weight_logs (id, weight_kg, date) VALUES (?, ?, ?);',
+        [logId, parsedWeight, nowMs]
+      );
+
+      if (userProfile) {
+        await db.runAsync('UPDATE user_profile SET body_weight_kg = ? WHERE id = ?;', [parsedWeight, userProfile.id]);
+        setUserProfile({ ...userProfile, bodyWeightKg: parsedWeight });
+      }
+
+      await loadBodyWeightChartData(parsedWeight);
+      setShowWeightModal(false);
+      setInputLogWeightKg('');
+      Alert.alert('¡Peso Registrado!', `Nuevo peso de ${parsedWeight} kg guardado.`);
+    } catch (err) {
+      console.error('Error guardando peso:', err);
+      Alert.alert('Error', 'No se pudo guardar el registro de peso.');
+    }
+  };
 
   const activeLang = userProfile?.language || 'es';
   const t = i18n[activeLang] || i18n.es;
@@ -749,6 +821,7 @@ export default function App() {
       setVolumeChartData(chartPointsVolume);
 
       await load1RMChartForExercise(selected1RMExerciseId);
+      await loadBodyWeightChartData(userProf?.bodyWeightKg);
     } catch (error) {
       console.error('Error cargando estadísticas reales de SQLite:', error);
     } finally {
@@ -1115,6 +1188,13 @@ export default function App() {
             onSelectChip={handleSelect1RMExercise}
           />
 
+          <ProgressionChart
+            title={activeLang === 'es' ? 'Evolución del Peso Corporal' : 'Body Weight Evolution'}
+            unit="KG"
+            data={weightChartData}
+            color={colors.cyan}
+          />
+
           <View style={styles.widgetGridRow}>
             <View style={[styles.widget, styles.halfW]}>
               <Text style={styles.wTitleSm}>{t.totalSets}</Text>
@@ -1139,19 +1219,31 @@ export default function App() {
             <Text style={styles.wSub}>{t.routinesSub}</Text>
           </View>
 
-          {routinesList.map((r) => (
-            <View key={r.id} style={styles.widget}>
-              <Text style={styles.wTitle}>{getLocalizedRoutineName(r.name, activeLang)}</Text>
-              <Text style={styles.wSub}>{getLocalizedRoutineDesc(r.description, r.name, activeLang)}</Text>
-              <TouchableOpacity
-                style={[styles.pillBtn, { marginTop: 12, backgroundColor: colors.primary }]}
-                onPress={() => handleStartRoutineWorkout(r)}
-              >
-                <Ionicons name="play" size={14} color="#FFFFFF" />
-                <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>{t.startRoutine}</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+          {routinesList.map((r, index) => {
+            const charSum = r.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const imgIndex = Math.abs(charSum) % GYM_ROUTINE_IMAGES.length;
+
+            return (
+              <View key={r.id} style={[styles.widget, { padding: 0, overflow: 'hidden' }]}>
+                <Image
+                  source={GYM_ROUTINE_IMAGES[imgIndex]}
+                  style={{ width: '100%', height: 130 }}
+                  resizeMode="cover"
+                />
+                <View style={{ padding: 16 }}>
+                  <Text style={styles.wTitle}>{getLocalizedRoutineName(r.name, activeLang)}</Text>
+                  <Text style={styles.wSub}>{getLocalizedRoutineDesc(r.description, r.name, activeLang)}</Text>
+                  <TouchableOpacity
+                    style={[styles.pillBtn, { marginTop: 12, backgroundColor: colors.primary, alignSelf: 'flex-start' }]}
+                    onPress={() => handleStartRoutineWorkout(r)}
+                  >
+                    <Ionicons name="play" size={14} color="#FFFFFF" />
+                    <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>{t.startRoutine}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })}
         </ScrollView>
 
         {/* P3: Catálogo de Ejercicios */}
@@ -1236,11 +1328,13 @@ export default function App() {
           </View>
 
           <View style={styles.widget}>
-            <Text style={styles.wTitle}>{t.profileTitle}</Text>
-            <TouchableOpacity style={styles.pillBtn} onPress={openEditProfile}>
-              <Ionicons name="create-outline" size={14} color={colors.primary} />
-              <Text style={styles.pillBtnText}>{t.editProfile}</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.wTitle}>{t.profileTitle}</Text>
+              <TouchableOpacity style={styles.pillBtn} onPress={openEditProfile}>
+                <Ionicons name="create-outline" size={14} color={colors.primary} />
+                <Text style={styles.pillBtnText}>{t.editProfile}</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.name}</Text><Text style={styles.bVal}>{userProfile.name}</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.age}</Text><Text style={styles.bVal}>{userProfile.age} {activeLang === 'es' ? 'años' : 'years'}</Text></View>
@@ -1249,6 +1343,29 @@ export default function App() {
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.weight}</Text><Text style={styles.bVal}>{userProfile.bodyWeightKg} kg</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.level}</Text><Text style={styles.bVal}>{(t as any)[userProfile.experienceLevel] || userProfile.experienceLevel.toUpperCase()}</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.language}</Text><Text style={styles.bVal}>{userProfile.language === 'en' ? 'English (EN)' : 'Español (ES)'}</Text></View>
+          </View>
+
+          {/* Card de Registro de Peso Corporal */}
+          <View style={styles.widget}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={styles.wTitle}>{activeLang === 'es' ? 'Evolución de Peso Corporal' : 'Body Weight Evolution'}</Text>
+              <TouchableOpacity
+                style={[styles.pillBtn, { backgroundColor: colors.cyan }]}
+                onPress={() => {
+                  setInputLogWeightKg(String(userProfile.bodyWeightKg));
+                  setShowWeightModal(true);
+                }}
+              >
+                <Ionicons name="add" size={14} color="#FFFFFF" />
+                <Text style={[styles.pillBtnText, { color: '#FFFFFF' }]}>{activeLang === 'es' ? 'Registrar' : 'Log'}</Text>
+              </TouchableOpacity>
+            </View>
+            <ProgressionChart
+              title={activeLang === 'es' ? 'Histórico de Pesaje (KG)' : 'Weight History (KG)'}
+              unit="KG"
+              data={weightChartData}
+              color={colors.cyan}
+            />
           </View>
 
           <View style={styles.widget}>
@@ -1663,6 +1780,39 @@ export default function App() {
           })}
         </BlurView>
       </View>
+
+      {/* Modal para Registrar Peso Corporal */}
+      <Modal visible={showWeightModal} transparent animationType="fade" onRequestClose={() => setShowWeightModal(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowWeightModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalBox}>
+                <View style={styles.sheetHandle} />
+                <Text style={styles.modalTitle}>{activeLang === 'es' ? 'Registrar Peso Corporal' : 'Log Body Weight'}</Text>
+                <Text style={styles.wSub}>{activeLang === 'es' ? 'Introduce tu peso actual en kilogramos:' : 'Enter your current weight in kg:'}</Text>
+                
+                <TextInput
+                  style={[styles.formInput, { marginTop: 12, fontSize: 18, textAlign: 'center' }]}
+                  keyboardType="decimal-pad"
+                  placeholder="75.5"
+                  placeholderTextColor={colors.textMuted}
+                  value={inputLogWeightKg}
+                  onChangeText={setInputLogWeightKg}
+                />
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, gap: 8 }}>
+                  <TouchableOpacity style={styles.pillBtn} onPress={() => setShowWeightModal(false)}>
+                    <Text style={styles.pillBtnText}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.pillBtn, { backgroundColor: colors.cyan }]} onPress={handleAddWeightLog}>
+                    <Text style={[styles.pillBtnText, { color: '#FFF' }]}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 }

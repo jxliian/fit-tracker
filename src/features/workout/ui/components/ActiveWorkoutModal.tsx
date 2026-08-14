@@ -59,10 +59,35 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [catalogExercises, setCatalogExercises] = useState<{ id: string; name: string; category: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const workoutRepo = new SqliteWorkoutRepository();
   const exerciseRepo = new SqliteExerciseRepository();
   const getRecommendation = new GetProgressionRecommendationUseCase(workoutRepo, exerciseRepo);
+
+  const handleWeekShift = (delta: number) => {
+    const newOffset = weekOffset + delta;
+    setWeekOffset(newOffset);
+
+    setExercisesInWorkout((prev) =>
+      prev.map((ex) => {
+        const isCompound = ['chest', 'back', 'quadriceps', 'compound'].includes(ex.category.toLowerCase());
+        const weightStep = delta * (isCompound ? 2.5 : 1.25);
+
+        return {
+          ...ex,
+          sets: ex.sets.map((s) => {
+            const currentWeight = parseFloat(s.weightKg) || 0;
+            const nextWeight = Math.max(0, currentWeight + weightStep);
+            return {
+              ...s,
+              weightKg: String(Math.round(nextWeight * 4) / 4)
+            };
+          })
+        };
+      })
+    );
+  };
 
   // Cronómetro del entrenamiento
   useEffect(() => {
@@ -335,6 +360,28 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
 
           <TouchableOpacity style={styles.finishBtn} onPress={handleFinishWorkout}>
             <Text style={styles.finishBtnText}>Finalizar</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Bar de Selección de Semana (Progresión Automática) */}
+        <View style={styles.weekProgressionBar}>
+          <TouchableOpacity style={styles.weekBtn} onPress={() => handleWeekShift(-1)}>
+            <Ionicons name="chevron-back" size={16} color={colors.cyan} />
+            <Text style={styles.weekBtnText}>Sem. Anterior</Text>
+          </TouchableOpacity>
+
+          <View style={styles.weekBadge}>
+            <Ionicons name="sparkles" size={14} color={colors.primary} />
+            <Text style={styles.weekBadgeText}>
+              {weekOffset === 0
+                ? 'Semana 1 (Actual)'
+                : `Semana ${1 + weekOffset} (${weekOffset > 0 ? '+' : ''}${(weekOffset * 2.5).toFixed(1)}kg)`}
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.weekBtn} onPress={() => handleWeekShift(1)}>
+            <Text style={styles.weekBtnText}>Sem. Siguiente</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.cyan} />
           </TouchableOpacity>
         </View>
 
@@ -784,5 +831,47 @@ const styles = StyleSheet.create({
   },
   setKindTextEffective: {
     color: '#30D158'
+  },
+  weekProgressionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border
+  },
+  weekBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.surfaceLight,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.border
+  },
+  weekBtnText: {
+    color: colors.cyan,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12
+  },
+  weekBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 102, 204, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: colors.primary
+  },
+  weekBadgeText: {
+    color: '#FFFFFF',
+    fontFamily: fonts.bodyBold,
+    fontSize: 12
   }
 });
