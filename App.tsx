@@ -512,6 +512,7 @@ export default function App() {
   
   // Modales de Entrenamiento, Rutinas, Ejercicios y Perfil
   const [showActiveWorkout, setShowActiveWorkout] = useState<boolean>(false);
+  const [isWorkoutActive, setIsWorkoutActive] = useState<boolean>(false);
   const [activeWorkoutTitle, setActiveWorkoutTitle] = useState<string>('Entrenamiento Libre');
   const [activeWorkoutInitialExercises, setActiveWorkoutInitialExercises] = useState<{ exerciseId: string; exerciseName: string; category: string }[]>([]);
 
@@ -924,12 +925,22 @@ export default function App() {
   }, [viewMonthDate]);
 
   const handleStartFreeWorkout = () => {
+    if (isWorkoutActive) {
+      setShowActiveWorkout(true);
+      return;
+    }
     setActiveWorkoutTitle(t.startWorkout);
     setActiveWorkoutInitialExercises([]);
+    setIsWorkoutActive(true);
     setShowActiveWorkout(true);
   };
 
   const handleStartRoutineWorkout = async (routine: { id: string; name: string }) => {
+    if (isWorkoutActive) {
+      setShowActiveWorkout(true);
+      return;
+    }
+
     try {
       const routineExs = await db.getAllAsync<{ exercise_id: string; exercise_name: string; category: string }>(
         `SELECT re.exercise_id, e.name as exercise_name, e.category 
@@ -970,6 +981,7 @@ export default function App() {
 
       setActiveWorkoutTitle(routine.name);
       setActiveWorkoutInitialExercises(initialList);
+      setIsWorkoutActive(true);
       setShowActiveWorkout(true);
     } catch (err) {
       console.error('Error al cargar la rutina:', err);
@@ -1184,6 +1196,40 @@ export default function App() {
       <ScrollView ref={scrollViewRef} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={handleScroll} style={styles.pagerStyle}>
         {/* P1: Resumen Dashboard */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent} nestedScrollEnabled={true} overScrollMode="never" scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
+          {/* Banner de Entrenamiento en Curso en Resumen */}
+          {isWorkoutActive && (
+            <TouchableOpacity
+              style={[
+                styles.widget,
+                {
+                  backgroundColor: 'rgba(0, 102, 204, 0.15)',
+                  borderColor: colors.primary,
+                  borderWidth: 1.5,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingVertical: 14,
+                  paddingHorizontal: 16,
+                  marginBottom: 12
+                }
+              ]}
+              activeOpacity={0.85}
+              onPress={() => setShowActiveWorkout(true)}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#FF3B30', marginRight: 10 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 14, letterSpacing: 0.5 }}>
+                    {activeLang === 'es' ? 'ENTRENAMIENTO EN CURSO' : 'WORKOUT IN PROGRESS'}
+                  </Text>
+                  <Text style={{ color: colors.textSecondary, fontFamily: fonts.bodyRegular, fontSize: 12, marginTop: 2 }}>
+                    {activeWorkoutTitle} · {activeLang === 'es' ? 'Toca para continuar' : 'Tap to resume'}
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          )}
           <View style={styles.widget}>
             <Text style={styles.wTitle}>{t.metrics}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
@@ -1424,13 +1470,7 @@ export default function App() {
           </View>
 
           <View style={styles.widget}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.wTitle}>{t.profileTitle}</Text>
-              <TouchableOpacity style={styles.pillBtn} onPress={openEditProfile}>
-                <Ionicons name="create-outline" size={14} color={colors.primary} />
-                <Text style={styles.pillBtnText}>{t.editProfile}</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[styles.wTitle, { textAlign: 'center', marginBottom: 12 }]}>{t.profileTitle}</Text>
 
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.name}</Text><Text style={styles.bVal}>{userProfile.name}</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.age}</Text><Text style={styles.bVal}>{userProfile.age} {activeLang === 'es' ? 'años' : 'years'}</Text></View>
@@ -1439,6 +1479,11 @@ export default function App() {
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.weight}</Text><Text style={styles.bVal}>{userProfile.bodyWeightKg} kg</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.level}</Text><Text style={styles.bVal}>{(t as any)[userProfile.experienceLevel] || userProfile.experienceLevel.toUpperCase()}</Text></View>
             <View style={styles.blockCard}><Text style={styles.bLabel}>{t.language}</Text><Text style={styles.bVal}>{userProfile.language === 'en' ? 'English (EN)' : 'Español (ES)'}</Text></View>
+
+            <TouchableOpacity style={[styles.pillBtn, { alignSelf: 'center', marginTop: 12, paddingHorizontal: 20, paddingVertical: 8 }]} onPress={openEditProfile}>
+              <Ionicons name="create-outline" size={14} color={colors.primary} />
+              <Text style={styles.pillBtnText}>{t.editProfile}</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Card de Registro de Peso Corporal */}
@@ -1533,6 +1578,7 @@ export default function App() {
         onClose={() => setShowActiveWorkout(false)}
         onFinish={() => {
           setShowActiveWorkout(false);
+          setIsWorkoutActive(false);
           loadDatabaseData();
         }}
       />

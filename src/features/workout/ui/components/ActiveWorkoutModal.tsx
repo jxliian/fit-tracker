@@ -303,8 +303,16 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
 
     if (totalCompletedSets === 0) {
       Alert.alert(
-        'Entrenamiento Vacío',
-        'Por favor completa al menos 1 serie introduciendo Peso y Repeticiones antes de finalizar.'
+        'Sin Series Completadas',
+        'No has completado ni verificado ninguna serie. El entrenamiento no se registrará en tu historial. ¿Deseas descartar la sesión?',
+        [
+          { text: 'Volver al Entrenamiento', style: 'cancel' },
+          {
+            text: 'Descartar y Salir',
+            style: 'destructive',
+            onPress: () => onFinish()
+          }
+        ]
       );
       return;
     }
