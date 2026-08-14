@@ -15,10 +15,11 @@ The UI architecture adheres to four primary design standards:
         \item \textbf{Neon Purple (\#BF5AF2)}: Repetition counts and strength records.
     \end{itemize}
     \item \textbf{Glassmorphism Translucent Floating Navigation}: Floating navigation bar utilizing \texttt{expo-blur} \texttt{BlurView} with dark frosted glass tint, layered above the active content pager.
+    \item \textbf{Athletic Typography System}: Dual Google Fonts hierarchy featuring \textbf{Outfit} (extra bold geometric sans-serif for numerical telemetry and headers) and \textbf{Plus Jakarta Sans} (clean, high-legibility sans-serif for labels and athlete reports).
 \end{enumerate}
 
 \subsection{Design Tokens Specification}
-Table~\ref{tab:design_tokens} documents the exact color palette and radius tokens implemented in \texttt{src/core/theme/colors.ts}.
+Table~\ref{tab:design_tokens} documents the exact color palette, typography, and radius tokens implemented in \texttt{src/core/theme/colors.ts}.
 
 \begin{table}[h!]
 \centering
@@ -26,7 +27,7 @@ Table~\ref{tab:design_tokens} documents the exact color palette and radius token
 \label{tab:design_tokens}
 \begin{tabularx}{\textwidth}{l l X}
 \toprule
-\textbf{Token Identifier} & \textbf{Hex / RGBA Value} & \textbf{Design System Function} \\
+\textbf{Token Identifier} & \textbf{Value / Font Family} & \textbf{Design System Function} \\
 \midrule
 \texttt{background} & \texttt{\#000000} & Primary OLED canvas background. \\
 \texttt{surface} & \texttt{\#1C1C1E} & Standard widget container background. \\
@@ -36,6 +37,8 @@ Table~\ref{tab:design_tokens} documents the exact color palette and radius token
 \texttt{secondary} & \texttt{\#FF2D55} & Apple Fitness Neon Pink/Red (Volume / Move). \\
 \texttt{cyan} & \texttt{\#64D2FF} & Apple Fitness Neon Cyan (RPE / Sets). \\
 \texttt{purple} & \texttt{\#BF5AF2} & Apple Fitness Neon Purple (Reps / Stats). \\
+\texttt{headingBold} & \texttt{Outfit\_800ExtraBold} & Geometric heading \& numerical telemetry font. \\
+\texttt{bodyRegular} & \texttt{PlusJakartaSans\_400Regular} & Clean readable body text font. \\
 \texttt{glassBackground} & \texttt{rgba(28,28,30,0.94)} & High-contrast frosted glass backdrop. \\
 \texttt{glassBorder} & \texttt{rgba(255,255,255,0.18)} & Glass edge light reflection border. \\
 \bottomrule
@@ -49,3 +52,4 @@ To guarantee zero UI clipping against device physical notches, camera punch-hole
     \item \textbf{Bottom Gesture Inset}: Positioned with an explicit elevation level ($\text{elevation} = 10, zIndex = 9999$) and bottom offset ($16\text{--}24\text{px}$) preventing collision with Android three-button or gesture pill navigation.
     \item \textbf{Horizontal Gesture Pager}: Implemented using a native \texttt{ScrollView} with \texttt{pagingEnabled} and \texttt{onMomentumScrollEnd} event listeners, allowing seamless bidirectional swiping synchronized with the floating bottom tab bar.
 \end{itemize}
+

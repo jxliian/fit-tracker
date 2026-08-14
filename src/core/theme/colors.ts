@@ -54,3 +54,14 @@ export const radii = {
   xl: 26,
   full: 9999
 };
+
+// Typography Font Family Tokens (Apple / Athletic Modernism)
+export const fonts = {
+  headingBold: 'Outfit_800ExtraBold',
+  headingSemiBold: 'Outfit_600SemiBold',
+  headingMedium: 'Outfit_500Medium',
+  bodyBold: 'PlusJakartaSans_700Bold',
+  bodySemiBold: 'PlusJakartaSans_600SemiBold',
+  bodyRegular: 'PlusJakartaSans_400Regular'
+};
+

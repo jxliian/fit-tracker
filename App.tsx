@@ -15,12 +15,22 @@ import {
   NativeScrollEvent
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useFonts } from 'expo-font';
+import {
+  useFonts,
+  Outfit_800ExtraBold,
+  Outfit_600SemiBold,
+  Outfit_500Medium
+} from '@expo-google-fonts/outfit';
+import {
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_400Regular
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { Ionicons } from '@expo/vector-icons';
 import { initDatabase } from '@database/schema/init';
 import { seedExercises } from '@database/seeds/seed';
 import { db } from '@database/client';
-import { colors, radii } from '@core/theme/colors';
+import { colors, radii, fonts } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
 import { OnboardingScreen } from '@features/profile/ui/screens/OnboardingScreen';
 import { calculateStrengthRank } from '@features/progression/domain/strength-ranks';
@@ -55,7 +65,16 @@ interface DashboardStats {
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts(Ionicons.font);
+  const [fontsLoaded] = useFonts({
+    ...Ionicons.font,
+    Outfit_800ExtraBold,
+    Outfit_600SemiBold,
+    Outfit_500Medium,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_400Regular
+  });
+
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -324,7 +343,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Cabecera Principal Estilo Apple Fitness */}
+      {/* Cabecera Principal Estilo Apple Fitness con Fuente Outfit */}
       <View style={[styles.header, { paddingTop: topInset }]}>
         <View>
           <Text style={styles.greetingTitle}>Resumen</Text>
@@ -335,7 +354,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Contenido Deslizable (Swipe Pager) con Widgets Apple Style */}
+      {/* Contenido Deslizable (Swipe Pager) con Tipografía Deportiva */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -779,6 +798,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 14,
     marginTop: 16,
     textAlign: 'center'
@@ -792,14 +812,14 @@ const styles = StyleSheet.create({
   },
   greetingTitle: {
     color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
     fontSize: 32,
-    fontWeight: '900',
     letterSpacing: -0.5
   },
   dateSubtitle: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodySemiBold,
     fontSize: 13,
-    fontWeight: '600',
     marginTop: 2
   },
   avatarButton: {
@@ -814,7 +834,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: colors.textPrimary,
-    fontWeight: '800',
+    fontFamily: fonts.headingBold,
     fontSize: 14
   },
   pagerStyle: {
@@ -844,14 +864,14 @@ const styles = StyleSheet.create({
   },
   widgetHeaderTitle: {
     color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
     fontSize: 18,
-    fontWeight: '800',
     marginBottom: 12
   },
   widgetHeaderTitleCompact: {
     color: colors.textPrimary,
+    fontFamily: fonts.headingBold,
     fontSize: 17,
-    fontWeight: '800',
     flex: 1
   },
   moreStatsBtnVisible: {
@@ -866,8 +886,8 @@ const styles = StyleSheet.create({
   },
   moreStatsBtnText: {
     color: colors.primary,
+    fontFamily: fonts.bodyBold,
     fontSize: 12,
-    fontWeight: '800',
     marginLeft: 4
   },
   widgetTopHeader: {
@@ -878,11 +898,12 @@ const styles = StyleSheet.create({
   },
   widgetGridTitle: {
     color: colors.textPrimary,
-    fontSize: 15,
-    fontWeight: '800'
+    fontFamily: fonts.headingBold,
+    fontSize: 15
   },
   widgetSubLabel: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 12,
     marginTop: 2
   },
@@ -898,8 +919,8 @@ const styles = StyleSheet.create({
   },
   streakText: {
     color: colors.primary,
+    fontFamily: fonts.bodyBold,
     fontSize: 12,
-    fontWeight: '800',
     marginLeft: 4
   },
   monthNavRow: {
@@ -918,14 +939,14 @@ const styles = StyleSheet.create({
   },
   monthNavBtnText: {
     color: colors.textPrimary,
+    fontFamily: fonts.bodySemiBold,
     fontSize: 12,
-    fontWeight: '700',
     marginHorizontal: 4
   },
   monthCurrentText: {
     color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '600'
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12
   },
   weekDaysHeaderGrid: {
     flexDirection: 'row',
@@ -934,8 +955,8 @@ const styles = StyleSheet.create({
   },
   weekDayTextGrid: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodySemiBold,
     fontSize: 11,
-    fontWeight: '700',
     textAlign: 'center'
   },
   calendarGridStrict: {
@@ -971,13 +992,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5
   },
   calendarDotText: {
+    fontFamily: fonts.headingSemiBold,
     fontSize: 12,
-    fontWeight: '700',
     color: colors.textMuted
   },
   calendarDotTextWhite: {
     color: '#FFFFFF',
-    fontWeight: '800'
+    fontFamily: fonts.headingBold
   },
   ringsRow: {
     flexDirection: 'row',
@@ -1021,17 +1042,17 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '600'
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12
   },
   metricValue: {
+    fontFamily: fonts.headingBold,
     fontSize: 18,
-    fontWeight: '800',
     marginTop: 1
   },
   metricUnit: {
-    fontSize: 11,
-    fontWeight: '800'
+    fontFamily: fonts.headingSemiBold,
+    fontSize: 11
   },
   widgetGridRow: {
     flexDirection: 'row',
@@ -1043,8 +1064,8 @@ const styles = StyleSheet.create({
     marginBottom: 0
   },
   widgetBigNumber: {
+    fontFamily: fonts.headingBold,
     fontSize: 32,
-    fontWeight: '900',
     marginVertical: 6
   },
   miniBarChart: {
@@ -1060,6 +1081,7 @@ const styles = StyleSheet.create({
   },
   routineDesc: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 14
@@ -1073,11 +1095,12 @@ const styles = StyleSheet.create({
   },
   profileLabel: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 14
   },
   profileValue: {
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontFamily: fonts.bodyBold,
     fontSize: 14
   },
   prRowItem: {
@@ -1092,11 +1115,12 @@ const styles = StyleSheet.create({
   },
   prExerciseName: {
     color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: '800'
+    fontFamily: fonts.headingBold,
+    fontSize: 14
   },
   prSubText: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 12,
     marginTop: 2
   },
@@ -1110,14 +1134,15 @@ const styles = StyleSheet.create({
   },
   prRankText: {
     color: colors.primary,
-    fontSize: 11,
-    fontWeight: '800'
+    fontFamily: fonts.bodyBold,
+    fontSize: 11
   },
   emptyPrContainer: {
     paddingVertical: 12
   },
   emptyPrText: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodyRegular,
     fontSize: 13,
     lineHeight: 18,
     fontStyle: 'italic'
@@ -1144,8 +1169,8 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: colors.textPrimary,
-    fontSize: 22,
-    fontWeight: '900'
+    fontFamily: fonts.headingBold,
+    fontSize: 22
   },
   closeBtn: {
     padding: 6,
@@ -1165,13 +1190,13 @@ const styles = StyleSheet.create({
   },
   statGridLabel: {
     color: colors.textSecondary,
+    fontFamily: fonts.bodySemiBold,
     fontSize: 13,
-    fontWeight: '600',
     marginBottom: 4
   },
   statGridValue: {
-    fontSize: 22,
-    fontWeight: '900'
+    fontFamily: fonts.headingBold,
+    fontSize: 22
   },
   floatingNavContainer: {
     position: 'absolute',
@@ -1208,12 +1233,12 @@ const styles = StyleSheet.create({
   },
   glassNavLabel: {
     color: '#8E8E93',
+    fontFamily: fonts.bodySemiBold,
     fontSize: 10,
-    fontWeight: '700',
     marginTop: 2
   },
   glassNavLabelActive: {
     color: colors.primary,
-    fontWeight: '800'
+    fontFamily: fonts.bodyBold
   }
 });
