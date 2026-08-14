@@ -10,5 +10,6 @@ export interface UserProfile {
   bodyWeightKg: number;
   experienceLevel: ExperienceLevel;
   language?: 'es' | 'en';
+  avatarKey?: string | null;
   createdAt: number;
 }

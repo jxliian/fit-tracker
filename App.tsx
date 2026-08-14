@@ -44,6 +44,13 @@ import { ActiveWorkoutModal } from '@features/workout/ui/components/ActiveWorkou
 import { WorkoutHistoryModal } from '@features/workout/ui/components/WorkoutHistoryModal';
 import { ProgressionChart } from '@features/progression/ui/components/ProgressionChart';
 
+const AVATAR_IMAGES: Record<string, any> = {
+  lion: require('./assets/avatars/lion.png'),
+  bear: require('./assets/avatars/bear.png'),
+  panther: require('./assets/avatars/panther.png'),
+  eagle: require('./assets/avatars/eagle.png')
+};
+
 // Dictionary for internationalization (ES / EN)
 const i18n = {
   es: {
@@ -481,8 +488,9 @@ export default function App() {
   const [allExercises, setAllExercises] = useState<{ id: string; name: string; category: string; equipment: string; instructions?: string; gif_url?: string }[]>([]);
   const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<any | null>(null);
 
-  // Estado Completo para Editar Perfil
+  // Estado Completo para Editar Perfil y Avatar
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [editName, setEditName] = useState('');
   const [editAge, setEditAge] = useState('');
   const [editSex, setEditSex] = useState<Sex>('male');
@@ -490,6 +498,17 @@ export default function App() {
   const [editBodyWeight, setEditBodyWeight] = useState('');
   const [editExperienceLevel, setEditExperienceLevel] = useState<ExperienceLevel>('intermediate');
   const [editLanguage, setEditLanguage] = useState<'es' | 'en'>('es');
+
+  const handleSelectAvatar = async (key: string | null) => {
+    if (!userProfile) return;
+    try {
+      await db.runAsync('UPDATE user_profile SET avatar_key = ? WHERE id = ?;', [key, userProfile.id]);
+      setUserProfile((prev) => (prev ? { ...prev, avatarKey: key } : prev));
+      setShowAvatarModal(false);
+    } catch (e) {
+      console.error('Error updating avatar:', e);
+    }
+  };
 
   // Estado para la navegación mensual del calendario y gráficas
   const [viewMonthDate, setViewMonthDate] = useState<Date>(new Date());
@@ -575,6 +594,7 @@ export default function App() {
           bodyWeightKg: profile.body_weight_kg || 75,
           experienceLevel: profile.experience_level as ExperienceLevel,
           language: (profile.language as 'es' | 'en') || 'es',
+          avatarKey: profile.avatar_key || null,
           createdAt: profile.created_at
         };
         setUserProfile(userProf);
@@ -958,7 +978,11 @@ export default function App() {
           <Text style={styles.dateSubtitle}>{formattedHeaderDate}</Text>
         </View>
         <TouchableOpacity style={styles.avatarButton} onPress={() => handleTabPress('profile', 3)}>
-          <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
+          {userProfile.avatarKey && AVATAR_IMAGES[userProfile.avatarKey] ? (
+            <Image source={AVATAR_IMAGES[userProfile.avatarKey]} style={{ width: 44, height: 44, borderRadius: 22 }} />
+          ) : (
+            <Text style={styles.avatarText}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -1156,6 +1180,29 @@ export default function App() {
 
         {/* P4: Perfil de Atleta y Edición Completa */}
         <ScrollView style={styles.pageContainer} contentContainerStyle={styles.scrollContent} nestedScrollEnabled={true} overScrollMode="never" scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
+          {/* Card Avatar IA (4 Animales) */}
+          <View style={styles.widget}>
+            <View style={{ alignItems: 'center', marginVertical: 8 }}>
+              <TouchableOpacity onPress={() => setShowAvatarModal(true)} activeOpacity={0.8} style={{ position: 'relative' }}>
+                {userProfile.avatarKey && AVATAR_IMAGES[userProfile.avatarKey] ? (
+                  <Image source={AVATAR_IMAGES[userProfile.avatarKey]} style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: colors.primary }} />
+                ) : (
+                  <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: '#FFFFFF', fontSize: 32, fontFamily: fonts.headingBold }}>{userProfile.name.substring(0, 2).toUpperCase()}</Text>
+                  </View>
+                )}
+                <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.primary, borderRadius: 12, padding: 6, borderWidth: 2, borderColor: colors.background }}>
+                  <Ionicons name="sparkles" size={14} color="#FFFFFF" />
+                </View>
+              </TouchableOpacity>
+              <Text style={[styles.greetingTitle, { marginTop: 12, fontSize: 20 }]}>{userProfile.name}</Text>
+              <TouchableOpacity style={[styles.pillBtn, { marginTop: 10 }]} onPress={() => setShowAvatarModal(true)}>
+                <Ionicons name="images-outline" size={14} color={colors.primary} />
+                <Text style={styles.pillBtnText}>{activeLang === 'es' ? 'Cambiar Avatar IA (4 Animales)' : 'Change AI Avatar (4 Animals)'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <View style={styles.widget}>
             <Text style={styles.wTitle}>{t.profileTitle}</Text>
             <TouchableOpacity style={styles.pillBtn} onPress={openEditProfile}>
@@ -1190,6 +1237,41 @@ export default function App() {
             )) : (
               <Text style={styles.wSub}>{t.noPrs}</Text>
             )}
+          </View>
+
+          {/* Widget Privacidad, Seguridad, Créditos y Creador */}
+          <View style={styles.widget}>
+            <Text style={styles.wTitle}>🛡️ Privacidad, Seguridad y Créditos</Text>
+            
+            <View style={styles.blockCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                <Ionicons name="shield-checkmark" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={[styles.bVal, { fontSize: 14 }]}>Privacidad 100% Local-First</Text>
+              </View>
+              <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
+                Tus datos de entrenamiento, series, pesos y notas residen exclusivamente en la base de datos cifrada SQLite de tu dispositivo. No se envían ni se rastrean en servidores externos.
+              </Text>
+            </View>
+
+            <View style={styles.blockCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                <Ionicons name="lock-closed" size={16} color={colors.cyan} style={{ marginRight: 6 }} />
+                <Text style={[styles.bVal, { fontSize: 14 }]}>Seguridad y Control de Datos</Text>
+              </View>
+              <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
+                Tienes el control absoluto. Puedes exportar una copia completa de tus entrenamientos en formato JSON en cualquier momento desde la pantalla de Historial.
+              </Text>
+            </View>
+
+            <View style={styles.blockCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                <Ionicons name="code-slash" size={16} color="#FF9500" style={{ marginRight: 6 }} />
+                <Text style={[styles.bVal, { fontSize: 14 }]}>Créditos y Creador</Text>
+              </View>
+              <Text style={[styles.bLabel, { fontSize: 12, lineHeight: 18 }]}>
+                FitTracker v1.0.0 (Expo SDK 54). Diseñado e impulsado por tecnología de vanguardia para atletas de alto rendimiento.
+              </Text>
+            </View>
           </View>
         </ScrollView>
       </ScrollView>
@@ -1350,6 +1432,74 @@ export default function App() {
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Modal Selector de Avatar IA (Animales) */}
+      <Modal visible={showAvatarModal} animationType="slide" transparent onRequestClose={() => setShowAvatarModal(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowAvatarModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalBox, { maxHeight: '85%' }]}>
+                <View style={styles.sheetHandle} />
+                <Text style={styles.modalTitle}>Elige tu Avatar de Animal IA</Text>
+                <Text style={[styles.wSub, { marginBottom: 12 }]}>Selecciona uno de los 4 avatares de animales fitness generados por IA:</Text>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+                    {/* León */}
+                    <TouchableOpacity
+                      style={[styles.avatarChoiceCard, userProfile?.avatarKey === 'lion' && styles.avatarChoiceSelected]}
+                      onPress={() => handleSelectAvatar('lion')}
+                      activeOpacity={0.8}
+                    >
+                      <Image source={AVATAR_IMAGES.lion} style={styles.avatarChoiceImg} />
+                      <Text style={styles.avatarChoiceName}>🦁 León Fuerza</Text>
+                    </TouchableOpacity>
+
+                    {/* Oso */}
+                    <TouchableOpacity
+                      style={[styles.avatarChoiceCard, userProfile?.avatarKey === 'bear' && styles.avatarChoiceSelected]}
+                      onPress={() => handleSelectAvatar('bear')}
+                      activeOpacity={0.8}
+                    >
+                      <Image source={AVATAR_IMAGES.bear} style={styles.avatarChoiceImg} />
+                      <Text style={styles.avatarChoiceName}>🐻 Oso Mass</Text>
+                    </TouchableOpacity>
+
+                    {/* Pantera */}
+                    <TouchableOpacity
+                      style={[styles.avatarChoiceCard, userProfile?.avatarKey === 'panther' && styles.avatarChoiceSelected]}
+                      onPress={() => handleSelectAvatar('panther')}
+                      activeOpacity={0.8}
+                    >
+                      <Image source={AVATAR_IMAGES.panther} style={styles.avatarChoiceImg} />
+                      <Text style={styles.avatarChoiceName}>🐆 Pantera Agilidad</Text>
+                    </TouchableOpacity>
+
+                    {/* Águila */}
+                    <TouchableOpacity
+                      style={[styles.avatarChoiceCard, userProfile?.avatarKey === 'eagle' && styles.avatarChoiceSelected]}
+                      onPress={() => handleSelectAvatar('eagle')}
+                      activeOpacity={0.8}
+                    >
+                      <Image source={AVATAR_IMAGES.eagle} style={styles.avatarChoiceImg} />
+                      <Text style={styles.avatarChoiceName}>🦅 Águila Élite</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+
+                {/* Opción Iniciales predeterminadas */}
+                <TouchableOpacity
+                  style={[styles.pillBtn, { backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, marginTop: 12 }]}
+                  onPress={() => handleSelectAvatar(null)}
+                >
+                  <Ionicons name="person-outline" size={16} color={colors.textPrimary} />
+                  <Text style={[styles.pillBtnText, { color: colors.textPrimary, marginLeft: 6 }]}>Usar Iniciales Predeterminadas</Text>
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -1595,6 +1745,12 @@ const styles = StyleSheet.create({
   navItem: { flex: 1, paddingVertical: 8, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   navItemActive: { backgroundColor: '#3A3A3C' },
   navLabel: { color: '#8E8E93', fontFamily: fonts.bodySemiBold, fontSize: 10, marginTop: 2, textAlign: 'center', includeFontPadding: false },
-  navLabelActive: { color: colors.primary, fontFamily: fonts.bodyBold }
+  navLabelActive: { color: colors.primary, fontFamily: fonts.bodyBold },
+
+  // Avatar choice cards
+  avatarChoiceCard: { width: '45%', backgroundColor: colors.surfaceLight, borderColor: colors.border, borderWidth: 1, borderRadius: radii.md, padding: 10, alignItems: 'center', marginBottom: 12 },
+  avatarChoiceSelected: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primary + '18' },
+  avatarChoiceImg: { width: 72, height: 72, borderRadius: 36, marginBottom: 8 },
+  avatarChoiceName: { color: colors.textPrimary, fontFamily: fonts.headingBold, fontSize: 13, textAlign: 'center' }
 });
 

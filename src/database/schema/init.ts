@@ -76,12 +76,13 @@ export async function initDatabase(): Promise<void> {
 
     try {
       await db.execAsync(`ALTER TABLE user_profile ADD COLUMN language TEXT NOT NULL DEFAULT 'es';`);
-      try {
+    } catch (e) {}
+
+    try {
       await db.execAsync(`ALTER TABLE exercise_sets ADD COLUMN rest_seconds INTEGER NOT NULL DEFAULT 0;`);
-    } catch (e) {
-      // La columna ya existe
-    }
-  } catch (e) {
-      // Column already exists
-    }
+    } catch (e) {}
+
+    try {
+      await db.execAsync(`ALTER TABLE user_profile ADD COLUMN avatar_key TEXT;`);
+    } catch (e) {}
 }
