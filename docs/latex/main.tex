@@ -1,0 +1,88 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- PAQUETES DE IDIOMA Y CODIFICACIÓN ---
+\usepackage[utf8]{utf8}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+
+% --- TIPOGRAFÍA Y MATEMÁTICAS ---
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{mathtools}
+
+% --- TABLAS Y DIAGRAMAS ---
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, babel}
+
+% --- CÓDIGO FUENTE ---
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% --- HIPERVÍNCULOS ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={FitTracker - Memoria Técnica},
+    pdfpagemode=UseOutlines,
+}
+
+% --- DATOS DEL DOCUMENTO ---
+\title{\textbf{\Huge FitTracker}\\[0.5em] 
+\Large Memoria Técnica de Arquitectura, Especificación SRS y Modelo Matemático de Sobrecarga Progresiva Automática}
+\author{\textbf{Lead Software Architect \& Tech Lead}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+El presente documento constituye la especificación técnica y de ingeniería de software para el desarrollo del sistema móvil \textbf{FitTracker}. Diseñado bajo un enfoque \textit{Local-First} y arquitectura modular \textit{Clean Architecture}, FitTracker automatiza la gestión de entrenamientos de fuerza mediante un motor de sobrecarga progresiva basado en formulación matemática de estimación de 1RM ($1Repetition Maximum$) y autorregulación por RPE/RIR. Se detalla la especificación de requerimientos (SRS), casos de uso UML, diseño de base de datos SQLite y el modelo algorítmico de progresión.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% --- INCLUSIÓN DE SECCIONES ---
+\input{sections/01_introduction.tex}
+\newpage
+\input{sections/02_srs.tex}
+\newpage
+\input{sections/03_use_cases.tex}
+\newpage
+\input{sections/04_architecture_db.tex}
+\newpage
+\input{sections/05_progressive_overload_math.tex}
+
+\end{document}

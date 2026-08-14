@@ -1,0 +1,45 @@
+# Node & Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Expo & Build Artifacts
+.expo/
+dist/
+web-build/
+*.apk
+*.aab
+*.ipa
+
+# Native folders (if prebuilt)
+android/
+ios/
+
+# Environment and Secrets
+.env*.local
+.env
+
+# SQLite local databases & test DBs
+*.db
+*.sqlite
+*.sqlite3
+
+# LaTeX Auxiliary Files
+docs/latex/*.aux
+docs/latex/*.log
+docs/latex/*.out
+docs/latex/*.toc
+docs/latex/*.synctex.gz
+docs/latex/*.fls
+docs/latex/*.fdb_latexmk
+docs/latex/*.bbl
+docs/latex/*.blg
+docs/latex/sections/*.aux
+
+# IDE & OS Files
+.DS_Store
+.vscode/
+.idea/
+*.swp

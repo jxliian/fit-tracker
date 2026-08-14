@@ -1,0 +1,23 @@
+\section{Introducción y Objetivos}
+
+\subsection{Contexto y Justificación}
+En la disciplina del entrenamiento de fuerza y la hipertrofia muscular, el principio de \textbf{sobrecarga progresiva} constituye el pilar fundamental para desencadenar adaptaciones fisiológicas a largo plazo. No obstante, la inmensa mayoría de las aplicaciones móviles del mercado actual sufren de dos deficiencias críticas:
+\begin{enumerate}
+    \item Dependencia estricta de conectividad a Internet y servidores en la nube (\textit{Cloud-First}), lo que degrada la experiencia de usuario en gimnasios con baja cobertura o zonas subterráneas.
+    \item Falta de algoritmos deterministas de sobrecarga progresiva automática basados en variables fisiológicas y métricas cuantitativas como el 1RM estimado y la escala RPE/RIR (\textit{Rating of Perceived Exertion} / \textit{Repetitions in Reserve}).
+\end{enumerate}
+
+\textbf{FitTracker} nace como un sistema móvil orientado a solucionar ambas limitaciones mediante una arquitectura \textbf{Local-First} impulsada por una base de datos SQLite integrada y un motor algorítmico adaptativo de progresión.
+
+\subsection{Objetivos del Sistema}
+
+\subsubsection{Objetivo General}
+Diseñar, construir e implementar una aplicación móvil multiplataforma (React Native + Expo en TypeScript) caracterizada por un funcionamiento 100\% offline y una arquitectura limpia (\textit{Clean Architecture}), capaz de calcular e incrementar automáticamente la carga y volumen de trabajo de los atletas según su rendimiento histórico.
+
+\subsubsection{Objetivos Específicos}
+\begin{itemize}
+    \item Implementar una capa de persistencia ultrarrápida local mediante SQLite, garantizando tolerancia a fallos de red y cero latencia en el registro de series.
+    \item Desarrollar el módulo matemático de estimación de 1RM ($1Repetition Maximum$) promediando los modelos clásicos de Epley y Brzycki con corrección por RIR.
+    \item Proveer un sistema de gestión modular separado estrictamente en capas de Dominio, Casos de Uso, Repositorios y UI.
+    \item Proporcionar una memoria técnica formal para auditoría e investigación académica.
+\end{itemize}

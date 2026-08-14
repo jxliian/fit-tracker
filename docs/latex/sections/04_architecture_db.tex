@@ -1,0 +1,56 @@
+\section{Diseño de Arquitectura y Base de Datos}
+
+\subsection{Arquitectura del Sistema (Clean Architecture)}
+FitTracker implementa la arquitectura limpia (\textit{Clean Architecture}) adaptada a módulos funcionales (\textit{Feature-First}).
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, auto]
+    \node [rectangle, draw, fill=blue!10, text width=6em, text centered, rounded corners, minimum height=2.5em] (ui) {UI Layer\newline (React Native)};
+    \node [rectangle, draw, fill=green!10, text width=7em, text centered, rounded corners, minimum height=2.5em, right=of ui] (usecase) {Use Cases\newline (Business Logic)};
+    \node [rectangle, draw, fill=red!10, text width=6em, text centered, rounded corners, minimum height=2.5em, right=of usecase] (domain) {Domain Layer\newline (Entities/Math)};
+    \node [rectangle, draw, fill=yellow!10, text width=6em, text centered, rounded corners, minimum height=2.5em, below=of usecase] (db) {Database Layer\newline (SQLite Engine)};
+    
+    \draw [->, thick] (ui) -- (usecase);
+    \draw [->, thick] (usecase) -- (domain);
+    \draw [->, thick] (usecase) -- (db);
+    \draw [->, thick] (db) -| (domain);
+\end{tikzpicture}
+\caption{Diagrama de Dependencias de Capas en Clean Architecture.}
+\end{figure}
+
+\subsection{Modelo Entidad-Relación y Esquema SQLite}
+
+\begin{lstlisting}[language=SQL, caption={DDL del Esquema Relacional SQLite}]
+-- Tabla de Ejercicios
+CREATE TABLE exercises (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL, -- Chest, Back, Legs, etc.
+    exercise_type TEXT NOT NULL, -- Compound vs Isolation
+    created_at INTEGER NOT NULL
+);
+
+-- Tabla de Sesiones de Entrenamiento
+CREATE TABLE workout_sessions (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    notes TEXT
+);
+
+-- Tabla de Series Registradas
+CREATE TABLE exercise_sets (
+    id TEXT PRIMARY KEY NOT NULL,
+    session_id TEXT NOT NULL,
+    exercise_id TEXT NOT NULL,
+    set_order INTEGER NOT NULL,
+    weight_kg REAL NOT NULL,
+    reps INTEGER NOT NULL,
+    rpe REAL NOT NULL,
+    is_warmup INTEGER NOT NULL DEFAULT 0,
+    estimated_1rm REAL NOT NULL,
+    FOREIGN KEY(session_id) REFERENCES workout_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY(exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+\end{lstlisting}

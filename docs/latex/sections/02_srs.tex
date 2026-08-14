@@ -1,0 +1,40 @@
+\section{Especificación de Requerimientos de Software (SRS)}
+
+La presente especificación sigue la adaptación del estándar IEEE 830 para sistemas móviles offline-first.
+
+\subsection{Requerimientos Funcionales (RF)}
+
+\begin{table}[h!]
+\centering
+\caption{Requerimientos Funcionales del Sistema}
+\begin{tabularx}{\textwidth}{l p{4.5cm} X}
+\toprule
+\textbf{Código} & \textbf{Nombre} & \textbf{Descripción} \\
+\midrule
+\textbf{RF-01} & Gestión de Catálogo de Ejercicios & El sistema permitirá crear, modificar y categorizar ejercicios por grupo muscular principal y secundario. \\
+\textbf{RF-02} & Configuración de Rutinas & El sistema permitirá definir rutinas compuestas por bloques de ejercicios, rango de reps objetivo y RPE deseado. \\
+\textbf{RF-03} & Registro de Series en Vivo & Permite registrar peso ($kg$), repeticiones ($r$) y RPE/RIR ($R$) en tiempo real con temporizador de descanso automatizado. \\
+\textbf{RF-04} & Cálculo de Sobrecarga Autómata & El sistema calculará al finalizar la rutina las sugerencias de carga/reps para la siguiente sesión del ejercicio. \\
+\textbf{RF-05} & Estimación de 1RM & El sistema calculará el 1RM histórico y actual por sesión mediante fórmulas validadas. \\
+\textbf{RF-06} & Registro Nutricional Offline & Registro diario de macronutrientes (proteínas, carbohidratos, grasas) y calorías totales sin requerir API externa. \\
+\textbf{RF-07} & Métricas Corporales & Registro de peso corporal, porcentaje de grasa y circunferencia de pliegues. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Requerimientos No Funcionales (RNF)}
+
+\begin{table}[h!]
+\centering
+\caption{Requerimientos No Funcionales del Sistema}
+\begin{tabularx}{\textwidth}{l p{4.5cm} X}
+\toprule
+\textbf{Código} & \textbf{Nombre} & \textbf{Métrica / Criterio de Aceptación} \\
+\midrule
+\textbf{RNF-01} & Operatividad Offline & El 100\% de las operaciones de lectura y escritura deben ejecutarse localmente sin conexión a red. \\
+\textbf{RNF-02} & Rendimiento de Escritura & La inserción de una serie completada en la DB debe tomar menos de $50\,ms$. \\
+\textbf{RNF-03} & Portabilidad & El código base en React Native (TypeScript) debe ser portable entre Android y iOS sin cambios de lógica. \\
+\textbf{RNF-04} & Integridad de Datos & La base de datos SQLite debe utilizar transacciones ACID para evitar corrupción ante cierres inesperados. \\
+\bottomrule
+\end{tabularx}
+\end{table}
