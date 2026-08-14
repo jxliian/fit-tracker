@@ -33,7 +33,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { Ionicons } from '@expo/vector-icons';
 import { initDatabase } from '@database/schema/init';
-import { seedExercises, seedUserRoutinesAndHistory } from '@database/seeds/seed';
+import { seedExercises } from '@database/seeds/seed';
 import { db } from '@database/client';
 import { colors, radii, fonts } from '@core/theme/colors';
 import { UserProfile, Sex, ExperienceLevel } from '@domain/entities/user-profile';
@@ -609,7 +609,6 @@ export default function App() {
     try {
       await initDatabase();
       await seedExercises();
-      await seedUserRoutinesAndHistory();
 
       // 1. Cargar Perfil
       const profile = await db.getFirstAsync<any>('SELECT * FROM user_profile LIMIT 1;');
