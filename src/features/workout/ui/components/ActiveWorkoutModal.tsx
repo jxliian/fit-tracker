@@ -98,6 +98,10 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
         // Sin historial previo
       }
 
+      const recWeight = rec?.recommendedWeightKg || 60;
+      const recReps = rec?.recommendedReps || 8;
+      const warmupWeight = Math.round((recWeight * 0.7) / 2.5) * 2.5;
+
       list.push({
         exerciseId: item.exerciseId,
         exerciseName: item.exerciseName,
@@ -107,9 +111,27 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
           {
             id: `set_${Date.now()}_1`,
             setOrder: 1,
-            weightKg: rec?.recommendedWeightKg ? String(rec.recommendedWeightKg) : '',
-            reps: rec?.recommendedReps ? String(rec.recommendedReps) : '',
+            weightKg: String(warmupWeight > 0 ? warmupWeight : recWeight),
+            reps: String(recReps),
+            rpe: '6.0',
+            isWarmup: true,
+            isCompleted: false
+          },
+          {
+            id: `set_${Date.now()}_2`,
+            setOrder: 2,
+            weightKg: String(recWeight),
+            reps: String(recReps),
             rpe: '8.0',
+            isWarmup: false,
+            isCompleted: false
+          },
+          {
+            id: `set_${Date.now()}_3`,
+            setOrder: 3,
+            weightKg: String(recWeight),
+            reps: String(recReps),
+            rpe: '8.5',
             isWarmup: false,
             isCompleted: false
           }
@@ -144,6 +166,10 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
       rec = await getRecommendation.execute({ exerciseId: ex.id });
     } catch (err) {}
 
+    const recWeight = rec?.recommendedWeightKg || 50;
+    const recReps = rec?.recommendedReps || 8;
+    const warmupWeight = Math.round((recWeight * 0.7) / 2.5) * 2.5;
+
     setExercisesInWorkout((prev) => [
       ...prev,
       {
@@ -155,8 +181,17 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
           {
             id: `set_${Date.now()}_1`,
             setOrder: 1,
-            weightKg: rec?.recommendedWeightKg ? String(rec.recommendedWeightKg) : '',
-            reps: rec?.recommendedReps ? String(rec.recommendedReps) : '',
+            weightKg: String(warmupWeight > 0 ? warmupWeight : recWeight),
+            reps: String(recReps),
+            rpe: '6.0',
+            isWarmup: true,
+            isCompleted: false
+          },
+          {
+            id: `set_${Date.now()}_2`,
+            setOrder: 2,
+            weightKg: String(recWeight),
+            reps: String(recReps),
             rpe: '8.0',
             isWarmup: false,
             isCompleted: false
@@ -325,12 +360,12 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
               )}
 
               {/* Encabezado de Columnas de Series */}
-              <View style={styles.setsHeaderRow}>
-                <Text style={[styles.setColLabel, { width: 36 }]}>SERIE</Text>
+              <View style={styles.setRowHeader}>
+                <Text style={styles.setOrderHeader}>#</Text>
                 <Text style={[styles.setColLabel, { flex: 1 }]}>PESO (KG)</Text>
                 <Text style={[styles.setColLabel, { flex: 1 }]}>REPS</Text>
-                <Text style={[styles.setColLabel, { width: 50 }]}>RPE</Text>
-                <Text style={[styles.setColLabel, { width: 36, textAlign: 'center' }]}>CAL</Text>
+                <Text style={[styles.setColLabel, { width: 44 }]}>RPE</Text>
+                <Text style={[styles.setColLabel, { width: 85, textAlign: 'center' }]}>TIPO</Text>
                 <Text style={[styles.setColLabel, { width: 36, textAlign: 'center' }]}>OK</Text>
               </View>
 
@@ -361,7 +396,7 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                   />
 
                   <TextInput
-                    style={[styles.setInput, { width: 50 }]}
+                    style={[styles.setInput, { width: 44 }]}
                     keyboardType="numeric"
                     placeholder="8.0"
                     placeholderTextColor={colors.textMuted}
@@ -369,12 +404,15 @@ export const ActiveWorkoutModal: React.FC<ActiveWorkoutModalProps> = ({
                     onChangeText={(txt) => handleUpdateSet(exIdx, setIdx, 'rpe', txt)}
                   />
 
-                  {/* Checkbox Calentamiento */}
+                  {/* Insignia Tipo de Serie: Calentamiento vs. Efectiva */}
                   <TouchableOpacity
-                    style={[styles.checkBtn, s.isWarmup && styles.checkBtnWarmup]}
+                    style={[styles.setKindChip, s.isWarmup ? styles.setKindWarmup : styles.setKindEffective]}
+                    activeOpacity={0.7}
                     onPress={() => handleUpdateSet(exIdx, setIdx, 'isWarmup', !s.isWarmup)}
                   >
-                    <Text style={styles.checkBtnText}>{s.isWarmup ? 'W' : '-'}</Text>
+                    <Text style={[styles.setKindText, s.isWarmup ? styles.setKindTextWarmup : styles.setKindTextEffective]} numberOfLines={1}>
+                      {s.isWarmup ? 'Calent.' : 'Efectiva'}
+                    </Text>
                   </TouchableOpacity>
 
                   {/* Checkbox Completar Serie */}
@@ -706,5 +744,45 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodySemiBold,
     fontSize: 11,
     marginTop: 2
+  },
+  setRowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    paddingHorizontal: 4
+  },
+  setOrderHeader: {
+    width: 36,
+    color: colors.textMuted,
+    fontFamily: fonts.bodyBold,
+    fontSize: 11
+  },
+  setKindChip: {
+    width: 80,
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginRight: 6,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  setKindWarmup: {
+    backgroundColor: 'rgba(255, 149, 0, 0.18)',
+    borderColor: '#FF9500'
+  },
+  setKindEffective: {
+    backgroundColor: 'rgba(48, 209, 88, 0.18)',
+    borderColor: '#30D158'
+  },
+  setKindText: {
+    fontSize: 10,
+    fontFamily: fonts.bodyBold
+  },
+  setKindTextWarmup: {
+    color: '#FF9500'
+  },
+  setKindTextEffective: {
+    color: '#30D158'
   }
 });

@@ -6,7 +6,7 @@ describe('Strength Ranks Engine', () => {
     const rank = calculateStrengthRank(40, 80, 'male', 'compound');
     expect(rank.tier).toBe('WOOD');
     expect(rank.label).toBe('Madera');
-    expect(rank.emoji).toBe('🪵');
+    expect(rank.emoji).toBe('');
     expect(rank.weightNeededForNextTierKg).toBeGreaterThan(0);
   });
 
@@ -15,7 +15,7 @@ describe('Strength Ranks Engine', () => {
     const rank = calculateStrengthRank(100, 75, 'male', 'compound');
     expect(rank.tier).toBe('SILVER');
     expect(rank.label).toBe('Plata');
-    expect(rank.emoji).toBe('🥈');
+    expect(rank.emoji).toBe('');
   });
 
   it('should return DIAMOND rank for 2.1x BW male squat', () => {
@@ -23,7 +23,7 @@ describe('Strength Ranks Engine', () => {
     const rank = calculateStrengthRank(170, 80, 'male', 'compound');
     expect(rank.tier).toBe('DIAMOND');
     expect(rank.label).toBe('Diamante');
-    expect(rank.emoji).toBe('👑');
+    expect(rank.emoji).toBe('');
   });
 
   it('should scale female thresholds appropriately', () => {
@@ -31,6 +31,6 @@ describe('Strength Ranks Engine', () => {
     const rank = calculateStrengthRank(70, 60, 'female', 'compound');
     expect(rank.tier).toBe('GOLD');
     expect(rank.label).toBe('Oro');
-    expect(rank.emoji).toBe('🥇');
+    expect(rank.emoji).toBe('');
   });
 });

@@ -68,7 +68,7 @@ export function calculateProgressionRecommendation(
             recommendedWeightKg: 0,
             recommendedReps: targetRange.min,
             action: 'MAINTAIN',
-            reasoning: 'No previous working sets recorded.'
+            reasoning: 'Sin series efectivas anteriores registradas.'
         };
     }
 
@@ -89,7 +89,7 @@ export function calculateProgressionRecommendation(
             recommendedWeightKg: newWeight,
             recommendedReps: targetRange.min,
             action: 'INCREMENT',
-            reasoning: `Target reps (${targetRange.max}) completed with solid RIR (${avgRIR.toFixed(1)}). Weight increased by +${incrementStep}kg.`
+            reasoning: `Objetivo de reps (${targetRange.max}) completado con buen RIR (${avgRIR.toFixed(1)}). Aumento sugerido: +${incrementStep} kg.`
         };
     }
 
@@ -99,7 +99,7 @@ export function calculateProgressionRecommendation(
             recommendedWeightKg: deloadWeight,
             recommendedReps: targetRange.min,
             action: 'DELOAD',
-            reasoning: `High fatigue detected (Avg RIR ${avgRIR.toFixed(1)}). Weight deloaded by 5% to allow recovery.`
+            reasoning: `Fatiga alta detectada (RIR prom. ${avgRIR.toFixed(1)}). Descarga del 5% sugerida para recuperar.`
         };
     }
 
@@ -107,6 +107,6 @@ export function calculateProgressionRecommendation(
         recommendedWeightKg: currentWeight,
         recommendedReps: Math.min(targetRange.max, lastSet.reps + 1),
         action: 'MAINTAIN',
-        reasoning: `Maintain weight at ${currentWeight}kg and aim for +1 rep in the next session.`
+        reasoning: `Mantén ${currentWeight} kg y busca hacer +1 repetición en la siguiente sesión.`
     };
 }

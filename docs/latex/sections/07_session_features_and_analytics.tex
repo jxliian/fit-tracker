@@ -1,0 +1,67 @@
+\section{Session Features, Advanced Analytics, and Streak Buffer Algorithm}
+
+\subsection{Consistency Streak Buffer Algorithm}
+To maintain athlete motivation without penalizing planned rest days or micro-deloads, FitTracker implements a rest-tolerant streak calculation algorithm. Let $D = \{d_1, d_2, \dots, d_n\}$ be the ordered set of unique training dates in epoch milliseconds, sorted in ascending order.
+
+The algorithm defines the inter-session gap in days between consecutive workouts $d_i$ and $d_{i+1}$ as:
+\begin{equation}
+\Delta d_i = \left\lfloor \frac{d_{i+1} - d_i}{86,400,000} \right\rfloor
+\end{equation}
+
+A streak continuity condition allows up to a maximum rest buffer of $K = 3$ consecutive days:
+\begin{equation}
+\text{StreakContinuation}(d_i, d_{i+1}) = 
+\begin{cases} 
+\text{True}, & \text{if } \Delta d_i \le K + 1 \\ 
+\text{False}, & \text{if } \Delta d_i > K + 1 
+\end{cases}
+\end{equation}
+
+If $\Delta d_i > 4$, the current streak counter resets to 1, accurately balancing discipline tracking with physical recovery.
+
+\subsection{Warmup vs. Effective Set Classification and Volume Aggregation}
+Each recorded set $s \in S$ contains a boolean indicator $is\_warmup \in \{0, 1\}$. Total workout volume $V_{total}$ is computed strictly over effective sets to avoid skewing progressive overload metrics:
+
+\begin{equation}
+V_{total} = \sum_{s \in S, \, is\_warmup = 0} (w_s \cdot r_s)
+\end{equation}
+
+Where $w_s$ is the weight in kilograms and $r_s$ is the number of completed repetitions. Warmup sets are tagged with custom UI chips (\texttt{[Calent.]} / \texttt{[Efectiva]}) and excluded from volume PR aggregations.
+
+\subsection{Rest Duration Persistence in SQLite Schema}
+The database schema for \texttt{exercise\_sets} incorporates a dedicated column \texttt{rest\_seconds} to persist intra-set rest intervals.
+
+\begin{lstlisting}[language=SQL, caption={Extended SQLite Table Schema for Exercise Sets}]
+CREATE TABLE IF NOT EXISTS exercise_sets (
+  id TEXT PRIMARY KEY NOT NULL,
+  session_id TEXT NOT NULL,
+  exercise_id TEXT NOT NULL,
+  set_order INTEGER NOT NULL,
+  weight_kg REAL NOT NULL,
+  reps INTEGER NOT NULL,
+  rpe REAL NOT NULL,
+  is_warmup INTEGER NOT NULL DEFAULT 0,
+  estimated_1rm REAL NOT NULL,
+  rest_seconds INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (session_id) REFERENCES workout_sessions (id) ON DELETE CASCADE,
+  FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
+);
+\end{lstlisting}
+
+\subsection{Pure Line Chart Progression Renderer}
+The progression module provides dynamic filtering via exercise chips (\textit{Squat, Hip Thrust, Bench Press, Pull-ups, Barbell Row}). The chart calculates normalized 2D coordinate positions $(x_i, y_i)$ for any given dataset of length $N$:
+
+\begin{align}
+x_i &= x_{min} + i \cdot \frac{W - 2 \cdot x_{min}}{N - 1} \\
+y_i &= H - y_{min} - \frac{v_i - v_{min}}{\max(v_{max} - v_{min}, 1)} \cdot (H - 2 \cdot y_{min})
+\end{align}
+
+Segment vectors between adjacent points $(x_i, y_i)$ and $(x_{i+1}, y_{i+1})$ are rendered natively with zero external Metro module resolution overhead using linear transformation matrices:
+\begin{equation}
+L = \sqrt{(x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2}, \quad \theta = \operatorname{atan2}(y_{i+1} - y_i, \, x_{i+1} - x_i)
+\end{equation}
+
+\subsection{Background Notification Service and Automatic Overload Pre-filling}
+Using \texttt{expo-notifications}, active workout timer states, current exercise names, and rest countdowns synchronize with local push notifications when the application enters background state.
+
+Simultaneously, the progressive overload engine queries historical performance records and automatically pre-fills set rows with calculated target loads ($w_{rec}$) and target repetitions ($r_{rec}$), streamlining session execution.

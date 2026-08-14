@@ -9,5 +9,6 @@ export interface UserProfile {
   heightCm: number;
   bodyWeightKg: number;
   experienceLevel: ExperienceLevel;
+  language?: 'es' | 'en';
   createdAt: number;
 }

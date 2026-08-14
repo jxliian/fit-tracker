@@ -6,12 +6,14 @@ export interface RestTimerModalProps {
   visible: boolean;
   initialSeconds: number;
   onClose: () => void;
+  lang?: 'es' | 'en';
 }
 
 export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   visible,
   initialSeconds,
-  onClose
+  onClose,
+  lang = 'es'
 }) => {
   const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
   const [isRunning, setIsRunning] = useState<boolean>(true);
@@ -46,13 +48,20 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progressPercent = Math.min(100, Math.max(0, (secondsLeft / initialSeconds) * 100));
+  const progressPercent = Math.min(100, Math.max(0, (secondsLeft / Math.max(1, initialSeconds)) * 100));
+
+  const t = {
+    title: lang === 'es' ? 'TIEMPO DE DESCANSO' : 'REST TIME',
+    pause: lang === 'es' ? 'Pausar' : 'Pause',
+    resume: lang === 'es' ? 'Reanudar' : 'Resume',
+    skip: lang === 'es' ? 'Omitir Descanso' : 'Skip Rest'
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.title}>TIEMPO DE DESCANSO</Text>
+          <Text style={styles.title}>{t.title}</Text>
           
           <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
 
@@ -74,7 +83,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
               onPress={() => setIsRunning(!isRunning)}
             >
               <Text style={styles.actionButtonText}>
-                {isRunning ? 'Pausar' : 'Reanudar'}
+                {isRunning ? t.pause : t.resume}
               </Text>
             </TouchableOpacity>
 
@@ -87,7 +96,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
           </View>
 
           <TouchableOpacity style={styles.skipButton} onPress={onClose}>
-            <Text style={styles.skipButtonText}>Omitir Descanso</Text>
+            <Text style={styles.skipButtonText}>{t.skip}</Text>
           </TouchableOpacity>
         </View>
       </View>

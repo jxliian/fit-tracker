@@ -32,6 +32,10 @@ class MockWorkoutRepo implements IWorkoutRepository {
   async getLastSetsForExercise(exerciseId: string, limit?: number): Promise<ExerciseSet[]> {
     return [];
   }
+
+  async getAllSessions(): Promise<WorkoutSession[]> {
+    return this.sessions;
+  }
 }
 
 describe('FinishWorkoutSessionUseCase', () => {

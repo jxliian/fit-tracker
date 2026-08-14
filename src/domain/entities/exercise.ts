@@ -25,3 +25,9 @@ export interface Exercise {
     gifUrl?: string;          // URL del GIF animado
     instructions?: string[];  // Pasos de ejecución
 }
+
+export function getLocalizedExerciseName(name: string, lang: 'es' | 'en'): string {
+    if (!name) return '';
+    return name;
+}
+

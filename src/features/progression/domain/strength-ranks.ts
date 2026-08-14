@@ -22,13 +22,13 @@ export const STRENGTH_RANK_META: Record<
   StrengthRankTier,
   { label: string; emoji: string; minPercentile: number }
 > = {
-  WOOD: { label: 'Madera', emoji: '🪵', minPercentile: 15 },
-  IRON: { label: 'Hierro', emoji: '⚙️', minPercentile: 35 },
-  BRONZE: { label: 'Bronce', emoji: '🥉', minPercentile: 55 },
-  SILVER: { label: 'Plata', emoji: '🥈', minPercentile: 75 },
-  GOLD: { label: 'Oro', emoji: '🥇', minPercentile: 90 },
-  PLATINUM: { label: 'Platino', emoji: '💎', minPercentile: 97 },
-  DIAMOND: { label: 'Diamante', emoji: '👑', minPercentile: 99.5 }
+  WOOD: { label: 'Madera', emoji: '', minPercentile: 15 },
+  IRON: { label: 'Hierro', emoji: '', minPercentile: 35 },
+  BRONZE: { label: 'Bronce', emoji: '', minPercentile: 55 },
+  SILVER: { label: 'Plata', emoji: '', minPercentile: 75 },
+  GOLD: { label: 'Oro', emoji: '', minPercentile: 90 },
+  PLATINUM: { label: 'Platino', emoji: '', minPercentile: 97 },
+  DIAMOND: { label: 'Diamante', emoji: '', minPercentile: 99.5 }
 };
 
 /**

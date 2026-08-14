@@ -34,6 +34,10 @@ class InMemoryWorkoutRepository implements IWorkoutRepository {
   async getLastSetsForExercise(exerciseId: string, limit = 10): Promise<ExerciseSet[]> {
     return this.sets.filter((s) => s.exerciseId === exerciseId).slice(-limit);
   }
+
+  async getAllSessions(): Promise<WorkoutSession[]> {
+    return this.sessions;
+  }
 }
 
 describe('RegisterSetUseCase', () => {

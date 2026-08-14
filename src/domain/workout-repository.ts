@@ -7,4 +7,5 @@ export interface IWorkoutRepository {
   addSetToSession(set: Omit<ExerciseSet, 'id' | 'estimated1RM'>): Promise<ExerciseSet>;
   getSetsForSession(sessionId: string): Promise<ExerciseSet[]>;
   getLastSetsForExercise(exerciseId: string, limit?: number): Promise<ExerciseSet[]>;
+  getAllSessions(): Promise<WorkoutSession[]>;
 }

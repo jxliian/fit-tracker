@@ -39,6 +39,7 @@ export async function initDatabase(): Promise<void> {
       rpe REAL NOT NULL,
       is_warmup INTEGER NOT NULL DEFAULT 0,
       estimated_1rm REAL NOT NULL,
+      rest_seconds INTEGER NOT NULL DEFAULT 0,
       FOREIGN KEY (session_id) REFERENCES workout_sessions (id) ON DELETE CASCADE,
       FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
     );
@@ -50,6 +51,7 @@ export async function initDatabase(): Promise<void> {
       height_cm REAL NOT NULL,
       body_weight_kg REAL NOT NULL,
       experience_level TEXT NOT NULL,
+      language TEXT NOT NULL DEFAULT 'es',
       created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS routines (
@@ -71,4 +73,15 @@ export async function initDatabase(): Promise<void> {
       FOREIGN KEY (exercise_id) REFERENCES exercises (id) ON DELETE CASCADE
     );
   `);
+
+    try {
+      await db.execAsync(`ALTER TABLE user_profile ADD COLUMN language TEXT NOT NULL DEFAULT 'es';`);
+      try {
+      await db.execAsync(`ALTER TABLE exercise_sets ADD COLUMN rest_seconds INTEGER NOT NULL DEFAULT 0;`);
+    } catch (e) {
+      // La columna ya existe
+    }
+  } catch (e) {
+      // Column already exists
+    }
 }

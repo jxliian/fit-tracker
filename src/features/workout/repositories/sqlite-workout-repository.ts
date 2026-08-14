@@ -43,9 +43,11 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     const estimated1RM = calculate1RM(setData.weightKg, setData.reps, setData.rpe);
     const isWarmupInt = setData.isWarmup ? 1 : 0;
 
+    const restSecs = setData.restSeconds || 0;
+
     await db.runAsync(
-      `INSERT INTO exercise_sets (id, session_id, exercise_id, set_order, weight_kg, reps, rpe, is_warmup, estimated_1rm)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO exercise_sets (id, session_id, exercise_id, set_order, weight_kg, reps, rpe, is_warmup, estimated_1rm, rest_seconds)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         id,
         setData.sessionId,
@@ -55,7 +57,8 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
         setData.reps,
         setData.rpe,
         isWarmupInt,
-        estimated1RM
+        estimated1RM,
+        restSecs
       ]
     );
 
@@ -68,7 +71,8 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
       reps: setData.reps,
       rpe: setData.rpe,
       isWarmup: setData.isWarmup,
-      estimated1RM
+      estimated1RM,
+      restSeconds: restSecs
     };
   }
 
@@ -90,6 +94,19 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     return rows.map(this.mapRowToSet);
   }
 
+  async getAllSessions(): Promise<WorkoutSession[]> {
+    const rows = await db.getAllAsync<any>(
+      `SELECT * FROM workout_sessions ORDER BY date DESC;`
+    );
+
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      date: r.date,
+      notes: r.notes || undefined
+    }));
+  }
+
   private mapRowToSet(row: any): ExerciseSet {
     return {
       id: row.id,
@@ -100,7 +117,8 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
       reps: row.reps,
       rpe: row.rpe,
       isWarmup: row.is_warmup === 1,
-      estimated1RM: row.estimated_1rm
+      estimated1RM: row.estimated_1rm,
+      restSeconds: row.rest_seconds || 0
     };
   }
 }
